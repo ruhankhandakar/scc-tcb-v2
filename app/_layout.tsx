@@ -1,9 +1,20 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { SplashScreen, Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
+import { View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+
+import ScreenHeaderBtn from 'components/common/header/ScreenHeaderBtn';
+
+import ThemeProvider from 'ThemeProvider';
+import { Provider, useAuth } from 'context/AuthContext';
+import AppContextProvider from 'context/AppContext';
+
+import { logoIcon } from 'constants/icons';
+import { COLORS, SIZES } from 'constants/theme';
+import { AppwriteProvider } from 'context/AppwriteContext';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -18,39 +29,70 @@ export const unstable_settings = {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
+const Layout = () => {
+  const router = useRouter();
+
+  const [fontLoaded] = useFonts({
+    DMBold: require('assets/fonts/DMSans-Bold.ttf'),
+    DMMedium: require('assets/fonts/DMSans-Medium.ttf'),
+    DMRegular: require('assets/fonts/DMSans-Regular.ttf'),
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
-
-  useEffect(() => {
-    if (loaded) {
+    if (fontLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [fontLoaded]);
 
-  if (!loaded) {
-    return null;
-  }
-
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  if (!fontLoaded) return null;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
+    <Provider>
+      <RootLayoutNav />
+    </Provider>
+  );
+};
+
+function RootLayoutNav() {
+  const { authInitialized, user } = useAuth();
+
+  if (!authInitialized && !user) return null;
+
+  const headerStyle: NativeStackNavigationOptions = {
+    headerStyle: {
+      backgroundColor: COLORS.white,
+    },
+    headerTitleStyle: {
+      fontWeight: 'bold',
+      fontSize: SIZES.medium,
+    },
+    headerShadowVisible: false,
+    headerBackVisible: false,
+    title: '(TCB) সিলেট সিটি কর্পোরেশন',
+    headerLeft: () => (
+      <View style={{ marginRight: 5 }}>
+        <ScreenHeaderBtn iconUrl={logoIcon} dimension="100%" />
+      </View>
+    ),
+    headerRight: () => '',
+  };
+
+  return (
+    <ThemeProvider>
+      <AppContextProvider>
+        <AppwriteProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Stack>
+              <Stack.Screen name="index" options={headerStyle} />
+              <Stack.Screen name="(auth)" options={headerStyle} />
+              <Stack.Screen name="(tabs)" options={headerStyle} />
+              <Stack.Screen name="(public)" options={headerStyle} />
+            </Stack>
+          </GestureHandlerRootView>
+        </AppwriteProvider>
+      </AppContextProvider>
     </ThemeProvider>
   );
 }
+
+export default Layout;

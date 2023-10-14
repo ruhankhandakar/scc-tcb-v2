@@ -1,53 +1,185 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable, useColorScheme } from 'react-native';
+import { Tabs } from 'expo-router';
+import { View, Text, Platform } from 'react-native';
+import { Entypo as Icon, MaterialIcons, AntDesign } from '@expo/vector-icons';
 
-import Colors from '../../constants/Colors';
-
-/**
- * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
- */
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
+import { COLORS } from 'constants/theme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-      }}>
+        headerShown: false,
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          left: 0,
+          height: 72,
+          elevation: 0,
+          backgroundColor: COLORS.white,
+        },
+      }}
+    >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
+          title: '',
+          headerShown: false,
+          tabBarIcon: ({ focused }: { focused: boolean }) => {
+            return (
+              <View
+                style={{
+                  alignItems: 'center',
+                  paddingTop: 16,
+                  borderTopColor: focused ? COLORS.primary : COLORS.white,
+                  borderTopWidth: 2,
+                }}
+              >
+                <Icon
+                  name="home"
+                  size={24}
+                  color={focused ? COLORS.primary : COLORS.gray}
+                />
+
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: focused ? COLORS.primary : COLORS.gray,
+                  }}
+                >
+                  হোম
+                </Text>
+              </View>
+            );
+          },
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="dashboard"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: '',
+          tabBarIcon: ({ focused }: { focused: boolean }) => {
+            return (
+              <View
+                style={{
+                  alignItems: 'center',
+                  paddingTop: 16,
+                  borderTopColor: focused ? COLORS.primary : COLORS.white,
+                  borderTopWidth: 2,
+                }}
+              >
+                <MaterialIcons
+                  name="dashboard"
+                  size={24}
+                  color={focused ? COLORS.primary : COLORS.gray}
+                />
+
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: focused ? COLORS.primary : COLORS.gray,
+                  }}
+                >
+                  ড্যাশবোর্ড
+                </Text>
+              </View>
+            );
+          },
+        }}
+      />
+
+      <Tabs.Screen
+        name="scanner"
+        options={{
+          title: '',
+          tabBarIcon: ({ focused }: { focused: boolean }) => {
+            return (
+              <View
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: COLORS.primary,
+                  width: Platform.OS == 'ios' ? 50 : 60,
+                  height: Platform.OS == 'ios' ? 50 : 60,
+                  top: Platform.OS == 'ios' ? -10 : -20,
+                  borderRadius: Platform.OS == 'ios' ? 25 : 30,
+                }}
+              >
+                <MaterialIcons
+                  name="qr-code-scanner"
+                  size={24}
+                  color={COLORS.white}
+                />
+              </View>
+            );
+          },
+        }}
+      />
+
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: '',
+          tabBarIcon: ({ focused }: { focused: boolean }) => {
+            return (
+              <View
+                style={{
+                  alignItems: 'center',
+                  paddingTop: 16,
+                  borderTopColor: focused ? COLORS.primary : COLORS.white,
+                  borderTopWidth: 2,
+                }}
+              >
+                <Icon
+                  name="help"
+                  size={24}
+                  color={focused ? COLORS.primary : COLORS.gray}
+                />
+
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: focused ? COLORS.primary : COLORS.gray,
+                  }}
+                >
+                  ই-সেবা
+                </Text>
+              </View>
+            );
+          },
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: '',
+          tabBarIcon: ({ focused }: { focused: boolean }) => {
+            return (
+              <View
+                style={{
+                  alignItems: 'center',
+                  paddingTop: 16,
+                  borderTopColor: focused ? COLORS.primary : COLORS.white,
+                  borderTopWidth: 2,
+                }}
+              >
+                <AntDesign
+                  name="user"
+                  size={24}
+                  color={focused ? COLORS.primary : COLORS.gray}
+                />
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: focused ? COLORS.primary : COLORS.gray,
+                  }}
+                >
+                  প্রোফাইল
+                </Text>
+              </View>
+            );
+          },
         }}
       />
     </Tabs>

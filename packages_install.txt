@@ -1,0 +1,16 @@
+npx expo install @react-native-community/datetimepicker
+npm i appwrite
+npx expo install expo-barcode-scanner
+npx expo install expo-build-properties
+npx expo install expo-camera
+npx expo install expo-image-picker
+npx expo install expo-image
+npx expo install expo-linear-gradient
+npx expo install expo-secure-store
+npm i fast-xml-parser
+npm i react-native-gesture-handler
+npx expo install react-native-svg
+npm install react-native-paper
+npm install react-native-safe-area-context
+npx expo install expo-linear-gradient
+npx expo install react-native-reanimated
