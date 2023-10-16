@@ -14,7 +14,6 @@ import AppContextProvider from 'context/AppContext';
 
 import { logoIcon } from 'constants/icons';
 import { COLORS, SIZES } from 'constants/theme';
-import { AppwriteProvider } from 'context/AppwriteContext';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -80,16 +79,14 @@ function RootLayoutNav() {
   return (
     <ThemeProvider>
       <AppContextProvider>
-        <AppwriteProvider>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <Stack>
-              <Stack.Screen name="index" options={headerStyle} />
-              <Stack.Screen name="(auth)" options={headerStyle} />
-              <Stack.Screen name="(tabs)" options={headerStyle} />
-              <Stack.Screen name="(public)" options={headerStyle} />
-            </Stack>
-          </GestureHandlerRootView>
-        </AppwriteProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <Stack>
+            <Stack.Screen name="index" options={headerStyle} />
+            <Stack.Screen name="(auth)" options={headerStyle} />
+            <Stack.Screen name="(tabs)" options={headerStyle} />
+            <Stack.Screen name="(public)" options={headerStyle} />
+          </Stack>
+        </GestureHandlerRootView>
       </AppContextProvider>
     </ThemeProvider>
   );

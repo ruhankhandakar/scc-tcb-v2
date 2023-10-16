@@ -2,8 +2,6 @@ import { useRootNavigation, useRouter, useSegments } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
 import { Models } from 'appwrite';
 
-import { appwrite } from 'lib/appwrite-service';
-
 interface SignInResponse {
   data: Models.Token | undefined;
   error: Error | undefined;
@@ -78,7 +76,7 @@ export function Provider(props: ProviderProps) {
   useEffect(() => {
     (async () => {
       try {
-        const user = await appwrite.account.get();
+        const user = null;
         setAuth(user);
       } catch (error) {
         setAuth(null);
@@ -89,7 +87,7 @@ export function Provider(props: ProviderProps) {
 
   const logout = async (): Promise<SignOutResponse> => {
     try {
-      const response = await appwrite.account.deleteSession('current');
+      const response = undefined;
       return { error: undefined, data: response };
     } catch (error) {
       return { error, data: undefined };
@@ -100,10 +98,7 @@ export function Provider(props: ProviderProps) {
 
   const login = async (number: string): Promise<SignInResponse> => {
     try {
-      const sessionToken = await appwrite.account.createPhoneSession(
-        appwrite.ID.unique(),
-        number
-      );
+      const sessionToken = undefined;
 
       return { data: sessionToken, error: undefined };
     } catch (error) {
@@ -114,7 +109,7 @@ export function Provider(props: ProviderProps) {
 
   const verifyOtp = async (otp: string, userId: string) => {
     try {
-      const session = await appwrite.account.updatePhoneSession(userId, otp);
+      const session = undefined;
       return { data: session, error: undefined };
     } catch (error) {
       setAuth(null);

@@ -14,7 +14,6 @@ import styles from './styles';
 import { COLORS, SIZES } from 'constants/theme';
 import ListCard from 'components/common/ListCard';
 import { useAppContext } from 'context/AppContext';
-import { useAppwrite } from 'context/AppwriteContext';
 
 interface Props {
   isReadOnly?: boolean;
@@ -25,9 +24,7 @@ const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
   const {
     action: { handleUpdateData },
   } = useAppContext();
-  const { userDetails } = useAppwrite();
-
-  console.log('userDetails', userDetails);
+  const userDetails = {};
 
   const tcbCard = 'avail'; // TODO: fetch from API
 
