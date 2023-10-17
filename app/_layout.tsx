@@ -2,9 +2,10 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
-import { View } from 'react-native';
+import { Button, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+import ErrorBoundary from 'react-native-error-boundary';
 
 import ScreenHeaderBtn from 'components/common/header/ScreenHeaderBtn';
 
@@ -28,6 +29,19 @@ export const unstable_settings = {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
+const CustomFallback = (props: { error: Error; resetError: Function }) => (
+  <View>
+    <Text>Something happened!</Text>
+    <Text>{props.error.toString()}</Text>
+    <Button
+      onPress={() => {
+        props.resetError();
+      }}
+      title={'Try again'}
+    />
+  </View>
+);
+
 const Layout = () => {
   const router = useRouter();
 
@@ -46,9 +60,11 @@ const Layout = () => {
   if (!fontLoaded) return null;
 
   return (
-    <Provider>
-      <RootLayoutNav />
-    </Provider>
+    <ErrorBoundary FallbackComponent={CustomFallback}>
+      <Provider>
+        <RootLayoutNav />
+      </Provider>
+    </ErrorBoundary>
   );
 };
 
