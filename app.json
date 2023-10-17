@@ -53,6 +53,12 @@
         {
           "photosPermission": "The app accesses your photos for your profile"
         }
+      ],
+      [
+        "expo-updates",
+        {
+          "username": "nyr"
+        }
       ]
     ],
     "experiments": {
@@ -67,6 +73,12 @@
         "projectId": "0c286034-d94d-473d-adec-d87ebccad152"
       }
     },
-    "owner": "nyr"
+    "owner": "nyr",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0c286034-d94d-473d-adec-d87ebccad152"
+    }
   }
 }

@@ -30,9 +30,10 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 const CustomFallback = (props: { error: Error; resetError: Function }) => (
-  <View>
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
     <Text>Something happened!</Text>
     <Text>{props.error.toString()}</Text>
+    <Text>Please contact with Sylhet City Coporation - Niaz Morshed</Text>
     <Button
       onPress={() => {
         props.resetError();

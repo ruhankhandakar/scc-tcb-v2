@@ -35,7 +35,7 @@ const AuthContext = React.createContext<AuthContextValue | undefined>(
 
 export function Provider(props: ProviderProps) {
   const [user, setAuth] =
-    React.useState<Models.User<Models.Preferences> | null>(null);
+    React.useState<Models.User<Models.Preferences> | null>({ name: 'rk' });
   const [authInitialized, setAuthInitialized] = React.useState<boolean>(false);
 
   const useProtectedRoute = (user: Models.User<Models.Preferences> | null) => {
@@ -77,7 +77,7 @@ export function Provider(props: ProviderProps) {
     (async () => {
       try {
         const user = null;
-        setAuth(user);
+        setAuth({ name: 'rk' });
       } catch (error) {
         setAuth(null);
       }
