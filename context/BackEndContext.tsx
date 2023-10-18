@@ -11,6 +11,7 @@ import { useSegments, useRouter } from 'expo-router';
 
 import { supabase } from 'lib/supabase';
 import { ProfileData } from 'types/profile';
+import { IWards } from 'types';
 
 type AuthParams = {
   email: string;
@@ -26,6 +27,7 @@ type ContextType = {
   actions: {
     signUpWithEmail: ({ email, password }: AuthParams) => void;
     signOut: () => void;
+    getWards: () => Promise<IWards[] | undefined>;
   };
 };
 
@@ -136,9 +138,20 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
   };
 
+  const getWards = async () => {
+    const { error, data } = await supabase.from('wards').select('*');
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      const wards = data as IWards[];
+      return wards;
+    }
+  };
+
   const actions = {
     signUpWithEmail,
     signOut,
+    getWards,
   };
 
   return (
