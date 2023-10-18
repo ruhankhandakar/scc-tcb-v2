@@ -44,8 +44,6 @@ const CustomFallback = (props: { error: Error; resetError: Function }) => (
 );
 
 const Layout = () => {
-  const router = useRouter();
-
   const [fontLoaded] = useFonts({
     DMBold: require('assets/fonts/DMSans-Bold.ttf'),
     DMMedium: require('assets/fonts/DMSans-Medium.ttf'),

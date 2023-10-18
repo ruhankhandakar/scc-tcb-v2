@@ -28,13 +28,14 @@ export default function SignIn() {
   const passwordRef = useRef('');
 
   const handleLogin = async () => {
-    const email = emailRef.current;
+    let email = emailRef.current;
     const password = passwordRef.current;
 
     if (!validateEmail(email) || !password.trim()) {
       setErrorMessage('সঠিক email ও password দিন');
       return;
     }
+    email = email.toLowerCase();
     const response = await signUpWithEmail({ email, password });
   };
   const handleVerification = async () => {};

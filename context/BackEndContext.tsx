@@ -10,6 +10,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { useSegments, useRouter } from 'expo-router';
 
 import { supabase } from 'lib/supabase';
+import { ProfileData } from 'types/profile';
 
 type AuthParams = {
   email: string;
@@ -18,27 +19,31 @@ type AuthParams = {
 type StateType = {
   loading: boolean;
   user: User | null;
+  profile: ProfileData | null;
 };
 type ContextType = {
   state: StateType;
   actions: {
     signUpWithEmail: ({ email, password }: AuthParams) => void;
+    signOut: () => void;
   };
 };
 
 const initialState: StateType = {
   loading: false,
   user: null,
+  profile: null,
 };
 
 export const BackEndContext = createContext<ContextType | null>(null);
 
 const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [initialized, setInitialized] = useState(false);
   const segments = useSegments();
   const router = useRouter();
+
+  const [session, setSession] = useState<Session | null>(null);
   const [state, setState] = useState(initialState);
+  const [initialized, setInitialized] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
@@ -68,6 +73,35 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [session, initialized]);
 
+  useEffect(() => {
+    if (state.user) {
+      setState((prevState) => ({
+        ...prevState,
+        loading: true,
+      }));
+
+      supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', state.user?.id)
+        .then((response) => {
+          const { error, data } = response;
+
+          if (error) {
+            setErrorMessage(error.message);
+          }
+
+          const profileData = data as ProfileData[];
+
+          setState((prevState) => ({
+            ...prevState,
+            loading: false,
+            profile: profileData?.length ? profileData[0] : null,
+          }));
+        });
+    }
+  }, [state.user]);
+
   /* ----------Actions ------------- */
   const signUpWithEmail = async ({ email, password }: AuthParams) => {
     setState((prevState) => ({
@@ -80,7 +114,17 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     });
 
     if (error) {
-      setErrorMessage(error.message);
+      if (error.message === 'User already registered') {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (signInError) {
+          setErrorMessage(signInError.message);
+        }
+      } else {
+        setErrorMessage(error.message);
+      }
     }
     setState((prevState) => ({
       ...prevState,

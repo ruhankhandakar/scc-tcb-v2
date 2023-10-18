@@ -28,6 +28,9 @@ const styles = StyleSheet.create({
     paddingRight: SIZES.medium,
     paddingBottom: SIZES.medium,
   },
+  spinnerTextStyle: {
+    color: COLORS.primary,
+  },
 });
 
 export default styles;

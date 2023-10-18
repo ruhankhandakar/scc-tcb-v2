@@ -1,15 +1,31 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import Dealer from './Dealer';
 import Admin from './Admin';
 import Customer from './Customer';
 
-import type { ROLE } from 'utils/types';
+import { useBackEndContext } from 'context/BackEndContext';
+import type { ROLE } from 'types/profile';
+import styles from './styles';
 
 const HomePage = () => {
-  const role: ROLE = 'DEALER';
-  // TODO: Based on role render different home page
+  const {
+    state: { profile, loading, user },
+    actions: { signOut },
+  } = useBackEndContext();
+
+  if (loading) {
+    return (
+      <Spinner
+        visible={loading}
+        textContent={'Loading...'}
+        textStyle={styles.spinnerTextStyle}
+      />
+    );
+  }
+
+  const role = profile?.user_role;
 
   if (role === 'DEALER') {
     return <Dealer />;
@@ -19,7 +35,7 @@ const HomePage = () => {
     return <Admin />;
   }
 
-  return <Customer />;
+  return <Customer user={user} signOut={signOut} />;
 };
 
-export default HomePage;
+export default React.memo(HomePage);
