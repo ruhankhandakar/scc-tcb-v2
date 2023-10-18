@@ -1,6 +1,6 @@
 import { useFonts } from 'expo-font';
-import { Stack, useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { Slot, Stack, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { Button, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -10,8 +10,8 @@ import ErrorBoundary from 'react-native-error-boundary';
 import ScreenHeaderBtn from 'components/common/header/ScreenHeaderBtn';
 
 import ThemeProvider from 'ThemeProvider';
-import { Provider, useAuth } from 'context/AuthContext';
 import AppContextProvider from 'context/AppContext';
+import BackEndContextProvider from 'context/BackEndContext';
 
 import { logoIcon } from 'constants/icons';
 import { COLORS, SIZES } from 'constants/theme';
@@ -62,18 +62,14 @@ const Layout = () => {
 
   return (
     <ErrorBoundary FallbackComponent={CustomFallback}>
-      <Provider>
+      <BackEndContextProvider>
         <RootLayoutNav />
-      </Provider>
+      </BackEndContextProvider>
     </ErrorBoundary>
   );
 };
 
 function RootLayoutNav() {
-  const { authInitialized, user } = useAuth();
-
-  if (!authInitialized && !user) return null;
-
   const headerStyle: NativeStackNavigationOptions = {
     headerStyle: {
       backgroundColor: COLORS.white,

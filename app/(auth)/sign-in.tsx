@@ -5,49 +5,40 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Image } from 'expo-image';
-import { Ionicons } from '@expo/vector-icons';
-import { Snackbar } from 'react-native-paper';
+import { Snackbar, Button } from 'react-native-paper';
 
-import { illustration1, illustration2 } from 'constants/icons';
 import WaterMarkBackground from 'components/common/WaterMarkBackground';
+
+import { useBackEndContext } from 'context/BackEndContext';
+import { illustration1, illustration2 } from 'constants/icons';
 import { COLORS, SIZES } from 'constants/theme';
-import { useAuth } from 'context/AuthContext';
+import { validateEmail } from 'utils';
 
 export default function SignIn() {
-  const { signIn, verifyOtp } = useAuth();
-  const router = useRouter();
-  const [errMsg, setErrMsg] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
-  const [userId, setUserId] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const {
+    state: { loading },
+    actions: { signUpWithEmail },
+  } = useBackEndContext();
 
-  const numberRef = useRef('');
-  const otpRef = useRef('');
+  const emailRef = useRef('');
+  const passwordRef = useRef('');
 
   const handleLogin = async () => {
-    console.log(numberRef.current);
-    let number = numberRef.current;
+    const email = emailRef.current;
+    const password = passwordRef.current;
 
-    if (!number.trim() || number.length !== 10) {
-      setErrMsg('সঠিক মোবাইল নাম্বার দিন');
+    if (!validateEmail(email) || !password.trim()) {
+      setErrorMessage('সঠিক email ও password দিন');
       return;
     }
-    number = `+880${number}`;
+    const response = await signUpWithEmail({ email, password });
+  };
+  const handleVerification = async () => {};
 
-    const response = await signIn(number);
-    setUserId(response.data?.userId || '');
-    if (response.data) {
-      setIsOtpSent(true);
-    } else {
-      setErrMsg(response.error?.message || 'Something went wrong');
-    }
-  };
-  const handleVerification = async () => {
-    const response = await verifyOtp(otpRef.current, userId);
-    console.log(response);
-  };
   return (
     <View
       style={{
@@ -61,67 +52,51 @@ export default function SignIn() {
             contentFit="contain"
             style={styles.imgContainer}
           />
-          {isOtpSent ? (
-            <View style={styles.textInputContainer}>
-              <TextInput
-                style={styles.inputText}
-                placeholder="OTP"
-                placeholderTextColor={COLORS.white}
-                onChangeText={(text) => {
-                  otpRef.current = text;
-                }}
-                keyboardType="phone-pad"
-                onSubmitEditing={handleVerification}
-              />
-              <Ionicons
-                name="keypad-outline"
-                size={24}
-                color={COLORS.white}
-                style={styles.icon}
-              />
-            </View>
-          ) : (
-            <View style={styles.textInputContainer}>
-              <Text style={styles.prefixText}>+880</Text>
-              <TextInput
-                style={styles.inputText}
-                placeholder="মোবাইল নাম্বার"
-                placeholderTextColor={COLORS.white}
-                onChangeText={(text) => {
-                  numberRef.current = text;
-                }}
-                keyboardType="phone-pad"
-                onSubmitEditing={handleLogin}
-              />
-              <Ionicons
-                name="keypad-outline"
-                size={24}
-                color={COLORS.white}
-                style={styles.icon}
-              />
-            </View>
-          )}
-          <TouchableOpacity
-            onPress={isOtpSent ? handleVerification : handleLogin}
+          <View style={styles.textInputContainer}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="Email"
+              placeholderTextColor={COLORS.white}
+              onChangeText={(text) => {
+                emailRef.current = text;
+              }}
+            />
+          </View>
+          <View style={styles.textInputContainer}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="Password"
+              placeholderTextColor={COLORS.white}
+              onChangeText={(text) => {
+                passwordRef.current = text;
+              }}
+              secureTextEntry={true}
+            />
+          </View>
+
+          <Button
+            mode="contained"
             style={styles.button}
+            onPress={isOtpSent ? handleVerification : handleLogin}
+            loading={loading}
           >
             <Text style={styles.buttonText}>Login</Text>
-          </TouchableOpacity>
+          </Button>
         </View>
       </WaterMarkBackground>
       <Snackbar
-        visible={!!errMsg}
+        visible={!!errorMessage}
         onDismiss={() => {
-          setErrMsg('');
+          setErrorMessage('');
         }}
         action={{
           label: 'Close',
           onPress: () => {
-            setErrMsg('');
+            setErrorMessage('');
           },
         }}
       >
-        {errMsg}
+        {errorMessage}
       </Snackbar>
     </View>
   );
@@ -155,7 +130,7 @@ const styles = StyleSheet.create({
   inputText: {
     color: COLORS.white,
     fontSize: 14,
-    width: '73%',
+    width: '100%',
     alignSelf: 'center',
   },
   icon: {
