@@ -11,8 +11,12 @@ import { useSegments, useRouter } from 'expo-router';
 
 import { supabase } from 'lib/supabase';
 import { ProfileData } from 'types/profile';
-import { IWards } from 'types';
+import { Customer, IWards } from 'types';
 
+type CustomerParams = {
+  startOffset: number;
+  endOffset: number;
+};
 type AuthParams = {
   email: string;
   password: string;
@@ -27,6 +31,11 @@ type ContextType = {
   actions: {
     signUpWithEmail: ({ email, password }: AuthParams) => void;
     signOut: () => void;
+    getTotalCustomers: () => Promise<number>;
+    getCustomers: ({
+      startOffset,
+      endOffset,
+    }: CustomerParams) => Promise<Customer[]>;
     getWards: () => Promise<IWards[] | undefined>;
   };
 };
@@ -158,10 +167,60 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getTotalCustomers = async () => {
+    const userRole = state.profile?.user_role || 'DEALER';
+
+    let query = supabase
+      .from('customers')
+      .select('id', { count: 'planned', head: true });
+
+    if (userRole !== 'ADMIN') {
+      query = query.eq('ward', state.profile?.ward);
+    }
+    const { count, error } = await query;
+
+    if (error) {
+      setErrorMessage(error.message);
+    }
+
+    return count || 0;
+  };
+
+  const getCustomers = async ({
+    startOffset = 0,
+    endOffset = 10,
+  }: CustomerParams) => {
+    const userRole = state.profile?.user_role || 'DEALER';
+
+    let customers: Customer[] = [];
+
+    let query = supabase
+      .from('customers')
+      .select('*, wards (*)')
+      .order('id', {
+        ascending: true,
+      })
+      .range(startOffset, endOffset);
+
+    if (userRole !== 'ADMIN') {
+      query = query.eq('ward', state.profile?.ward);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      customers = data as Customer[];
+    }
+    return customers;
+  };
+
   const actions = {
     signUpWithEmail,
     signOut,
     getWards,
+    getCustomers,
+    getTotalCustomers,
   };
 
   return (

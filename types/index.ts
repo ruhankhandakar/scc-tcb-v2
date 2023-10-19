@@ -12,3 +12,22 @@ export interface IWards {
   name: string;
   profiles: ProfileData[] | [];
 }
+
+export interface Customer {
+  address: string;
+  created_at: string;
+  customer_id: number;
+  document_proof_link?: string;
+  document_proof_name: string;
+  document_proof_number: string;
+  family_card?: string;
+  profile_pic?: string;
+  gurdian_name: string;
+  id: number;
+  is_active: boolean;
+  mobile_number: string;
+  name: string;
+  union: string;
+  ward: number;
+  wards: IWards;
+}

@@ -4,16 +4,10 @@ import { Image } from 'expo-image';
 
 import styles from './style';
 import { placeholderUser } from 'constants/icons';
+import { Customer } from 'types';
 
 interface Props {
-  item: {
-    id: number;
-    headFamilyName: string;
-    fatherOrHusbandName: string;
-    mobileNumber: string;
-    nidNumber: string;
-    address: string;
-  };
+  item: Customer;
   handleNavigate: () => void;
 }
 
@@ -22,7 +16,7 @@ const index: React.FC<Props> = ({ item, handleNavigate }) => {
     <TouchableOpacity style={styles.container} onPress={handleNavigate}>
       <View style={styles.leftContainer}>
         <Image
-          source={placeholderUser}
+          source={item.profile_pic || placeholderUser}
           contentFit="cover"
           style={styles.logoImage}
         />
@@ -31,32 +25,32 @@ const index: React.FC<Props> = ({ item, handleNavigate }) => {
           <View style={styles.textView}>
             <Text style={styles.labelText}>পরিবার প্রধানের নাম: </Text>
             <Text style={styles.valueText} numberOfLines={1}>
-              {item.headFamilyName}
+              {item.name}
             </Text>
           </View>
           <View style={styles.textView}>
             <Text style={styles.labelText}>পিতা/স্বামীর নাম: </Text>
             <Text style={styles.valueText} numberOfLines={1}>
-              {item.fatherOrHusbandName}
+              {item.gurdian_name}
             </Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.textView}>
             <Text style={styles.labelText}>মোবাইল নম্বর: </Text>
             <Text style={styles.valueText} numberOfLines={1}>
-              {item.mobileNumber}
+              {item.mobile_number}
             </Text>
           </View>
           <View style={styles.textView}>
-            <Text style={styles.labelText}>জাতীয় পরিচয়পত্র নম্বর: </Text>
+            <Text style={styles.labelText}>{item.document_proof_name}: </Text>
             <Text style={styles.valueText} numberOfLines={1}>
-              {item.nidNumber}
+              {item.document_proof_number}
             </Text>
           </View>
           <View style={styles.textView}>
             <Text style={styles.labelText}>ঠিকানা: </Text>
             <Text style={styles.valueText} numberOfLines={1}>
-              {item.address}
+              {item.wards.name} - {item.address}
             </Text>
           </View>
         </View>
@@ -65,4 +59,4 @@ const index: React.FC<Props> = ({ item, handleNavigate }) => {
   );
 };
 
-export default index;
+export default React.memo(index);
