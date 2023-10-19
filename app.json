@@ -2,9 +2,9 @@
   "expo": {
     "name": "TCB Sylhet City Corporation",
     "slug": "tcb-sylhet-city-corporation",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/icons/logo.png",
+    "icon": "./assets/app-assets/playstore.png",
     "scheme": "scc",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -12,9 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -25,7 +23,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/app-assets/adaptive-icon.png",
+        "foregroundImage": "./assets/app-assets/playstore.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
