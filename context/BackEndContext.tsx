@@ -14,8 +14,10 @@ import { ProfileData } from 'types/profile';
 import { Customer, IWards } from 'types';
 
 type CustomerParams = {
-  startOffset: number;
-  endOffset: number;
+  startOffset?: number;
+  endOffset?: number;
+  searchTerm?: string;
+  column?: string;
 };
 type AuthParams = {
   email: string;
@@ -187,23 +189,29 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getCustomers = async ({
-    startOffset = 0,
-    endOffset = 10,
+    startOffset,
+    endOffset,
+    column,
+    searchTerm,
   }: CustomerParams) => {
     const userRole = state.profile?.user_role || 'DEALER';
 
     let customers: Customer[] = [];
 
-    let query = supabase
-      .from('customers')
-      .select('*, wards (*)')
-      .order('id', {
-        ascending: true,
-      })
-      .range(startOffset, endOffset);
+    let query = supabase.from('customers').select('*, wards (*)').order('id', {
+      ascending: true,
+    });
 
     if (userRole !== 'ADMIN') {
       query = query.eq('ward', state.profile?.ward);
+    }
+
+    if (endOffset) {
+      query = query.range(startOffset!, endOffset);
+    }
+
+    if (searchTerm?.trim() && column) {
+      query = query.ilike('customer_search', `%${searchTerm}%`);
     }
 
     const { data, error } = await query;

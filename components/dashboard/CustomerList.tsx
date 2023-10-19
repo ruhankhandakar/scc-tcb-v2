@@ -41,17 +41,16 @@ const CustomerList = () => {
     setPage((prevPage) => prevPage + 1);
   };
 
-  const handleSearch = () => {
-    console.log('searching');
-  };
-
   const fetchCustomers = async () => {
     const startOffset = (page - 1) * PAGE_SIZE;
     const endOffset = startOffset + PAGE_SIZE;
 
     try {
       setLoading(true);
-      const response = await getCustomers({ startOffset, endOffset });
+      const response = await getCustomers({
+        startOffset,
+        endOffset,
+      });
       if (response.length < PAGE_SIZE || startOffset > 20) {
       } else {
         setUsers((prevState) => {
@@ -65,6 +64,22 @@ const CustomerList = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = async () => {
+    let column = 'mobile_number';
+
+    if (isNaN(parseInt(searchTerm))) {
+      column = 'name';
+    }
+
+    setLoading(true);
+    const response = await getCustomers({
+      column,
+      searchTerm,
+    });
+    setUsers(response);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -92,6 +107,8 @@ const CustomerList = () => {
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         handleClick={handleSearch}
+        loading={loading}
+        handleSearch={handleSearch}
       />
       {loading && !users.length && (
         <View>
@@ -139,7 +156,7 @@ const CustomerList = () => {
                   </Text>
                 </View>
               );
-            return !loading ? (
+            return loading ? (
               <View style={styles.footerContainer}>
                 <ActivityIndicator animating={true} color={COLORS.primary} />
               </View>

@@ -1,21 +1,25 @@
 import React from 'react';
-import { Image, TextInput, TouchableOpacity, View } from 'react-native';
+import { TextInput, TouchableOpacity, View } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import { ActivityIndicator } from 'react-native-paper';
 
 import styles from './style';
-import { searchIcon } from 'constants/icons';
 import { COLORS } from 'constants/theme';
 
 interface Props {
   searchTerm: string;
   setSearchTerm: (text: string) => void;
   handleClick: () => void;
+  handleSearch?: () => Promise<void>;
+  loading?: boolean;
 }
 
 const SearchBox: React.FC<Props> = ({
   searchTerm,
   setSearchTerm,
   handleClick,
+  loading = false,
+  handleSearch,
 }) => {
   return (
     <View style={styles.searchContainer}>
@@ -26,11 +30,20 @@ const SearchBox: React.FC<Props> = ({
           onChangeText={(text) => {
             setSearchTerm(text);
           }}
+          onSubmitEditing={handleSearch}
           placeholder="মোবাইল ও জাতীয় পরিচয়পত্র নাম্বার দিয়ে সার্চ করুন"
         />
       </View>
-      <TouchableOpacity style={styles.searchBtn} onPress={handleClick}>
-        <AntDesign name="search1" size={24} color={COLORS.white} />
+      <TouchableOpacity
+        style={styles.searchBtn}
+        onPress={handleClick}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator animating={true} color={COLORS.gray} />
+        ) : (
+          <AntDesign name="search1" size={24} color={COLORS.white} />
+        )}
       </TouchableOpacity>
     </View>
   );

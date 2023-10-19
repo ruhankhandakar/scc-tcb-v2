@@ -34,6 +34,12 @@ const index: React.FC<Props> = ({ item, handleNavigate }) => {
               {item.gurdian_name}
             </Text>
           </View>
+          <View style={styles.textView}>
+            <Text style={styles.labelText}>পরিবার কার্ড নাম্বার: </Text>
+            <Text style={styles.valueText} numberOfLines={1}>
+              {item.customer_id}
+            </Text>
+          </View>
           <View style={styles.divider} />
           <View style={styles.textView}>
             <Text style={styles.labelText}>মোবাইল নম্বর: </Text>
