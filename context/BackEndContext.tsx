@@ -139,9 +139,19 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getWards = async () => {
-    const { error, data } = await supabase.from('wards').select('*');
+    const { error, data } = await supabase
+      .from('wards')
+      .select('*, profiles (*)')
+      .eq('profiles.is_active', true)
+      .eq('is_active', true)
+      .eq('profiles.user_role', 'DEALER')
+      .order('id', {
+        ascending: true,
+      });
+
     if (error) {
       setErrorMessage(error.message);
+      return [];
     } else {
       const wards = data as IWards[];
       return wards;

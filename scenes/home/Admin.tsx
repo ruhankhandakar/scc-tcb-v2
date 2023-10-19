@@ -3,42 +3,45 @@ import { View } from 'react-native';
 
 import Stats from 'components/home/Stats';
 import DropdownComponent from 'components/common/Dropdown';
+import WardDealerList from 'components/home/WardDealerList';
 
 import styles from './styles';
 import { useBackEndContext } from 'context/BackEndContext';
-import type { ItemType } from 'types';
+import type { IWards } from 'types';
 
 const Admin = () => {
   const {
     actions: { getWards },
   } = useBackEndContext();
-  const [lists, setLists] = useState<ItemType[]>([]);
+  const [wardsList, setWardsList] = useState<IWards[]>([]);
+  const [selectedWards, setSelectedWard] = useState<IWards[]>([]);
 
   useEffect(() => {
     getWards().then((data) => {
-      const lists = data?.map((item) => ({
-        label: item.name,
-        value: item.id,
-      }));
-      setLists(lists as ItemType[]);
+      setWardsList(data!);
     });
   }, []);
 
-  const handleChange = (item: string[]) => {
-    console.log('item -->', item);
+  const handleChange = (item: number[]) => {
+    const selectedLists = wardsList.filter((list) => item.includes(list.id));
+    setSelectedWard(selectedLists);
   };
 
   return (
     <View style={styles.parentContainer}>
       <DropdownComponent
-        data={lists}
+        data={wardsList.map((ward) => ({
+          label: ward.name,
+          value: ward.id,
+        }))}
         handleChange={handleChange}
         placeholder="ওয়ার্ডস সিলেক্ট করুন"
         label="ওয়ার্ড"
       />
+      {!!selectedWards.length && <WardDealerList data={selectedWards} />}
       <Stats styles={styles} />
     </View>
   );
 };
 
-export default Admin;
+export default React.memo(Admin);

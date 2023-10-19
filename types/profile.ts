@@ -6,4 +6,5 @@ export interface ProfileData {
   last_name: string;
   user_role: ROLE;
   created_at: string;
+  ward: number;
 }

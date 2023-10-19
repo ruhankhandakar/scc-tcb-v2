@@ -14,6 +14,7 @@ import styles from './styles';
 import { COLORS, SIZES } from 'constants/theme';
 import ListCard from 'components/common/ListCard';
 import { useAppContext } from 'context/AppContext';
+import { useBackEndContext } from 'context/BackEndContext';
 
 interface Props {
   isReadOnly?: boolean;
@@ -24,6 +25,9 @@ const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
   const {
     action: { handleUpdateData },
   } = useAppContext();
+  const {
+    actions: { signOut },
+  } = useBackEndContext();
   const userDetails = {};
 
   const tcbCard = 'avail'; // TODO: fetch from API
@@ -150,7 +154,7 @@ const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
               rightIcon={
                 <TouchableOpacity
                   onPress={() => {
-                    console.log('logout');
+                    signOut();
                   }}
                 >
                   <AntDesign

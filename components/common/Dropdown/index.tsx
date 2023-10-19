@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import { MultiSelect } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Entypo } from '@expo/vector-icons';
 
-import { COLORS, SIZES } from 'constants/theme';
+import { COLORS, SHADOWS, SIZES } from 'constants/theme';
 import { ItemType } from 'types';
 
 interface Props {
   data: ItemType[];
-  handleChange: (item: string[]) => void;
+  handleChange: (item: number[]) => void;
   placeholder: string;
   label: string;
 }
@@ -42,10 +42,6 @@ const MultiSelectComponent = ({
     return null;
   };
 
-  useEffect(() => {
-    handleChange(selected);
-  }, [selected, handleChange]);
-
   return (
     <View style={styles.container}>
       {renderLabel()}
@@ -64,12 +60,11 @@ const MultiSelectComponent = ({
         searchPlaceholder="Search..."
         onChange={(item) => {
           setSelected(item);
+          // @ts-ignore
+          handleChange(item);
         }}
         onFocus={() => setIsFocus(true)}
         onBlur={() => setIsFocus(false)}
-        itemContainerStyle={{
-          backgroundColor: 'red',
-        }}
         renderLeftIcon={() => (
           <Entypo
             name="list"
@@ -80,7 +75,13 @@ const MultiSelectComponent = ({
         )}
         renderItem={renderItem}
         renderSelectedItem={(item, unSelect) => (
-          <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+          <TouchableOpacity
+            onPress={() => {
+              if (unSelect) {
+                unSelect(item);
+              }
+            }}
+          >
             <View style={styles.selectedStyle}>
               <Text style={styles.textSelectedStyle}>{item.label}</Text>
               <AntDesign color={COLORS.black} name="delete" size={12} />
@@ -99,6 +100,7 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: 'white',
     borderRadius: SIZES.medium,
+    ...SHADOWS.medium,
   },
 
   label: {

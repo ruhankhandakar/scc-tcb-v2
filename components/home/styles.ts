@@ -1,7 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-import { COLORS, SIZES, SHADOWS } from 'constants/theme';
-import { ViewStyle } from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
+import { COLORS, SIZES, SHADOWS, FONT } from 'constants/theme';
 
 const styles = StyleSheet.create({
   // @ts-ignore
@@ -51,6 +50,53 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     borderRadius: SIZES.large,
+  },
+
+  wardDealerListContainer: {
+    marginTop: SIZES.medium,
+    paddingLeft: SIZES.medium,
+    paddingRight: SIZES.medium,
+  },
+  headingView: {
+    flexDirection: 'row',
+    gap: 2,
+    alignItems: 'center',
+  },
+  wardDealerListCardContainer: {
+    marginBottom: SIZES.medium,
+  },
+  headingViewText: {
+    fontFamily: FONT.medium,
+    fontSize: SIZES.medium,
+    color: COLORS.darkBlue,
+  },
+  dealerView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginLeft: SIZES.medium,
+    padding: 4,
+  },
+  dealerLeftView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  dealerViewText: {
+    fontFamily: FONT.regular,
+    fontSize: SIZES.medium - 3,
+    color: COLORS.darkBlue,
+    marginTop: 2,
+  },
+  dealerViewEmptyText: {
+    fontFamily: FONT.regular,
+    fontSize: SIZES.medium - 3,
+    color: COLORS.gray,
+    marginTop: 2,
+    marginLeft: 2,
+  },
+  arrowRight: {
+    alignSelf: 'flex-end',
   },
 });
 
