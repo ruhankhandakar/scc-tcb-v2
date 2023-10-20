@@ -31,7 +31,7 @@ const SearchBox: React.FC<Props> = ({
             setSearchTerm(text);
           }}
           onSubmitEditing={handleSearch}
-          placeholder="মোবাইল ও জাতীয় পরিচয়পত্র নাম্বার দিয়ে সার্চ করুন"
+          placeholder="নাম, মোবাইল নাম্বার, জাতীয় পরিচয়পত্র ও পরিবার কার্ড নাম্বার দিয়ে সার্চ করুন"
         />
       </View>
       <TouchableOpacity
