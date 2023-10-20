@@ -31,3 +31,11 @@ export interface Customer {
   ward: number;
   wards: IWards;
 }
+
+export interface Products {
+  id: number;
+  is_active: boolean;
+  product_name: string;
+  created_at: string;
+  quantity: string;
+}

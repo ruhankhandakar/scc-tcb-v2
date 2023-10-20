@@ -1,4 +1,5 @@
-import { ReactNode, createContext, useContext, useState } from 'react';
+import React, { ReactNode, createContext, useContext, useState } from 'react';
+import { Snackbar } from 'react-native-paper';
 
 const initialState = {
   state: {
@@ -14,12 +15,16 @@ type ContextType = typeof initialState & {
     isShowRegistrationForm: boolean;
     [key: string]: any;
   };
+  action: {
+    handleErrorMessage: (message: string) => void;
+  };
 };
 
 export const AppContext = createContext<ContextType | null>(null);
 
 const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [data, setData] = useState(initialState.state);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleUpdateData = (params: Pick<ContextType, 'state'>): undefined => {
     setData((prevData) => ({
@@ -27,9 +32,32 @@ const AppContextProvider = ({ children }: { children: ReactNode }) => {
       ...params,
     }));
   };
+
+  const handleErrorMessage = (message: string): void => {
+    setErrorMessage(message);
+  };
+
   return (
-    <AppContext.Provider value={{ state: data, action: { handleUpdateData } }}>
+    <AppContext.Provider
+      value={{ state: data, action: { handleUpdateData, handleErrorMessage } }}
+    >
       {children}
+      {!!errorMessage && (
+        <Snackbar
+          visible={!!errorMessage}
+          onDismiss={() => {
+            setErrorMessage('');
+          }}
+          action={{
+            label: 'Close',
+            onPress: () => {
+              setErrorMessage('');
+            },
+          }}
+        >
+          {errorMessage}
+        </Snackbar>
+      )}
     </AppContext.Provider>
   );
 };

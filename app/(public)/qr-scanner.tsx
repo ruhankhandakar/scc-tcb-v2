@@ -5,6 +5,7 @@ import { Text, Button, useTheme } from 'react-native-paper';
 import { Stack, router, useGlobalSearchParams } from 'expo-router';
 import { XMLParser } from 'fast-xml-parser';
 import { Ionicons } from '@expo/vector-icons';
+import _ from 'lodash';
 
 import { COLORS, SIZES } from 'constants/theme';
 import { useAppContext } from 'context/AppContext';
@@ -31,15 +32,14 @@ const Scanner = () => {
     data: string;
   }) => {
     setScanned(true);
-    console.log('data', data);
     try {
       const scannedData = parser.parse(data);
       handleUpdateData({
-        [keyName]: scannedData,
+        [keyName]: _.isEmpty(scannedData) ? data : scannedData,
       });
     } catch (error) {
       handleUpdateData({
-        [keyName]: '',
+        [keyName]: data,
       });
     } finally {
       router.back();

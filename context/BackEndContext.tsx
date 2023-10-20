@@ -11,7 +11,7 @@ import { useSegments, useRouter } from 'expo-router';
 
 import { supabase } from 'lib/supabase';
 import { ProfileData } from 'types/profile';
-import { Customer, IWards } from 'types';
+import { Customer, IWards, Products } from 'types';
 
 type CustomerParams = {
   startOffset?: number;
@@ -27,6 +27,7 @@ type StateType = {
   loading: boolean;
   user: User | null;
   profile: ProfileData | null;
+  products: Products[] | null;
 };
 type ContextType = {
   state: StateType;
@@ -39,6 +40,7 @@ type ContextType = {
       endOffset,
     }: CustomerParams) => Promise<Customer[]>;
     getWards: () => Promise<IWards[] | undefined>;
+    getCustomerDetails: (customerId: number) => Promise<Customer | undefined>;
   };
 };
 
@@ -46,6 +48,7 @@ const initialState: StateType = {
   loading: false,
   user: null,
   profile: null,
+  products: null,
 };
 
 export const BackEndContext = createContext<ContextType | null>(null);
@@ -114,6 +117,15 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
         });
     }
   }, [state.user]);
+
+  useEffect(() => {
+    if (
+      state.profile?.user_role === 'ADMIN' ||
+      state.profile?.user_role === 'DEALER'
+    ) {
+      getProducts();
+    }
+  }, [state.profile?.user_role]);
 
   /* ----------Actions ------------- */
   const signUpWithEmail = async ({ email, password }: AuthParams) => {
@@ -223,12 +235,43 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     return customers;
   };
 
+  const getProducts = async () => {
+    const { error, data } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_active', true);
+
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      setState((prevState) => ({
+        ...prevState,
+        products: data as Products[],
+      }));
+    }
+  };
+
+  const getCustomerDetails = async (customerId: number) => {
+    const { error, data } = await supabase
+      .from('customers')
+      .select('*, wards(*)')
+      .eq('customer_id', customerId);
+
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      return data[0] as Customer;
+    }
+  };
+
   const actions = {
     signUpWithEmail,
     signOut,
     getWards,
     getCustomers,
     getTotalCustomers,
+    setErrorMessage,
+    getCustomerDetails,
   };
 
   return (

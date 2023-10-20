@@ -1,136 +1,189 @@
-import { useState, useEffect } from 'react';
-import { BarCodeScanner } from 'expo-barcode-scanner';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
-import { Text, Button, useTheme } from 'react-native-paper';
+import { StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
+import { ActivityIndicator, Text } from 'react-native-paper';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 
-import { SIZES } from 'constants/theme';
+import WaterMarkBackground from 'components/common/WaterMarkBackground';
+import CustomerDetailsWithEntry from 'components/CustomerEntry';
+
+import { COLORS, FONT, SIZES } from 'constants/theme';
+import { useAppContext } from 'context/AppContext';
+import { useBackEndContext } from 'context/BackEndContext';
+import { Customer } from 'types';
+import { noDataIllustration } from 'constants/icons';
+
+const screenHeight = Dimensions.get('screen');
 
 const CustomerEntry = () => {
-  const theme = useTheme();
+  const router = useRouter();
+  const {
+    state,
+    action: { handleErrorMessage, handleUpdateData },
+  } = useAppContext();
+  const {
+    actions: { getCustomerDetails },
+  } = useBackEndContext();
 
-  const [hasPermission, setHasPermission] = useState<null | boolean>(null);
-  const [scanned, setScanned] = useState(false);
-  const [showScannedUserDetails, setShowScannedUserDetails] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [customerDetails, setCustomerDetails] = useState<
+    Customer | undefined
+  >();
+  const [isMounted, setIsMounted] = useState(false);
 
-  const handleBarCodeScanned = ({
-    type,
-    data,
-  }: {
-    type: string;
-    data: string;
-  }) => {
-    setScanned(true);
-    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-  };
+  const familyCardNo = state?.familyCard;
 
-  const getBarCodeScannerPermissions = async () => {
-    const { status } = await BarCodeScanner.requestPermissionsAsync();
-    setHasPermission(status === 'granted');
+  const handleScannerRedirection = () => {
+    // @ts-ignore
+    router.push({
+      pathname: 'qr-scanner',
+      params: {
+        key: 'familyCard',
+      },
+    });
   };
 
   useEffect(() => {
-    getBarCodeScannerPermissions();
+    handleScannerRedirection();
+    setIsMounted(true);
   }, []);
 
-  if (hasPermission === null) {
-    return (
-      <SafeAreaView style={styles.areaViewContainer}>
-        <View style={{ ...styles.flexCenter, marginTop: SIZES.medium }}>
-          <Text
-            variant="headlineLarge"
-            style={{
-              color: theme.colors.error,
-              fontSize: SIZES.large - 2,
-              textAlign: 'center',
-              marginBottom: SIZES.small,
-            }}
-          >
-            Requesting for camera permission
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-  if (hasPermission === false) {
-    return (
-      <SafeAreaView style={styles.areaViewContainer}>
-        <View style={styles.flexCenter}>
-          <Text
-            variant="headlineLarge"
-            style={{
-              color: theme.colors.error,
-              fontSize: SIZES.large - 2,
-              textAlign: 'center',
-              marginBottom: SIZES.small,
-            }}
-          >
-            No Access To Camera
-          </Text>
-          <Button
-            onPressIn={getBarCodeScannerPermissions}
-            icon="camera"
-            mode="contained"
-            style={{
-              padding: SIZES.xSmall,
-              width: 300,
-            }}
-          >
-            Give Permission
-          </Button>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const fetchCustomerDetails = async (familyCardNo: string) => {
+    const splittedData = familyCardNo.split('_');
+    if (splittedData[0] !== 'scc') {
+      handleErrorMessage('এই ফ্যামিলি কার্ডটি বৈধ নয়');
+      return;
+    }
+    const wardNum = +splittedData[1];
+    const cardNum = +splittedData[2];
+
+    if (!wardNum || !cardNum) {
+      handleErrorMessage('এই ফ্যামিলি কার্ডটি বৈধ নয়');
+      return;
+    }
+
+    // TODO: Check ward number for dealer, if it is not same then show error
+
+    setLoading(true);
+    const response = await getCustomerDetails(cardNum);
+    setCustomerDetails(response);
+    setLoading(false);
+  };
+
+  const handleClearState = () => {
+    setCustomerDetails(undefined);
+    setLoading(false);
+    handleUpdateData({
+      familyCard: '',
+    });
+  };
+
+  useEffect(() => {
+    if (familyCardNo) {
+      fetchCustomerDetails(familyCardNo);
+    }
+  }, [familyCardNo]);
 
   return (
-    <SafeAreaView style={styles.areaViewContainer}>
-      <View style={styles.container}>
-        {showScannedUserDetails ? (
-          <View>
-            <Text>User Details</Text>
-          </View>
-        ) : (
-          <>
-            <BarCodeScanner
-              onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-              style={StyleSheet.absoluteFillObject}
-            />
-            {scanned && (
-              <View style={styles.flexCenter}>
-                <Button
-                  icon="camera"
-                  mode="contained"
-                  style={{
-                    padding: SIZES.xSmall,
-                    width: 300,
-                  }}
-                  onPressIn={() => setScanned(false)}
-                >
-                  Tap to Scan Again
-                </Button>
-              </View>
-            )}
-          </>
-        )}
-      </View>
-    </SafeAreaView>
+    <>
+      <WaterMarkBackground>
+        <View
+          style={[styles.container, !customerDetails && styles.centerContainer]}
+        >
+          {loading ? (
+            <View>
+              <ActivityIndicator
+                animating={true}
+                color={COLORS.primary}
+                size="large"
+              />
+              <Text style={styles.loadingText}>কার্ড চেক করা হচ্ছে...</Text>
+            </View>
+          ) : (
+            <>
+              {customerDetails ? (
+                <CustomerDetailsWithEntry
+                  customerDetails={customerDetails!}
+                  handleClearState={handleClearState}
+                />
+              ) : familyCardNo ? (
+                <View style={styles.noDataImgContainer}>
+                  <Image
+                    source={noDataIllustration}
+                    contentFit="cover"
+                    style={styles.noDataImg}
+                  />
+                  <Text variant="bodyMedium" style={styles.noDataText}>
+                    এই গ্র্যাহকের কোন ডাটা খুঁজে পাওয়া যায়নি
+                  </Text>
+                </View>
+              ) : null}
+            </>
+          )}
+        </View>
+      </WaterMarkBackground>
+
+      {isMounted && (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => handleScannerRedirection()}
+        >
+          <Ionicons name="qr-code-outline" size={24} color={COLORS.white} />
+        </TouchableOpacity>
+      )}
+    </>
   );
 };
 
 export default CustomerEntry;
 
 const styles = StyleSheet.create({
-  flexCenter: {
+  container: {
+    flex: 1,
+    minHeight: screenHeight.height - 200,
+  },
+  centerContainer: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  areaViewContainer: {
-    flex: 1,
-    paddingBottom: SIZES.xxLarge,
-    paddingTop: SIZES.xxLarge,
+  text: {
+    color: COLORS.darkBlue,
   },
-  container: {
-    flex: 1,
+  fab: {
+    position: 'absolute',
+    marginRight: 16,
+    right: 0,
+    top: 10,
+    backgroundColor: COLORS.primary,
+    height: 50,
+    width: 50,
+    borderRadius: 25,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontFamily: FONT.medium,
+    color: COLORS.lightBlue,
+    textAlign: 'center',
+    fontSize: SIZES.medium,
+    marginTop: SIZES.xxLarge,
+  },
+  noDataImgContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: SIZES.xxLarge,
+    paddingHorizontal: SIZES.medium,
+  },
+  noDataImg: {
+    height: 300,
+    width: 300,
+    textAlign: 'center',
+  },
+  noDataText: {
+    color: COLORS.error,
+    fontFamily: FONT.medium,
+    fontSize: SIZES.xLarge,
+    textAlign: 'center',
   },
 });
