@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { Button, Checkbox } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 
-import { Customer } from 'types';
+import { Customer, StatusType } from 'types';
 import { placeholderUser } from 'constants/icons';
 import { useBackEndContext } from 'context/BackEndContext';
 import { COLORS } from 'constants/theme';
@@ -13,7 +13,7 @@ import styles from './style';
 
 interface Props {
   customerDetails: Customer;
-  handleClearState: () => void;
+  handleClearState: (status: StatusType) => void;
 }
 
 const CustomerDetailsWithEntry = ({
@@ -46,8 +46,8 @@ const CustomerDetailsWithEntry = ({
   };
 
   const handleCancel = () => {
-    handleClearState();
-    router.push('/(tabs)/home');
+    handleClearState('CANCEL');
+    // router.push('/(tabs)/home');
   };
   const handleOk = () => {
     console.log('Submitting');

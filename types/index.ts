@@ -39,3 +39,5 @@ export interface Products {
   created_at: string;
   quantity: string;
 }
+
+export type StatusType = 'IDLE' | 'CANCEL' | 'SUCCESS' | 'VIEW';

@@ -1,6 +1,6 @@
 import { StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -11,7 +11,7 @@ import CustomerDetailsWithEntry from 'components/CustomerEntry';
 import { COLORS, FONT, SIZES } from 'constants/theme';
 import { useAppContext } from 'context/AppContext';
 import { useBackEndContext } from 'context/BackEndContext';
-import { Customer } from 'types';
+import { Customer, StatusType } from 'types';
 import { noDataIllustration } from 'constants/icons';
 
 const screenHeight = Dimensions.get('screen');
@@ -31,8 +31,9 @@ const CustomerEntry = () => {
     Customer | undefined
   >();
   const [isMounted, setIsMounted] = useState(false);
+  const [status, setStatus] = useState<StatusType>('IDLE');
 
-  const familyCardNo = state?.familyCard;
+  const familyCardNo = state?.familyCard || 'scc_1_5502';
 
   useFocusEffect(() => {
     if (!familyCardNo) {
@@ -51,7 +52,7 @@ const CustomerEntry = () => {
   };
 
   useEffect(() => {
-    handleScannerRedirection();
+    // handleScannerRedirection();
     setIsMounted(true);
   }, []);
 
@@ -77,13 +78,59 @@ const CustomerEntry = () => {
     setLoading(false);
   };
 
-  const handleClearState = () => {
+  const handleClearState = (statusType: StatusType) => {
     setCustomerDetails(undefined);
     setLoading(false);
     handleUpdateData({
       familyCard: '',
     });
+    setStatus(statusType);
   };
+
+  const getEl = useCallback((statusType: StatusType) => {
+    if (statusType === 'CANCEL') {
+      return (
+        <View>
+          <Text style={{ color: '#000' }}>Cancel View</Text>
+        </View>
+      );
+    }
+
+    return (
+      <>
+        {loading ? (
+          <View>
+            <ActivityIndicator
+              animating={true}
+              color={COLORS.primary}
+              size="large"
+            />
+            <Text style={styles.loadingText}>কার্ড চেক করা হচ্ছে...</Text>
+          </View>
+        ) : (
+          <>
+            {customerDetails ? (
+              <CustomerDetailsWithEntry
+                customerDetails={customerDetails!}
+                handleClearState={handleClearState}
+              />
+            ) : familyCardNo ? (
+              <View style={styles.noDataImgContainer}>
+                <Image
+                  source={noDataIllustration}
+                  contentFit="cover"
+                  style={styles.noDataImg}
+                />
+                <Text variant="bodyMedium" style={styles.noDataText}>
+                  এই গ্র্যাহকের কোন ডাটা খুঁজে পাওয়া যায়নি
+                </Text>
+              </View>
+            ) : null}
+          </>
+        )}
+      </>
+    );
+  }, []);
 
   useEffect(() => {
     if (familyCardNo) {
@@ -97,36 +144,7 @@ const CustomerEntry = () => {
         <View
           style={[styles.container, !customerDetails && styles.centerContainer]}
         >
-          {loading ? (
-            <View>
-              <ActivityIndicator
-                animating={true}
-                color={COLORS.primary}
-                size="large"
-              />
-              <Text style={styles.loadingText}>কার্ড চেক করা হচ্ছে...</Text>
-            </View>
-          ) : (
-            <>
-              {customerDetails ? (
-                <CustomerDetailsWithEntry
-                  customerDetails={customerDetails!}
-                  handleClearState={handleClearState}
-                />
-              ) : familyCardNo ? (
-                <View style={styles.noDataImgContainer}>
-                  <Image
-                    source={noDataIllustration}
-                    contentFit="cover"
-                    style={styles.noDataImg}
-                  />
-                  <Text variant="bodyMedium" style={styles.noDataText}>
-                    এই গ্র্যাহকের কোন ডাটা খুঁজে পাওয়া যায়নি
-                  </Text>
-                </View>
-              ) : null}
-            </>
-          )}
+          {getEl(status)}
         </View>
       </WaterMarkBackground>
 
