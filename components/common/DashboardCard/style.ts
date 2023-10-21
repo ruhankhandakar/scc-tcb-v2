@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    width: 50,
+    width: 150,
     backgroundColor: COLORS.gray,
     marginVertical: SIZES.medium,
     alignSelf: 'center',
