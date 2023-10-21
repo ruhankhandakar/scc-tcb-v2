@@ -140,7 +140,7 @@ const CustomerList = () => {
               item={item}
               handleNavigate={() => {
                 // @ts-ignore
-                router.push(`/profile/details/${item.id}`);
+                router.replace(`/profile/details/${item.id}`);
               }}
             />
           )}

@@ -7,4 +7,9 @@ const config = getDefaultConfig(__dirname, {
   isCSSEnabled: true,
 });
 
+config.resolver.assetExts.push(
+  // Adds support for `.lottie` files
+  'lottie'
+);
+
 module.exports = config;

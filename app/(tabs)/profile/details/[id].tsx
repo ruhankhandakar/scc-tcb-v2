@@ -15,7 +15,8 @@ const UserDetails = () => {
           paddingLeft: SIZES.medium,
         }}
         onPress={() => {
-          router.push('/dashboard');
+          // @ts-ignore
+          router.replace('/dashboard');
         }}
       >
         <AntDesign name="back" size={24} color={COLORS.lightBlue} />

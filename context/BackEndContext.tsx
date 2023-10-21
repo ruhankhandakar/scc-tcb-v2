@@ -83,9 +83,9 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!session && !inAuthGroup) {
-      router.push('/sign-in');
+      router.replace('/sign-in');
     } else if (session) {
-      router.push('/(tabs)/home');
+      router.replace('/(tabs)/home');
     }
   }, [session, initialized]);
 

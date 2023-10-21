@@ -47,10 +47,9 @@ const CustomerDetailsWithEntry = ({
 
   const handleCancel = () => {
     handleClearState('CANCEL');
-    // router.push('/(tabs)/home');
   };
   const handleOk = () => {
-    console.log('Submitting');
+    handleClearState('SUCCESS');
   };
 
   return (

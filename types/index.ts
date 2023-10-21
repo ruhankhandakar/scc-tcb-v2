@@ -40,4 +40,4 @@ export interface Products {
   quantity: string;
 }
 
-export type StatusType = 'IDLE' | 'CANCEL' | 'SUCCESS' | 'VIEW';
+export type StatusType = 'IDLE' | 'CANCEL' | 'SUCCESS' | 'VIEW' | '';

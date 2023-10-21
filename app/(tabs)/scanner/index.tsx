@@ -1,9 +1,10 @@
 import { StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
-import { ActivityIndicator, Text } from 'react-native-paper';
+import { ActivityIndicator, Button, Text } from 'react-native-paper';
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import LottieView from 'lottie-react-native';
 
 import WaterMarkBackground from 'components/common/WaterMarkBackground';
 import CustomerDetailsWithEntry from 'components/CustomerEntry';
@@ -13,6 +14,7 @@ import { useAppContext } from 'context/AppContext';
 import { useBackEndContext } from 'context/BackEndContext';
 import { Customer, StatusType } from 'types';
 import { noDataIllustration } from 'constants/icons';
+import { successLottie, tryAgainLottie } from 'constants/lottie_files';
 
 const screenHeight = Dimensions.get('screen');
 
@@ -30,16 +32,9 @@ const CustomerEntry = () => {
   const [customerDetails, setCustomerDetails] = useState<
     Customer | undefined
   >();
-  const [isMounted, setIsMounted] = useState(false);
-  const [status, setStatus] = useState<StatusType>('IDLE');
+  const [status, setStatus] = useState<StatusType>('');
 
-  const familyCardNo = state?.familyCard || 'scc_1_5502';
-
-  useFocusEffect(() => {
-    if (!familyCardNo) {
-      handleScannerRedirection();
-    }
-  });
+  const familyCardNo = state?.familyCard;
 
   const handleScannerRedirection = () => {
     // @ts-ignore
@@ -52,8 +47,13 @@ const CustomerEntry = () => {
   };
 
   useEffect(() => {
-    // handleScannerRedirection();
-    setIsMounted(true);
+    handleScannerRedirection();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      console.log('unmounting');
+    };
   }, []);
 
   const fetchCustomerDetails = async (familyCardNo: string) => {
@@ -85,13 +85,71 @@ const CustomerEntry = () => {
       familyCard: '',
     });
     setStatus(statusType);
+    setTimeout(() => {
+      setStatus('IDLE');
+    }, 2000);
   };
 
-  const getEl = useCallback((statusType: StatusType) => {
-    if (statusType === 'CANCEL') {
+  const getEl = () => {
+    if (status === 'CANCEL' || status === 'SUCCESS') {
       return (
-        <View>
-          <Text style={{ color: '#000' }}>Cancel View</Text>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <LottieView
+            source={status === 'CANCEL' ? tryAgainLottie : successLottie}
+            autoPlay
+            loop
+            style={{
+              height: 200,
+              width: 200,
+            }}
+          />
+          {status === 'SUCCESS' && (
+            <Text style={styles.reScanText}>এন্ট্রি সফল হয়েছে</Text>
+          )}
+          <Text
+            style={[
+              styles.reScanText,
+              {
+                fontSize: SIZES.medium,
+              },
+            ]}
+          >
+            আবার স্ক্যান করুন
+          </Text>
+          <Button
+            onPress={() => handleScannerRedirection()}
+            style={styles.reScanBtn}
+            mode="contained"
+          >
+            <Ionicons name="qr-code-outline" size={24} color={COLORS.white} />
+          </Button>
+        </View>
+      );
+    }
+
+    if (status === 'IDLE') {
+      return (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Text style={[styles.reScanText]}>নতুন স্ক্যান করুন</Text>
+          <Button
+            onPress={() => handleScannerRedirection()}
+            style={styles.reScanBtn}
+            mode="contained"
+          >
+            <Ionicons name="qr-code-outline" size={24} color={COLORS.white} />
+          </Button>
         </View>
       );
     }
@@ -130,11 +188,12 @@ const CustomerEntry = () => {
         )}
       </>
     );
-  }, []);
+  };
 
   useEffect(() => {
     if (familyCardNo) {
       fetchCustomerDetails(familyCardNo);
+      setStatus('VIEW');
     }
   }, [familyCardNo]);
 
@@ -144,11 +203,11 @@ const CustomerEntry = () => {
         <View
           style={[styles.container, !customerDetails && styles.centerContainer]}
         >
-          {getEl(status)}
+          {getEl()}
         </View>
       </WaterMarkBackground>
 
-      {isMounted && (
+      {status === 'VIEW' && (
         <TouchableOpacity
           style={styles.fab}
           onPress={() => handleScannerRedirection()}
@@ -209,5 +268,19 @@ const styles = StyleSheet.create({
     fontFamily: FONT.medium,
     fontSize: SIZES.xLarge,
     textAlign: 'center',
+  },
+  reScanText: {
+    color: COLORS.darkBlue,
+    fontFamily: FONT.medium,
+    fontSize: SIZES.xLarge,
+    textAlign: 'center',
+  },
+  reScanBtn: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: SIZES.medium,
   },
 });

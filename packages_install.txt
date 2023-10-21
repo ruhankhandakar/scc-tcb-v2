@@ -14,3 +14,4 @@ npm install react-native-paper
 npm install react-native-safe-area-context
 npx expo install expo-linear-gradient
 npx expo install react-native-reanimated
+npx expo install lottie-react-native
