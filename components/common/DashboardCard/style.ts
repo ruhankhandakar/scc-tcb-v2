@@ -47,9 +47,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   divider: {
+    flex: 1,
     height: 1,
+    width: 50,
     backgroundColor: COLORS.gray,
     marginVertical: SIZES.medium,
+    alignSelf: 'center',
   },
 });
 

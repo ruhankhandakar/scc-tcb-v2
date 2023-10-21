@@ -1,7 +1,7 @@
 import { StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 
@@ -33,6 +33,12 @@ const CustomerEntry = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   const familyCardNo = state?.familyCard;
+
+  useFocusEffect(() => {
+    if (!familyCardNo) {
+      handleScannerRedirection();
+    }
+  });
 
   const handleScannerRedirection = () => {
     // @ts-ignore
