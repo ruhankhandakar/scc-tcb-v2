@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Camera, CameraType } from 'expo-camera';
 import { Image, TouchableOpacity, View } from 'react-native';
 import { Text, Button } from 'react-native-paper';
+import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import styles from './style';
 import { COLORS, SIZES } from 'constants/theme';
@@ -15,12 +17,13 @@ interface Props {
 
 const CameraCapture: React.FC<Props> = ({ cameraType = 'back', keyName }) => {
   const [type, setType] = useState(cameraType);
-  const [permission] = Camera.useCameraPermissions();
+  const [permission, requestPermission] = Camera.useCameraPermissions();
   const [camera, setCamera] = useState();
   const [capturedImage, setCapturedImage] = useState('');
   const {
     action: { handleUpdateData },
   } = useAppContext();
+  const [isManip, setIsManip] = useState(false);
 
   const toggleCameraType = () => {
     setType((current) =>
@@ -37,6 +40,20 @@ const CameraCapture: React.FC<Props> = ({ cameraType = 'back', keyName }) => {
     }
   };
 
+  const handleStoreCapturedImage = async () => {
+    setIsManip(true);
+    const manipResult = await manipulateAsync(
+      capturedImage,
+      [{ flip: FlipType.Vertical }],
+      { compress: 0.3, format: SaveFormat.PNG }
+    );
+    handleUpdateData({
+      [keyName]: manipResult.uri,
+    });
+    setIsManip(false);
+    router.back();
+  };
+
   if (!permission) {
     return (
       <View style={styles.areaViewContainer}>
@@ -44,6 +61,9 @@ const CameraCapture: React.FC<Props> = ({ cameraType = 'back', keyName }) => {
           <Text variant="headlineLarge" style={styles.accessBtn}>
             Requesting for camera permission
           </Text>
+          <Button onPress={requestPermission} mode="contained-tonal">
+            Grand Permission
+          </Button>
         </View>
       </View>
     );
@@ -56,6 +76,9 @@ const CameraCapture: React.FC<Props> = ({ cameraType = 'back', keyName }) => {
           <Text variant="headlineLarge" style={styles.accessBtn}>
             No Access To Camera
           </Text>
+          <Button onPress={requestPermission} mode="contained-tonal">
+            Grand Permission
+          </Button>
         </View>
       </View>
     );
@@ -63,6 +86,11 @@ const CameraCapture: React.FC<Props> = ({ cameraType = 'back', keyName }) => {
 
   return (
     <View style={styles.container}>
+      <Spinner
+        visible={isManip}
+        textContent={'Compressing'}
+        textStyle={{ color: COLORS.white }}
+      />
       {capturedImage ? (
         <Image source={{ uri: capturedImage }} style={{ flex: 1 }} />
       ) : (
@@ -92,12 +120,9 @@ const CameraCapture: React.FC<Props> = ({ cameraType = 'back', keyName }) => {
       >
         <Button
           mode="contained"
-          onPressIn={() => {
+          onPressIn={async () => {
             if (capturedImage) {
-              handleUpdateData({
-                [keyName]: capturedImage,
-              });
-              router.back();
+              handleStoreCapturedImage();
             } else {
               takePicture();
             }

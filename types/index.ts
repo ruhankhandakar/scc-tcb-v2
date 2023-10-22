@@ -13,6 +13,8 @@ export interface IWards {
   profiles: ProfileData[] | [];
 }
 
+export type TWards = Omit<IWards, 'profiles'>;
+
 export interface Customer {
   address: string;
   created_at: string;

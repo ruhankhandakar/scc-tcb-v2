@@ -8,10 +8,11 @@ import {
 import { Snackbar } from 'react-native-paper';
 import { Session, User } from '@supabase/supabase-js';
 import { useSegments, useRouter } from 'expo-router';
+import { decode } from 'base64-arraybuffer';
 
 import { supabase } from 'lib/supabase';
 import { ProfileData } from 'types/profile';
-import { Customer, IWards, Products } from 'types';
+import { Customer, IWards, Products, TWards } from 'types';
 
 type CustomerParams = {
   startOffset?: number;
@@ -23,6 +24,14 @@ type AuthParams = {
   email: string;
   password: string;
 };
+type PhoneAuthParams = {
+  phone: string;
+  password: string;
+};
+type PhoneVerifyParams = {
+  phone: string;
+  otp: string;
+};
 type StateType = {
   loading: boolean;
   user: User | null;
@@ -33,6 +42,48 @@ type ContextType = {
   state: StateType;
   actions: {
     signUpWithEmail: ({ email, password }: AuthParams) => void;
+    signUpWithPhoneAndPassword: ({
+      phone,
+      password,
+    }: PhoneAuthParams) => Promise<
+      | {
+          success: boolean;
+          data?: undefined;
+        }
+      | {
+          success: boolean;
+          data: {
+            user: User | null;
+            session: Session | null;
+          };
+        }
+    >;
+    loginWithPhoneAndPassword: ({
+      phone,
+      password,
+    }: PhoneAuthParams) => Promise<
+      | {
+          success: boolean;
+          data?: undefined;
+        }
+      | {
+          success: boolean;
+          data: {
+            user: User;
+            session: Session;
+          };
+        }
+    >;
+    verifyOtp: ({ phone, otp }: PhoneVerifyParams) => Promise<
+      | {
+          success: boolean;
+          session?: undefined;
+        }
+      | {
+          success: boolean;
+          session: Session | null;
+        }
+    >;
     signOut: () => void;
     getTotalCustomers: () => Promise<number>;
     getCustomers: ({
@@ -40,7 +91,13 @@ type ContextType = {
       endOffset,
     }: CustomerParams) => Promise<Customer[]>;
     getWards: () => Promise<IWards[] | undefined>;
+    getOnlyWards: () => Promise<TWards[] | undefined>;
     getCustomerDetails: (customerId: number) => Promise<Customer | undefined>;
+    uploadFile: (
+      filePath: string,
+      base64: string,
+      contentType: string
+    ) => Promise<void>;
   };
 };
 
@@ -181,6 +238,24 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getOnlyWards = async () => {
+    const { error, data } = await supabase
+      .from('wards')
+      .select('*')
+      .eq('is_active', true)
+      .order('id', {
+        ascending: true,
+      });
+
+    if (error) {
+      setErrorMessage(error.message);
+      return [];
+    } else {
+      const wards = data as TWards[];
+      return wards;
+    }
+  };
+
   const getTotalCustomers = async () => {
     const userRole = state.profile?.user_role || 'DEALER';
 
@@ -264,14 +339,98 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const uploadFile = async (
+    filePath: string,
+    base64: string,
+    contentType: string
+  ) => {
+    const { data, error } = await supabase.storage
+      .from('public_documents')
+      .upload(filePath, decode(base64), { contentType, upsert: true });
+
+    if (data?.path) {
+      const { data: response } = await supabase.storage
+        .from('public_documents')
+        .getPublicUrl(data.path);
+      console.log('response', response);
+    }
+
+    console.log(error, data);
+  };
+
+  const signUpWithPhoneAndPassword = async ({
+    phone,
+    password,
+  }: PhoneAuthParams) => {
+    const { data, error } = await supabase.auth.signUp({
+      phone,
+      password,
+    });
+    if (error) {
+      setErrorMessage(error.message);
+      return {
+        success: false,
+      };
+    } else {
+      return {
+        success: true,
+        data,
+      };
+    }
+  };
+
+  const verifyOtp = async ({ phone, otp }: PhoneVerifyParams) => {
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone,
+      token: otp,
+      type: 'sms',
+    });
+    if (error) {
+      setErrorMessage(error.message);
+      return {
+        success: false,
+      };
+    }
+    return {
+      success: true,
+      session: data.session,
+    };
+  };
+
+  const loginWithPhoneAndPassword = async ({
+    phone,
+    password,
+  }: PhoneAuthParams) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      phone,
+      password,
+    });
+
+    if (error) {
+      setErrorMessage(error.message);
+      return {
+        success: false,
+      };
+    }
+    return {
+      success: true,
+      data,
+    };
+  };
+
   const actions = {
     signUpWithEmail,
     signOut,
     getWards,
+    getOnlyWards,
     getCustomers,
     getTotalCustomers,
     setErrorMessage,
     getCustomerDetails,
+    uploadFile,
+    signUpWithPhoneAndPassword,
+    verifyOtp,
+    loginWithPhoneAndPassword,
   };
 
   return (

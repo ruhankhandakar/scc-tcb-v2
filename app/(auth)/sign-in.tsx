@@ -1,13 +1,8 @@
-import {
-  Text,
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-} from 'react-native';
+import { Text, View, StyleSheet, TextInput } from 'react-native';
 import { useRef, useState } from 'react';
 import { Image } from 'expo-image';
 import { Snackbar, Button } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import WaterMarkBackground from 'components/common/WaterMarkBackground';
 
@@ -15,6 +10,7 @@ import { useBackEndContext } from 'context/BackEndContext';
 import { illustration1, illustration2 } from 'constants/icons';
 import { COLORS, SIZES } from 'constants/theme';
 import { validateEmail } from 'utils';
+import { router } from 'expo-router';
 
 export default function SignIn() {
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -74,7 +70,6 @@ export default function SignIn() {
               secureTextEntry={true}
             />
           </View>
-
           <Button
             mode="contained"
             style={styles.button}
@@ -83,6 +78,22 @@ export default function SignIn() {
           >
             <Text style={styles.buttonText}>Login</Text>
           </Button>
+          <View style={styles.registerContainer}>
+            <Button
+              mode="outlined"
+              onPress={() => {
+                router.replace('/(auth)/register');
+              }}
+              textColor={COLORS.error}
+            >
+              <Text>অ্যাকাউন্ট নেই? রেজিস্টার করুন</Text>
+              <MaterialCommunityIcons
+                name="cursor-default-click"
+                size={24}
+                color={COLORS.error}
+              />
+            </Button>
+          </View>
         </View>
       </WaterMarkBackground>
       <Snackbar
@@ -151,5 +162,8 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     textAlign: 'center',
     fontSize: SIZES.medium,
+  },
+  registerContainer: {
+    marginTop: SIZES.xSmall,
   },
 });
