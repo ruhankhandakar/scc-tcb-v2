@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Text, Button, useTheme } from 'react-native-paper';
+import { Text, Button } from 'react-native-paper';
 import { Stack, router, useGlobalSearchParams } from 'expo-router';
 import { XMLParser } from 'fast-xml-parser';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +18,6 @@ const Scanner = () => {
     action: { handleUpdateData },
   } = useAppContext();
 
-  const theme = useTheme();
   const keyName = key as string;
 
   const [hasPermission, setHasPermission] = useState<null | boolean>(null);
@@ -62,7 +61,7 @@ const Scanner = () => {
           <Text
             variant="headlineLarge"
             style={{
-              color: theme.colors.error,
+              color: COLORS.error,
               fontSize: SIZES.large - 2,
               textAlign: 'center',
               marginBottom: SIZES.small,
@@ -81,7 +80,7 @@ const Scanner = () => {
           <Text
             variant="headlineLarge"
             style={{
-              color: theme.colors.error,
+              color: COLORS.error,
               fontSize: SIZES.large - 2,
               textAlign: 'center',
               marginBottom: SIZES.small,

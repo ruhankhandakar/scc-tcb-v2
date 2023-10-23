@@ -1,116 +1,107 @@
 import { Text, View, StyleSheet, TextInput } from 'react-native';
-import { useRef, useState } from 'react';
 import { Image } from 'expo-image';
-import { Snackbar, Button } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
-import WaterMarkBackground from 'components/common/WaterMarkBackground';
-
-import { useBackEndContext } from 'context/BackEndContext';
-import { illustration1, illustration2 } from 'constants/icons';
-import { COLORS, SIZES } from 'constants/theme';
-import { validateEmail } from 'utils';
 import { router } from 'expo-router';
+import { useState } from 'react';
+
+import ScrollViewWithWaterMark from 'components/common/ScrollViewWithWaterMark';
+
+import { illustration1 } from 'constants/icons';
+import { COLORS, SIZES } from 'constants/theme';
+import { useAppContext } from 'context/AppContext';
 
 export default function SignIn() {
-  const [isOtpSent, setIsOtpSent] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const {
-    state: { loading },
-    actions: { signUpWithEmail },
-  } = useBackEndContext();
+    action: { handleErrorMessage },
+  } = useAppContext();
 
-  const emailRef = useRef('');
-  const passwordRef = useRef('');
+  const [number, setNumber] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = async () => {
-    let email = emailRef.current;
-    const password = passwordRef.current;
+  const handleLogin = async () => {};
 
-    if (!validateEmail(email) || !password.trim()) {
-      setErrorMessage('সঠিক email ও password দিন');
-      return;
-    }
-    email = email.toLowerCase();
-    const response = await signUpWithEmail({ email, password });
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
   };
-  const handleVerification = async () => {};
+
+  const isDisabled = !number.trim() || !password.trim() || password.length < 6;
 
   return (
-    <View
-      style={{
-        flex: 1,
-      }}
-    >
-      <WaterMarkBackground>
-        <View style={styles.container}>
-          <Image
-            source={isOtpSent ? illustration2 : illustration1}
-            contentFit="contain"
-            style={styles.imgContainer}
-          />
-          <View style={styles.textInputContainer}>
+    <ScrollViewWithWaterMark>
+      <View style={styles.container}>
+        <Image
+          source={illustration1}
+          contentFit="contain"
+          style={styles.imgContainer}
+        />
+
+        <View style={styles.forms}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.mobilePrefix}>+880</Text>
             <TextInput
-              style={styles.inputText}
-              placeholder="Email"
-              placeholderTextColor={COLORS.white}
-              onChangeText={(text) => {
-                emailRef.current = text;
-              }}
+              style={styles.input}
+              onChangeText={setNumber}
+              value={number}
+              placeholder="মোবাইল নাম্বার"
+              keyboardType="phone-pad"
+              placeholderTextColor={COLORS.darkBlue}
             />
           </View>
-          <View style={styles.textInputContainer}>
+          <View style={styles.inputContainer}>
             <TextInput
-              style={styles.inputText}
-              placeholder="Password"
-              placeholderTextColor={COLORS.white}
-              onChangeText={(text) => {
-                passwordRef.current = text;
-              }}
-              secureTextEntry={true}
+              style={styles.input}
+              onChangeText={setPassword}
+              value={password}
+              placeholder="পাসওয়ার্ড"
+              placeholderTextColor={COLORS.darkBlue}
+              secureTextEntry={!showPassword}
+            />
+            <MaterialCommunityIcons
+              name={showPassword ? 'eye-off' : 'eye'}
+              size={24}
+              color="#aaa"
+              style={styles.icon}
+              onPress={toggleShowPassword}
             />
           </View>
-          <Button
-            mode="contained"
-            style={styles.button}
-            onPress={isOtpSent ? handleVerification : handleLogin}
-            loading={loading}
-          >
-            <Text style={styles.buttonText}>Login</Text>
-          </Button>
-          <View style={styles.registerContainer}>
+
+          <View style={styles.btnContainer}>
             <Button
-              mode="outlined"
-              onPress={() => {
-                router.replace('/(auth)/register');
+              mode="contained"
+              disabled={isDisabled}
+              style={{
+                backgroundColor: isDisabled
+                  ? COLORS.surfaceDisabled
+                  : COLORS.primary,
               }}
-              textColor={COLORS.error}
+              textColor={isDisabled ? COLORS.onSurfaceDisabled : COLORS.white}
+              onPress={handleLogin}
             >
-              <Text>অ্যাকাউন্ট নেই? রেজিস্টার করুন</Text>
-              <MaterialCommunityIcons
-                name="cursor-default-click"
-                size={24}
-                color={COLORS.error}
-              />
+              Submit
             </Button>
           </View>
         </View>
-      </WaterMarkBackground>
-      <Snackbar
-        visible={!!errorMessage}
-        onDismiss={() => {
-          setErrorMessage('');
-        }}
-        action={{
-          label: 'Close',
-          onPress: () => {
-            setErrorMessage('');
-          },
-        }}
-      >
-        {errorMessage}
-      </Snackbar>
-    </View>
+
+        <View style={styles.registerContainer}>
+          <Button
+            mode="outlined"
+            onPress={() => {
+              router.replace('/(auth)/register');
+            }}
+            textColor={COLORS.error}
+          >
+            <Text>অ্যাকাউন্ট নেই? রেজিস্টার করুন</Text>
+            <MaterialCommunityIcons
+              name="cursor-default-click"
+              size={24}
+              color={COLORS.error}
+            />
+          </Button>
+        </View>
+      </View>
+    </ScrollViewWithWaterMark>
   );
 }
 
@@ -126,44 +117,43 @@ const styles = StyleSheet.create({
     height: 300,
     width: 300,
   },
-  prefixText: {
-    color: COLORS.white,
-    marginRight: SIZES.medium,
-  },
-  textInputContainer: {
-    flexDirection: 'row',
+
+  forms: {
     width: '100%',
-    padding: 14,
-    borderRadius: 3,
-    marginTop: 15,
-    backgroundColor: COLORS.darkBlue,
-    alignItems: 'center',
-  },
-  inputText: {
-    color: COLORS.white,
-    fontSize: 14,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  icon: {
-    marginRight: 12,
-    width: '10%',
-    alignSelf: 'flex-start',
+    marginTop: SIZES.small,
   },
 
-  button: {
-    padding: 10,
-    width: 250,
-    borderRadius: 5,
-    marginTop: SIZES.xxLarge,
-    backgroundColor: COLORS.primary,
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    marginLeft: 12,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    marginBottom: 16,
+    height: 50,
   },
-  buttonText: {
-    color: COLORS.white,
-    textAlign: 'center',
-    fontSize: SIZES.medium,
+  input: {
+    color: COLORS.darkBlue,
+    flex: 1,
+    paddingVertical: 10,
+    paddingRight: 10,
+    fontSize: 16,
+  },
+  mobilePrefix: {
+    marginRight: SIZES.medium,
+  },
+  icon: {
+    marginLeft: 10,
   },
   registerContainer: {
     marginTop: SIZES.xSmall,
+  },
+  btnContainer: {
+    margin: 12,
   },
 });

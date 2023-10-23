@@ -1,30 +1,14 @@
-import { useFonts } from 'expo-font';
-import { Slot, Stack, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import * as SplashScreen from 'expo-splash-screen';
-import { Button, Text, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+import { Slot } from 'expo-router';
 import ErrorBoundary from 'react-native-error-boundary';
+import { View, Text, Button } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
+import { useEffect } from 'react';
 
-import ScreenHeaderBtn from 'components/common/header/ScreenHeaderBtn';
-
-import ThemeProvider from 'ThemeProvider';
+import { AuthProvider } from 'context/AuthContext';
 import AppContextProvider from 'context/AppContext';
 import BackEndContextProvider from 'context/BackEndContext';
-
-import { logoIcon } from 'constants/icons';
-import { COLORS, SIZES } from 'constants/theme';
-
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
-
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
+import ThemeProvider from 'context/ThemeProvider';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -43,7 +27,7 @@ const CustomFallback = (props: { error: Error; resetError: Function }) => (
   </View>
 );
 
-const Layout = () => {
+export default function Root() {
   const [fontLoaded] = useFonts({
     DMBold: require('assets/fonts/DMSans-Bold.ttf'),
     DMMedium: require('assets/fonts/DMSans-Medium.ttf'),
@@ -58,49 +42,16 @@ const Layout = () => {
 
   if (!fontLoaded) return null;
 
+  // Set up the auth context and render our layout inside of it.
   return (
     <ErrorBoundary FallbackComponent={CustomFallback}>
-      <BackEndContextProvider>
-        <RootLayoutNav />
-      </BackEndContextProvider>
+      <AuthProvider>
+        <AppContextProvider>
+          <BackEndContextProvider>
+            <Slot />
+          </BackEndContextProvider>
+        </AppContextProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
-};
-
-function RootLayoutNav() {
-  const headerStyle: NativeStackNavigationOptions = {
-    headerStyle: {
-      backgroundColor: COLORS.white,
-    },
-    headerTitleStyle: {
-      fontWeight: 'bold',
-      fontSize: SIZES.medium,
-    },
-    headerShadowVisible: false,
-    headerBackVisible: false,
-    title: '(TCB) সিলেট সিটি কর্পোরেশন',
-    headerLeft: () => (
-      <View style={{ marginRight: 5 }}>
-        <ScreenHeaderBtn iconUrl={logoIcon} dimension="100%" />
-      </View>
-    ),
-    headerRight: () => '',
-  };
-
-  return (
-    <ThemeProvider>
-      <AppContextProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <Stack>
-            <Stack.Screen name="index" options={headerStyle} />
-            <Stack.Screen name="(auth)" options={headerStyle} />
-            <Stack.Screen name="(tabs)" options={headerStyle} />
-            <Stack.Screen name="(public)" options={headerStyle} />
-          </Stack>
-        </GestureHandlerRootView>
-      </AppContextProvider>
-    </ThemeProvider>
-  );
 }
-
-export default Layout;

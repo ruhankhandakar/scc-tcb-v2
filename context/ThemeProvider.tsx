@@ -4,7 +4,7 @@ import {
   MD2DarkTheme as DefaultTheme,
 } from 'react-native-paper';
 
-import { COLORS, SIZES } from './constants/theme';
+import { COLORS, SIZES } from '../constants/theme';
 
 interface Props {
   children: React.ReactNode;

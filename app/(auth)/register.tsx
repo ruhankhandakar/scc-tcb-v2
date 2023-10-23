@@ -14,6 +14,7 @@ import { Entypo } from '@expo/vector-icons';
 import Spinner from 'react-native-loading-spinner-overlay';
 import LottieView from 'lottie-react-native';
 import * as FileSystem from 'expo-file-system';
+import { AntDesign } from '@expo/vector-icons';
 
 import ScrollViewWithWaterMark from 'components/common/ScrollViewWithWaterMark';
 import SingleDropdown from 'components/common/Dropdown/SingleDropdown';
@@ -314,17 +315,19 @@ const register = () => {
                           handlePickDocument();
                         }}
                         style={{
-                          borderColor: COLORS.darkBlue,
+                          borderColor: COLORS.gray2,
                           borderWidth: 1,
                           padding: 0,
                           margin: 0,
                           borderTopRightRadius: 6,
+                          borderTopLeftRadius: 6,
                           borderBottomRightRadius: 6,
+                          borderBottomLeftRadius: 6,
                         }}
                       >
                         <MaterialCommunityIcons
                           name="file-document"
-                          size={40}
+                          size={20}
                           color={COLORS.darkBlue}
                           style={styles.icon}
                           onPress={toggleShowPassword}
@@ -378,6 +381,21 @@ const register = () => {
                     Submit
                   </Button>
                 </View>
+
+                <Button
+                  onPress={() => {
+                    router.replace('/sign-in');
+                  }}
+                >
+                  <AntDesign name="back" size={16} color={COLORS.primary} />
+                  <Text
+                    style={{
+                      color: COLORS.primary,
+                    }}
+                  >
+                    Back to Login
+                  </Text>
+                </Button>
               </View>
             </View>
           </>
@@ -392,6 +410,7 @@ export default register;
 const styles = StyleSheet.create({
   container: {
     padding: SIZES.medium,
+    marginTop: SIZES.xLarge,
     flex: 1,
   },
   lottieContainer: {

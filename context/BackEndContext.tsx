@@ -120,33 +120,6 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    // Listen for changes to authentication state
-    const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session);
-      setState((prevState) => ({
-        ...prevState,
-        user: session ? session.user : null,
-      }));
-      setInitialized(true);
-    });
-    return () => {
-      data.subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!initialized) return;
-
-    const inAuthGroup = segments[0] === '(auth)';
-
-    if (!session && !inAuthGroup) {
-      router.replace('/sign-in');
-    } else if (session) {
-      router.replace('/(tabs)/home');
-    }
-  }, [session, initialized]);
-
-  useEffect(() => {
     if (state.user) {
       setState((prevState) => ({
         ...prevState,
