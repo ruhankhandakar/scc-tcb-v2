@@ -1,17 +1,18 @@
 import AnimatedLottieView from 'lottie-react-native';
 import React, { useState } from 'react';
-import { Button } from 'react-native-paper';
+import { Button, Text } from 'react-native-paper';
 import { StyleSheet, View } from 'react-native';
 import OTPTextView from 'react-native-otp-textinput';
 
-import { COLORS } from 'constants/theme';
+import { COLORS, SIZES } from 'constants/theme';
 import { otpVerificationLottie } from 'constants/lottie_files';
 
 interface Props {
   handleVerify: (otp: string) => void;
+  number: string;
 }
 
-const OtpInput: React.FC<Props> = ({ handleVerify }) => {
+const OtpInput: React.FC<Props> = ({ handleVerify, number }) => {
   const [inputText, setInputText] = useState<null | string>();
   const isDisabled = inputText?.length !== 6;
 
@@ -26,6 +27,11 @@ const OtpInput: React.FC<Props> = ({ handleVerify }) => {
           width: 200,
         }}
       />
+      <View style={styles.infoTextContainer}>
+        <Text style={styles.infoText}>
+          আপনার {number} এই নাম্বারে একটি OTP পাঠানো হয়েছে
+        </Text>
+      </View>
       <OTPTextView
         handleTextChange={setInputText}
         containerStyle={styles.textInputContainer}
@@ -77,5 +83,13 @@ const styles = StyleSheet.create({
   },
   btnContainer: {
     margin: 12,
+  },
+  infoTextContainer: {
+    marginBottom: SIZES.medium,
+  },
+  infoText: {
+    textAlign: 'center',
+    color: COLORS.darkBlue,
+    fontSize: SIZES.medium,
   },
 });

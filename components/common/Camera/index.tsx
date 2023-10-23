@@ -44,7 +44,7 @@ const CameraCapture: React.FC<Props> = ({ cameraType = 'back', keyName }) => {
     setIsManip(true);
     const manipResult = await manipulateAsync(
       capturedImage,
-      [{ flip: FlipType.Vertical }],
+      [{ flip: FlipType.Horizontal }],
       { compress: 0.3, format: SaveFormat.PNG }
     );
     handleUpdateData({
@@ -100,6 +100,7 @@ const CameraCapture: React.FC<Props> = ({ cameraType = 'back', keyName }) => {
           type={type}
           // @ts-ignore
           ref={(ref) => setCamera(ref)}
+          ratio="1:1"
         >
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={toggleCameraType}>

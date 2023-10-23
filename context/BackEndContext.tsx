@@ -7,7 +7,6 @@ import {
 } from 'react';
 import { Snackbar } from 'react-native-paper';
 import { Session, User } from '@supabase/supabase-js';
-import { useSegments, useRouter } from 'expo-router';
 import { decode } from 'base64-arraybuffer';
 
 import { supabase } from 'lib/supabase';
@@ -41,6 +40,9 @@ type StateType = {
 type ContextType = {
   state: StateType;
   actions: {
+    getLoggedInUserProfileData: (
+      userId: string
+    ) => Promise<ProfileData[] | undefined>;
     signUpWithEmail: ({ email, password }: AuthParams) => void;
     signUpWithPhoneAndPassword: ({
       phone,
@@ -58,6 +60,7 @@ type ContextType = {
           };
         }
     >;
+    updateState<T>(key: string, data: T | null): void;
     loginWithPhoneAndPassword: ({
       phone,
       password,
@@ -71,6 +74,18 @@ type ContextType = {
           data: {
             user: User;
             session: Session;
+          };
+        }
+    >;
+    updateUserPassword: ({ phone, password }: PhoneAuthParams) => Promise<
+      | {
+          success: boolean;
+          data?: undefined;
+        }
+      | {
+          success: boolean;
+          data: {
+            user: User;
           };
         }
     >;
@@ -111,42 +126,8 @@ const initialState: StateType = {
 export const BackEndContext = createContext<ContextType | null>(null);
 
 const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
-  const segments = useSegments();
-  const router = useRouter();
-
-  const [session, setSession] = useState<Session | null>(null);
   const [state, setState] = useState(initialState);
-  const [initialized, setInitialized] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
-  useEffect(() => {
-    if (state.user) {
-      setState((prevState) => ({
-        ...prevState,
-        loading: true,
-      }));
-
-      supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', state.user?.id)
-        .then((response) => {
-          const { error, data } = response;
-
-          if (error) {
-            setErrorMessage(error.message);
-          }
-
-          const profileData = data as ProfileData[];
-
-          setState((prevState) => ({
-            ...prevState,
-            loading: false,
-            profile: profileData?.length ? profileData[0] : null,
-          }));
-        });
-    }
-  }, [state.user]);
 
   useEffect(() => {
     if (
@@ -158,6 +139,28 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
   }, [state.profile?.user_role]);
 
   /* ----------Actions ------------- */
+
+  const getLoggedInUserProfileData = async (userId: string) => {
+    const { error, data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId);
+
+    if (error) {
+      setErrorMessage(error.message);
+      return;
+    }
+
+    const profileData = data as ProfileData[];
+    return profileData;
+  };
+
+  function updateState<T>(key: keyof StateType, data: T | null) {
+    setState((prevState) => ({
+      ...prevState,
+      [key]: data,
+    }));
+  }
   const signUpWithEmail = async ({ email, password }: AuthParams) => {
     setState((prevState) => ({
       ...prevState,
@@ -374,24 +377,57 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     phone,
     password,
   }: PhoneAuthParams) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      phone,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        phone,
+        password,
+      });
 
-    if (error) {
+      if (error) {
+        setErrorMessage(error.message);
+        return {
+          success: false,
+        };
+      }
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
       setErrorMessage(error.message);
       return {
         success: false,
       };
     }
-    return {
-      success: true,
-      data,
-    };
+  };
+
+  const updateUserPassword = async ({ phone, password }: PhoneAuthParams) => {
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        phone,
+        password,
+      });
+
+      if (error) {
+        setErrorMessage(error.message);
+        return {
+          success: false,
+        };
+      }
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      setErrorMessage(error.message);
+      return {
+        success: false,
+      };
+    }
   };
 
   const actions = {
+    getLoggedInUserProfileData,
     signUpWithEmail,
     signOut,
     getWards,
@@ -404,6 +440,8 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     signUpWithPhoneAndPassword,
     verifyOtp,
     loginWithPhoneAndPassword,
+    updateUserPassword,
+    updateState,
   };
 
   return (

@@ -12,6 +12,7 @@ import { supabase } from 'lib/supabase';
 interface AuthContextValue {
   session: Session | null;
   authInitialized: boolean;
+  handleRefresh: () => void;
 }
 
 // Define the Provider component
@@ -23,39 +24,13 @@ interface ProviderProps {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider(props: ProviderProps) {
+  const segments = useSegments();
+  const router = useRouter();
+
   const [authInitialized, setAuthInitialized] = useState<boolean>(false);
   const [session, setSession] = useState<Session | null>(null);
 
-  // This hook will protect the route access based on user authentication.
-  const useProtectedRoute = (user: User | null) => {
-    const segments = useSegments();
-    const router = useRouter();
-
-    // checking that navigation is all good;
-    const navigationState = useRootNavigationState();
-
-    useEffect(() => {
-      if (!navigationState?.key || !authInitialized) return;
-
-      const inAuthGroup = segments[0] === '(auth)';
-
-      if (
-        // If the user is not signed in and the initial segment is not anything in the auth group.
-        !user &&
-        !inAuthGroup
-      ) {
-        // Redirect to the sign-in page.
-        router.replace('/sign-in');
-      } else if (user && inAuthGroup) {
-        // Redirect away from the sign-in page.
-        router.replace('/(tabs)/home');
-      }
-    }, [user, segments, authInitialized, navigationState?.key]);
-  };
-
   useEffect(() => {
-    if (authInitialized) return;
-
     // Listen for changes to authentication state
     const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
@@ -66,11 +41,21 @@ export function AuthProvider(props: ProviderProps) {
     };
   }, []);
 
+  const handleRefresh = async () => {
+    const { data } = await supabase.auth.refreshSession();
+
+    if (!data.session) {
+      await supabase.auth.signOut();
+    }
+    setSession(data.session);
+  };
+
   return (
     <AuthContext.Provider
       value={{
         session,
         authInitialized,
+        handleRefresh,
       }}
     >
       {props.children}

@@ -15,3 +15,8 @@ export const isValidBangladeshiMobileNumber = (
   // Check if the provided number matches the regex
   return bdMobileRegex.test(mobileNumber);
 };
+
+export const bytesToKB = (bytes: number): string => {
+  const kilobytes = Math.round(bytes / 1024);
+  return kilobytes.toFixed(2) + ' KB';
+};

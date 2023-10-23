@@ -21,27 +21,23 @@ import SingleDropdown from 'components/common/Dropdown/SingleDropdown';
 
 import { COLORS, FONT, SIZES } from 'constants/theme';
 import { useBackEndContext } from 'context/BackEndContext';
-import { TWards } from 'types';
+import { FileUploadDocumentKeyName, TWards } from 'types';
 import { useAppContext } from 'context/AppContext';
 import _ from 'lodash';
 import { isValidBangladeshiMobileNumber } from 'utils';
 import { uploadingLottie } from 'constants/lottie_files';
 import OtpInput from 'components/auth/OtpInput';
+import FileUploadModal from 'components/common/FileUploadModal';
 
-const MAX_FILE_SIZE = 500000; // 500 KB
+import { MAX_FILE_SIZE } from 'constants/data';
 
 const register = () => {
   const {
-    actions: {
-      getOnlyWards,
-      uploadFile,
-      signUpWithPhoneAndPassword,
-      verifyOtp,
-    },
+    actions: { getOnlyWards, signUpWithPhoneAndPassword, verifyOtp },
   } = useBackEndContext();
   const {
     state,
-    action: { handleErrorMessage },
+    action: { handleErrorMessage, handleUpdateData, setFileUploadConfig },
   } = useAppContext();
   const router = useRouter();
 
@@ -56,9 +52,15 @@ const register = () => {
   const [nidDocuments, setNidDocuments] = useState<
     DocumentPicker.DocumentPickerAsset[]
   >([]);
-  const [isFileSelecting, setIsFileSelecting] = useState(false);
+  const [deoDocuments, setDeoDocuments] = useState<
+    DocumentPicker.DocumentPickerAsset[]
+  >([]);
   const [submitting, setSubmitting] = useState(false);
   const [isOtpVerification, setIsOtpVerification] = useState(false);
+  const [profilePicture, setProfilePicture] =
+    useState<DocumentPicker.DocumentPickerAsset | null>();
+
+  const { fileUploadConfig } = state;
 
   const handleChange = (item: number | string) => {
     setSelectedWard(+item);
@@ -66,58 +68,6 @@ const register = () => {
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
-  };
-
-  const handlePickDocument = async () => {
-    try {
-      setIsFileSelecting(true);
-      const result = await DocumentPicker.getDocumentAsync({
-        type: [
-          'image/jpeg',
-          'image/png',
-          'image/jpg',
-          'image/webp',
-          'application/*',
-        ],
-        multiple: true,
-      });
-      console.log('result', result);
-
-      const files = result.assets || [];
-
-      if (files?.length === 2) {
-        let errorFileNames: string[] = [];
-
-        files.forEach((file) => {
-          if (file.size! > MAX_FILE_SIZE) {
-            errorFileNames.push(file.name);
-          }
-        });
-
-        if (errorFileNames.length) {
-          handleErrorMessage(
-            `${errorFileNames.join(', ')} ফাইলর সাইজ 500 KB এর থেকে বেশি`
-          );
-        } else {
-          setNidDocuments(files);
-        }
-      } else {
-        handleErrorMessage('শুধুমাত্র দুইটি ফাইল সিলেক্ট করুন');
-      }
-    } catch (error) {
-    } finally {
-      setIsFileSelecting(false);
-    }
-  };
-
-  const handleCamera = (key: string, pathName: string) => {
-    // @ts-ignore
-    router.push({
-      pathname: pathName,
-      params: {
-        key,
-      },
-    });
   };
 
   const handleSubmit = async () => {
@@ -164,11 +114,35 @@ const register = () => {
       otp: otp,
     });
     if (verifyResponse.success) {
-      // TODO:Store all data into context
-      // TODO: Upload all things from Customer page
+      //? Store all data into context
+      handleUpdateData({
+        dealerRegistrationData: {
+          number,
+          firstName,
+          lastName,
+          password,
+          selectedWard,
+          nidDocuments,
+        },
+      });
+      router.replace('/');
+      // TODO: Upload all things from on boarding page
       // TODO: After then do the sign out, so that user can login with DEALER access
     }
     setSubmitting(false);
+  };
+
+  const getFileData = (
+    documentKeyName: FileUploadDocumentKeyName,
+    files: DocumentPicker.DocumentPickerAsset[]
+  ) => {
+    if (documentKeyName === 'profilePicture') {
+      setProfilePicture(files[0]);
+    } else if (documentKeyName === 'deoDocument') {
+      setDeoDocuments(files);
+    } else if (documentKeyName === 'nidDocuments') {
+      setNidDocuments(files);
+    }
   };
 
   useEffect(() => {
@@ -188,131 +162,143 @@ const register = () => {
     nidDocuments.length !== 2;
 
   return (
-    <ScrollViewWithWaterMark>
-      <Spinner
-        visible={submitting}
-        textContent={'সাবমিট হচ্ছে... অনুগ্রহ করে এই স্ক্রীনে থাকুন'}
-        textStyle={styles.spinnerTextStyle}
-        overlayColor="rgba(0,0,0,0.5)"
-        customIndicator={
-          <LottieView
-            source={uploadingLottie}
-            autoPlay
-            loop
-            style={{
-              height: 150,
-              width: 150,
-            }}
-          />
-        }
-      />
-      <View style={styles.container}>
-        {isOtpVerification ? (
-          <OtpInput handleVerify={handleVerify} />
-        ) : (
-          <>
-            {/* Registration Form */}
-            <View style={styles.formContainer}>
-              <Text style={styles.heading}>রেজিস্টার করুন</Text>
-              <View style={styles.forms}>
-                <View style={{ ...styles.flexCenter, ...styles.userAvatar }}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      handleCamera('profilePicture', 'camera');
-                    }}
-                  >
-                    {state.profilePicture ? (
-                      <Avatar.Image
-                        size={80}
-                        source={{
-                          uri: state.profilePicture,
-                        }}
+    <>
+      <ScrollViewWithWaterMark>
+        <Spinner
+          visible={submitting}
+          textContent={'সাবমিট হচ্ছে... অনুগ্রহ করে এই স্ক্রীনে থাকুন'}
+          textStyle={styles.spinnerTextStyle}
+          overlayColor="rgba(0,0,0,0.5)"
+          customIndicator={
+            <LottieView
+              source={uploadingLottie}
+              autoPlay
+              loop
+              style={{
+                height: 150,
+                width: 150,
+              }}
+            />
+          }
+        />
+        <View style={styles.container}>
+          {isOtpVerification ? (
+            <OtpInput handleVerify={handleVerify} number={`+880${number}`} />
+          ) : (
+            <>
+              {/* Registration Form */}
+              <View style={styles.formContainer}>
+                <Text style={styles.heading}>রেজিস্টার করুন</Text>
+                <View style={styles.forms}>
+                  <View style={{ ...styles.flexCenter, ...styles.userAvatar }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setFileUploadConfig({
+                          documentKeyName: 'profilePicture',
+                          keyName: 'selectedProfilePicture',
+                          pathName: 'camera',
+                          maxFileSize: MAX_FILE_SIZE * 4,
+                          multiple: false,
+                          numberOfFilesAllowedFromFilePicker: 1,
+                          type: ['image/*'],
+                        });
+                      }}
+                    >
+                      {profilePicture ? (
+                        <Avatar.Image
+                          size={80}
+                          source={{
+                            uri: profilePicture.uri,
+                          }}
+                        />
+                      ) : (
+                        <Avatar.Icon size={80} icon="account" />
+                      )}
+                      <Avatar.Icon
+                        size={20}
+                        icon="camera"
+                        style={styles.pencilIcon}
                       />
-                    ) : (
-                      <Avatar.Icon size={80} icon="account" />
-                    )}
-                    <Avatar.Icon
-                      size={20}
-                      icon="camera"
-                      style={styles.pencilIcon}
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      onChangeText={setFirstName}
+                      value={firstName}
+                      placeholder="ফার্স্ট নাম"
+                      placeholderTextColor={COLORS.darkBlue}
                     />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={setFirstName}
-                    value={firstName}
-                    placeholder="ফার্স্ট নাম"
-                    placeholderTextColor={COLORS.darkBlue}
-                  />
-                </View>
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={setLastName}
-                    value={lastName}
-                    placeholder="পদবি (বংশনাম)"
-                    placeholderTextColor={COLORS.darkBlue}
-                  />
-                </View>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.mobilePrefix}>+880</Text>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={setNumber}
-                    value={number}
-                    placeholder="মোবাইল নাম্বার"
-                    keyboardType="phone-pad"
-                    placeholderTextColor={COLORS.darkBlue}
-                  />
-                </View>
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={setPassword}
-                    value={password}
-                    placeholder="পাসওয়ার্ড"
-                    placeholderTextColor={COLORS.darkBlue}
-                    secureTextEntry={!showPassword}
-                  />
-                  <MaterialCommunityIcons
-                    name={showPassword ? 'eye-off' : 'eye'}
-                    size={24}
-                    color="#aaa"
-                    style={styles.icon}
-                    onPress={toggleShowPassword}
-                  />
-                </View>
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={setConfirmPassword}
-                    value={confirmPassword}
-                    placeholder="কনফার্ম পাসওয়ার্ড"
-                    placeholderTextColor={COLORS.darkBlue}
-                    secureTextEntry={!showPassword}
-                  />
-                  <MaterialCommunityIcons
-                    name={showPassword ? 'eye-off' : 'eye'}
-                    size={24}
-                    color="#aaa"
-                    style={styles.icon}
-                    onPress={toggleShowPassword}
-                  />
-                </View>
-                <View>
-                  <View
-                    style={[
-                      styles.inputContainer,
-                      { marginBottom: 2, paddingRight: 0 },
-                    ]}
-                  >
-                    <Text>আপলোড জাতীয় পরিচয় পত্র</Text>
-                    {!isFileSelecting && (
+                  </View>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      onChangeText={setLastName}
+                      value={lastName}
+                      placeholder="পদবি (বংশনাম)"
+                      placeholderTextColor={COLORS.darkBlue}
+                    />
+                  </View>
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.mobilePrefix}>+880</Text>
+                    <TextInput
+                      style={styles.input}
+                      onChangeText={setNumber}
+                      value={number}
+                      placeholder="মোবাইল নাম্বার"
+                      keyboardType="phone-pad"
+                      placeholderTextColor={COLORS.darkBlue}
+                    />
+                  </View>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      onChangeText={setPassword}
+                      value={password}
+                      placeholder="পাসওয়ার্ড"
+                      placeholderTextColor={COLORS.darkBlue}
+                      secureTextEntry={!showPassword}
+                    />
+                    <MaterialCommunityIcons
+                      name={showPassword ? 'eye-off' : 'eye'}
+                      size={24}
+                      color="#aaa"
+                      style={styles.icon}
+                      onPress={toggleShowPassword}
+                    />
+                  </View>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      onChangeText={setConfirmPassword}
+                      value={confirmPassword}
+                      placeholder="কনফার্ম পাসওয়ার্ড"
+                      placeholderTextColor={COLORS.darkBlue}
+                      secureTextEntry={!showPassword}
+                    />
+                    <MaterialCommunityIcons
+                      name={showPassword ? 'eye-off' : 'eye'}
+                      size={24}
+                      color="#aaa"
+                      style={styles.icon}
+                      onPress={toggleShowPassword}
+                    />
+                  </View>
+                  <View className="nid">
+                    <View
+                      style={[
+                        styles.inputContainer,
+                        { marginBottom: 2, paddingRight: 0 },
+                      ]}
+                    >
+                      <Text>আপলোড জাতীয় পরিচয় পত্র</Text>
                       <Button
                         onPress={() => {
-                          handlePickDocument();
+                          setFileUploadConfig({
+                            numberOfFilesAllowedFromFilePicker: 2,
+                            multiple: true,
+                            documentKeyName: 'nidDocuments',
+                          });
                         }}
                         style={{
                           borderColor: COLORS.gray2,
@@ -330,78 +316,136 @@ const register = () => {
                           size={20}
                           color={COLORS.darkBlue}
                           style={styles.icon}
-                          onPress={toggleShowPassword}
                         />
                       </Button>
-                    )}
-                  </View>
-                  {!!nidDocuments.length && (
-                    <View style={styles.uploadedFileContainer}>
-                      {nidDocuments.map((document) => (
-                        <View style={styles.fileView} key={document.uri}>
-                          <Text style={styles.uploadFileName}>
-                            {document.name}
-                          </Text>
-                        </View>
-                      ))}
                     </View>
+                    {!!nidDocuments.length && (
+                      <View style={styles.uploadedFileContainer}>
+                        {nidDocuments.map((document) => (
+                          <View style={styles.fileView} key={document.uri}>
+                            <Text style={styles.uploadFileName}>
+                              {document.name}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                    <Text style={styles.filePickerInfoText}>
+                      <Entypo name="dot-single" size={10} color="black" />{' '}
+                      অনুগ্রহ করে, কার্ডের উভয় দিক আপলোড করুন {'\n'}
+                      <Entypo name="dot-single" size={10} color="black" />{' '}
+                      প্রতিটি ফাইল সাইজ সর্বোচ্চ 500 KB
+                    </Text>
+                  </View>
+                  <View className="deo">
+                    <View
+                      style={[
+                        styles.inputContainer,
+                        { marginBottom: 2, paddingRight: 0 },
+                      ]}
+                    >
+                      <Text>আপলোড DEO ফাইল</Text>
+                      <Button
+                        onPress={() => {
+                          setFileUploadConfig({
+                            maxFileSize: 1024000,
+                            numberOfFilesAllowedFromFilePicker: 1,
+                            documentKeyName: 'deoDocument',
+                          });
+                        }}
+                        style={{
+                          borderColor: COLORS.gray2,
+                          borderWidth: 1,
+                          padding: 0,
+                          margin: 0,
+                          borderTopRightRadius: 6,
+                          borderTopLeftRadius: 6,
+                          borderBottomRightRadius: 6,
+                          borderBottomLeftRadius: 6,
+                        }}
+                      >
+                        <MaterialCommunityIcons
+                          name="file-document"
+                          size={20}
+                          color={COLORS.darkBlue}
+                          style={styles.icon}
+                        />
+                      </Button>
+                    </View>
+                    {!!deoDocuments.length && (
+                      <View style={styles.uploadedFileContainer}>
+                        {nidDocuments.map((document) => (
+                          <View style={styles.fileView} key={document.uri}>
+                            <Text style={styles.uploadFileName}>
+                              {document.name}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                    <Text style={styles.filePickerInfoText}></Text>
+                  </View>
+                  {!!wardsList?.length && (
+                    <SingleDropdown
+                      data={wardsList.map((ward) => ({
+                        label: ward.name,
+                        value: ward.id,
+                      }))}
+                      handleChange={handleChange}
+                      placeholder="ওয়ার্ড সিলেক্ট করুন"
+                    />
                   )}
-                  <Text style={styles.filePickerInfoText}>
-                    <Entypo name="dot-single" size={10} color="black" /> অনুগ্রহ
-                    করে, কার্ডের উভয় দিক আপলোড করুন {'\n'}
-                    <Entypo name="dot-single" size={10} color="black" /> প্রতিটি
-                    ফাইল সাইজ সর্বোচ্চ 500 KB
-                  </Text>
-                </View>
-                {!!wardsList?.length && (
-                  <SingleDropdown
-                    data={wardsList.map((ward) => ({
-                      label: ward.name,
-                      value: ward.id,
-                    }))}
-                    handleChange={handleChange}
-                    placeholder="ওয়ার্ড সিলেক্ট করুন"
-                  />
-                )}
 
-                <View style={styles.btnContainer}>
+                  <View style={styles.btnContainer}>
+                    <Button
+                      mode="contained"
+                      disabled={isDisabled}
+                      style={{
+                        backgroundColor: isDisabled
+                          ? COLORS.surfaceDisabled
+                          : COLORS.primary,
+                      }}
+                      textColor={
+                        isDisabled ? COLORS.onSurfaceDisabled : COLORS.white
+                      }
+                      onPress={handleSubmit}
+                    >
+                      Submit
+                    </Button>
+                  </View>
+
                   <Button
-                    mode="contained"
-                    disabled={isDisabled}
-                    style={{
-                      backgroundColor: isDisabled
-                        ? COLORS.surfaceDisabled
-                        : COLORS.primary,
+                    onPress={() => {
+                      router.replace('/sign-in');
                     }}
-                    textColor={
-                      isDisabled ? COLORS.onSurfaceDisabled : COLORS.white
-                    }
-                    onPress={handleSubmit}
                   >
-                    Submit
+                    <AntDesign name="back" size={16} color={COLORS.primary} />
+                    <Text
+                      style={{
+                        color: COLORS.primary,
+                      }}
+                    >
+                      Back to Login
+                    </Text>
                   </Button>
                 </View>
-
-                <Button
-                  onPress={() => {
-                    router.replace('/sign-in');
-                  }}
-                >
-                  <AntDesign name="back" size={16} color={COLORS.primary} />
-                  <Text
-                    style={{
-                      color: COLORS.primary,
-                    }}
-                  >
-                    Back to Login
-                  </Text>
-                </Button>
               </View>
-            </View>
-          </>
-        )}
-      </View>
-    </ScrollViewWithWaterMark>
+            </>
+          )}
+        </View>
+      </ScrollViewWithWaterMark>
+
+      {!!fileUploadConfig && (
+        <FileUploadModal
+          visible
+          toggleModal={() => {
+            setFileUploadConfig(null);
+          }}
+          handleSubmit={getFileData}
+          {...fileUploadConfig}
+        />
+      )}
+    </>
   );
 };
 

@@ -43,3 +43,8 @@ export interface Products {
 }
 
 export type StatusType = 'IDLE' | 'CANCEL' | 'SUCCESS' | 'VIEW' | '';
+
+export type FileUploadDocumentKeyName =
+  | 'profilePicture'
+  | 'nidDocuments'
+  | 'deoDocument';

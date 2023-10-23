@@ -9,9 +9,14 @@ import ScrollViewWithWaterMark from 'components/common/ScrollViewWithWaterMark';
 
 import { illustration1 } from 'constants/icons';
 import { COLORS, SIZES } from 'constants/theme';
+import { useBackEndContext } from 'context/BackEndContext';
+import { isValidBangladeshiMobileNumber } from 'utils';
 import { useAppContext } from 'context/AppContext';
 
 export default function SignIn() {
+  const {
+    actions: { loginWithPhoneAndPassword },
+  } = useBackEndContext();
   const {
     action: { handleErrorMessage },
   } = useAppContext();
@@ -19,8 +24,25 @@ export default function SignIn() {
   const [number, setNumber] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = async () => {};
+  const handleLogin = async () => {
+    if (!isValidBangladeshiMobileNumber(number)) {
+      handleErrorMessage('দয়া করে, বৈধ নম্বর প্রদান করুন');
+      return;
+    }
+    setIsSubmitting(true);
+    const response = await loginWithPhoneAndPassword({
+      phone: `+880${number}`,
+      password,
+    });
+
+    if (response.success) {
+      router.replace('/');
+    }
+
+    setIsSubmitting(false);
+  };
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -70,7 +92,8 @@ export default function SignIn() {
           <View style={styles.btnContainer}>
             <Button
               mode="contained"
-              disabled={isDisabled}
+              disabled={isDisabled || isSubmitting}
+              loading={isSubmitting}
               style={{
                 backgroundColor: isDisabled
                   ? COLORS.surfaceDisabled
@@ -79,7 +102,7 @@ export default function SignIn() {
               textColor={isDisabled ? COLORS.onSurfaceDisabled : COLORS.white}
               onPress={handleLogin}
             >
-              Submit
+              {isSubmitting ? 'Logging..,' : 'Login'}
             </Button>
           </View>
         </View>

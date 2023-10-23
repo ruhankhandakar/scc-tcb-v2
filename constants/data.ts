@@ -800,3 +800,5 @@ export const users = [
     address: '১, মিয়া ফাজিল চিস্ত, ১৯৯ শুভেচ্ছা',
   },
 ];
+
+export const MAX_FILE_SIZE = 512000; // 500 KB
