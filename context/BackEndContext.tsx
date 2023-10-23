@@ -8,10 +8,13 @@ import {
 import { Snackbar } from 'react-native-paper';
 import { Session, User } from '@supabase/supabase-js';
 import { decode } from 'base64-arraybuffer';
+import * as FileSystem from 'expo-file-system';
 
 import { supabase } from 'lib/supabase';
 import { ProfileData } from 'types/profile';
 import { Customer, IWards, Products, TWards } from 'types';
+import { ProfileDBPayload, StoreFileInBucketParamType } from 'utils/types';
+import { BUCKET_NAME } from 'constants/supabase';
 
 type CustomerParams = {
   startOffset?: number;
@@ -44,6 +47,7 @@ type ContextType = {
       userId: string
     ) => Promise<ProfileData[] | undefined>;
     signUpWithEmail: ({ email, password }: AuthParams) => void;
+    downloadFile: (filePath: string) => Promise<string | undefined>;
     signUpWithPhoneAndPassword: ({
       phone,
       password,
@@ -108,11 +112,20 @@ type ContextType = {
     getWards: () => Promise<IWards[] | undefined>;
     getOnlyWards: () => Promise<TWards[] | undefined>;
     getCustomerDetails: (customerId: number) => Promise<Customer | undefined>;
-    uploadFile: (
-      filePath: string,
-      base64: string,
-      contentType: string
-    ) => Promise<void>;
+    storeFileInBucketAndReturnPublicUrl: ({
+      fileURI,
+      filePath,
+      contentType,
+      folderName,
+      keyName,
+    }: StoreFileInBucketParamType) => Promise<{
+      keyName: string;
+      pathName: string;
+      errorMsg: string;
+    }>;
+    createProfile: (payload: ProfileDBPayload) => Promise<{
+      success: boolean;
+    }>;
   };
 };
 
@@ -143,8 +156,8 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
   const getLoggedInUserProfileData = async (userId: string) => {
     const { error, data } = await supabase
       .from('profiles')
-      .select('*')
-      .eq('id', userId);
+      .select('*, wards(*)')
+      .eq('user_id', userId);
 
     if (error) {
       setErrorMessage(error.message);
@@ -320,18 +333,62 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     base64: string,
     contentType: string
   ) => {
-    const { data, error } = await supabase.storage
-      .from('public_documents')
-      .upload(filePath, decode(base64), { contentType, upsert: true });
+    let pathName = '';
+    let errorMsg = '';
+    try {
+      const { data, error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(filePath, decode(base64), { contentType, upsert: true });
 
-    if (data?.path) {
-      const { data: response } = await supabase.storage
-        .from('public_documents')
-        .getPublicUrl(data.path);
-      console.log('response', response);
+      if (error) {
+        errorMsg = error.message;
+      }
+      pathName = data?.path || '';
+    } catch (err: any) {
+      errorMsg += err.message;
     }
 
-    console.log(error, data);
+    return {
+      pathName,
+      errorMsg,
+    };
+  };
+
+  const downloadFile = async (filePath: string) => {
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .createSignedUrl(filePath, 60, {
+        download: true,
+      });
+
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      return data.signedUrl;
+    }
+  };
+
+  const storeFileInBucketAndReturnPublicUrl = async ({
+    fileURI,
+    filePath,
+    contentType,
+    folderName,
+    keyName,
+  }: StoreFileInBucketParamType) => {
+    const base64 = await FileSystem.readAsStringAsync(fileURI, {
+      encoding: 'base64',
+    });
+
+    const { pathName, errorMsg } = await uploadFile(
+      `${folderName}/${filePath}`,
+      base64,
+      contentType
+    );
+    return {
+      keyName,
+      pathName,
+      errorMsg,
+    };
   };
 
   const signUpWithPhoneAndPassword = async ({
@@ -426,6 +483,28 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const createProfile = async (payload: ProfileDBPayload) => {
+    try {
+      const { error } = await supabase.from('profiles').insert(payload);
+
+      if (error) {
+        setErrorMessage(error.message);
+        return {
+          success: false,
+        };
+      } else {
+        return {
+          success: true,
+        };
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message);
+      return {
+        success: false,
+      };
+    }
+  };
+
   const actions = {
     getLoggedInUserProfileData,
     signUpWithEmail,
@@ -436,12 +515,14 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     getTotalCustomers,
     setErrorMessage,
     getCustomerDetails,
-    uploadFile,
     signUpWithPhoneAndPassword,
     verifyOtp,
     loginWithPhoneAndPassword,
     updateUserPassword,
     updateState,
+    storeFileInBucketAndReturnPublicUrl,
+    downloadFile,
+    createProfile,
   };
 
   return (

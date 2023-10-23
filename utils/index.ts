@@ -20,3 +20,8 @@ export const bytesToKB = (bytes: number): string => {
   const kilobytes = Math.round(bytes / 1024);
   return kilobytes.toFixed(2) + ' KB';
 };
+
+export const getExtensionFromUrl = (url: string): string => {
+  const lastDotIndex = url.lastIndexOf('.');
+  return lastDotIndex === -1 ? '' : url.substring(lastDotIndex + 1);
+};

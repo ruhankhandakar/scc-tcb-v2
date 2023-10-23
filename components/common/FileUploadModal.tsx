@@ -210,6 +210,7 @@ const styles = StyleSheet.create({
     minHeight: 200,
     backgroundColor: COLORS.white,
     borderRadius: 8,
+    padding: 20,
   },
   childrenContainer: {
     flexDirection: 'row',

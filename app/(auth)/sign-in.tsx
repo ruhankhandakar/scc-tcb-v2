@@ -109,16 +109,19 @@ export default function SignIn() {
 
         <View style={styles.registerContainer}>
           <Button
-            mode="outlined"
+            mode="elevated"
             onPress={() => {
               router.replace('/(auth)/register');
             }}
             textColor={COLORS.error}
+            style={{
+              height: 40,
+            }}
           >
             <Text>অ্যাকাউন্ট নেই? রেজিস্টার করুন</Text>
             <MaterialCommunityIcons
               name="cursor-default-click"
-              size={24}
+              size={18}
               color={COLORS.error}
             />
           </Button>

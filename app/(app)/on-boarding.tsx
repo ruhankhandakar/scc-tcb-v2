@@ -11,6 +11,9 @@ import { COLORS, FONT, SIZES } from 'constants/theme';
 import { useAppContext } from 'context/AppContext';
 import { useAuth } from 'context/AuthContext';
 import Spinner from 'react-native-loading-spinner-overlay';
+import { useBackEndContext } from 'context/BackEndContext';
+import { getExtensionFromUrl } from 'utils';
+import { ProfileDBPayload } from 'utils/types';
 
 type registrationDataType = {
   number: string;
@@ -19,25 +22,152 @@ type registrationDataType = {
   password: string;
   selectedWard: number | null;
   nidDocuments: DocumentPickerAsset[];
+  deoDocuments: DocumentPickerAsset[];
+  profilePicture: DocumentPickerAsset;
+};
+
+interface FulfilledResult {
+  status: 'fulfilled' | 'rejected';
+  value: {
+    errorMsg: string;
+    keyName: string;
+    pathName: string;
+  } | null;
+}
+
+type ExtendedDocumentPickerAsset = DocumentPickerAsset & {
+  keyName: string;
+  fileName: string;
 };
 
 const OnBoarding = () => {
   const router = useRouter();
-  const { state } = useAppContext();
+  const {
+    state,
+    action: { handleUpdateData },
+  } = useAppContext();
   const { handleRefresh } = useAuth();
+  const {
+    state: { user },
+    actions: { storeFileInBucketAndReturnPublicUrl, createProfile },
+  } = useBackEndContext();
 
   const [isProcessing, setIsProcessing] = useState(false);
 
   const dealerRegistrationData =
     state.dealerRegistrationData as registrationDataType;
-  // {"dealerRegistrationData": {"firstName": "রুহান", "lastName": "খন্দকার", "nidDocuments": [[Object], [Object]], "number": "1728007477", "password": "123456", "selectedWard": 1}, "isShowRegistrationForm": false, "profilePicture": "file:///data/user/0/host.exp.exponent/cache/ImageManipulator/7dea9f01-3f4a-418b-83f0-3b92d3f6dd19.png"}
+
+  const uploadAllFiles = async (files: ExtendedDocumentPickerAsset[]) => {
+    // @ts-ignore
+    const allSettledResults: FulfilledResult[] = await Promise.allSettled(
+      files.map(async (file) => {
+        return await storeFileInBucketAndReturnPublicUrl({
+          fileURI: file.uri,
+          contentType: file.mimeType || 'image/png',
+          folderName: file.keyName,
+          filePath: `${user!.phone}_${file.fileName}.${getExtensionFromUrl(
+            file.uri
+          )}`,
+          keyName: file.keyName,
+        });
+      })
+    );
+
+    const payload = {
+      deoDocuments: [],
+      nidDocuments: [],
+      profilePicture: '',
+    };
+    allSettledResults.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        if (result.value?.keyName === 'profilePicture') {
+          payload.profilePicture = result.value.pathName;
+        } else {
+          // @ts-ignore
+          payload[result.value.keyName].push(result.value.pathName);
+        }
+      }
+    });
+
+    return payload;
+  };
+
+  const processingAccountCreation = async (data: registrationDataType) => {
+    setIsProcessing(true);
+
+    let files: ExtendedDocumentPickerAsset[] = [];
+
+    if (data.deoDocuments) {
+      files = [
+        ...files,
+        ...data.deoDocuments.map((document, index) => ({
+          ...document,
+          fileName: `deoDocuments${index + 1}`,
+          keyName: 'deoDocuments',
+        })),
+      ];
+    }
+    if (data.nidDocuments) {
+      files = [
+        ...files,
+        ...data.nidDocuments.map((document, index) => ({
+          ...document,
+          fileName: `nidDocuments_${index + 1}`,
+          keyName: 'nidDocuments',
+        })),
+      ];
+    }
+    if (data.profilePicture) {
+      const upatedPic = {
+        ...data.profilePicture,
+        keyName: 'profilePicture',
+        fileName: 'profilePicture',
+      };
+      files = [...files, ...[upatedPic]];
+    }
+
+    const profileDBPayload: ProfileDBPayload = {
+      user_id: user!.id,
+      first_name: data.firstName,
+      last_name: data.lastName,
+      user_role: 'DEALER',
+      ward: data.selectedWard!,
+      document_proof_link: null,
+      profile_picture: null,
+      deo_documents: null,
+    };
+
+    if (files.length) {
+      const result = await uploadAllFiles(files);
+
+      if (result.profilePicture) {
+        profileDBPayload.profile_picture = result.profilePicture;
+      }
+      if (result.deoDocuments?.length) {
+        profileDBPayload.deo_documents = result.deoDocuments;
+      }
+      if (result.nidDocuments?.length) {
+        profileDBPayload.document_proof_link = result.nidDocuments;
+      }
+    }
+
+    const response = await createProfile(profileDBPayload);
+
+    if (response.success) {
+      handleUpdateData({
+        dealerRegistrationData: null,
+      });
+      handleRefresh();
+      router.replace('/');
+    }
+    setIsProcessing(false);
+  };
 
   useEffect(() => {
     if (dealerRegistrationData) {
-      // TODO: process uploading
-      console.log('OnBoarding state', dealerRegistrationData.nidDocuments);
+      processingAccountCreation(dealerRegistrationData);
     }
-  }, [dealerRegistrationData]);
+  }, []);
 
   return (
     <ScrollViewWithWaterMark>
@@ -75,13 +205,17 @@ const OnBoarding = () => {
               width: 250,
             }}
           />
-          <Text style={styles.text}>আপনার verification এখনো pending আছে</Text>
+          <Text style={styles.text}>
+            আপনার verification এখনো pending আছে {'\n'} সিলেট সিটি কর্পোরেশনে
+            যোগাযোগ করুন
+          </Text>
           <Button
             mode="contained"
             buttonColor={COLORS.primary}
             style={styles.btn}
             onPress={() => {
               handleRefresh();
+              router.replace('/');
             }}
           >
             Refresh
@@ -97,7 +231,7 @@ export default OnBoarding;
 const styles = StyleSheet.create({
   text: {
     fontFamily: FONT.bold,
-    fontSize: SIZES.xLarge,
+    fontSize: SIZES.medium,
     marginTop: SIZES.xLarge,
     color: COLORS.darkBlue,
     textAlign: 'center',

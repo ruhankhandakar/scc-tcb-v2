@@ -13,7 +13,6 @@ import * as DocumentPicker from 'expo-document-picker';
 import { Entypo } from '@expo/vector-icons';
 import Spinner from 'react-native-loading-spinner-overlay';
 import LottieView from 'lottie-react-native';
-import * as FileSystem from 'expo-file-system';
 import { AntDesign } from '@expo/vector-icons';
 
 import ScrollViewWithWaterMark from 'components/common/ScrollViewWithWaterMark';
@@ -94,14 +93,6 @@ const register = () => {
       setIsOtpVerification(true);
     }
 
-    // const base64 = await FileSystem.readAsStringAsync(payload.profilePicture, {
-    //   encoding: 'base64',
-    // });
-    // const filePath = `user_profile_${payload.number}.jpeg`;
-    // const contentType = 'image/jpeg';
-
-    // await uploadFile(`profile_picture/${filePath}`, base64, contentType);
-
     setSubmitting(false);
   };
 
@@ -123,11 +114,11 @@ const register = () => {
           password,
           selectedWard,
           nidDocuments,
+          profilePicture,
+          deoDocuments,
         },
       });
       router.replace('/');
-      // TODO: Upload all things from on boarding page
-      // TODO: After then do the sign out, so that user can login with DEALER access
     }
     setSubmitting(false);
   };

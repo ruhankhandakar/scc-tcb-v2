@@ -33,7 +33,7 @@ export default function Index() {
     }
   }, [session]);
 
-  const isOnBoardingPending = !profile;
+  const isOnBoardingPending = !profile || !profile.is_verified;
   const href = isOnBoardingPending ? '/on-boarding' : '/(app)/(tabs)/home';
 
   return (
