@@ -48,6 +48,7 @@ type ContextType = {
     ) => Promise<ProfileData[] | undefined>;
     signUpWithEmail: ({ email, password }: AuthParams) => void;
     downloadFile: (filePath: string) => Promise<string | undefined>;
+    getPublicUrl: (filePath: string) => Promise<void>;
     signUpWithPhoneAndPassword: ({
       phone,
       password,
@@ -368,6 +369,14 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getPublicUrl = async (filePath: string) => {
+    const { data } = await supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath);
+
+    console.log(data);
+  };
+
   const storeFileInBucketAndReturnPublicUrl = async ({
     fileURI,
     filePath,
@@ -523,6 +532,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     storeFileInBucketAndReturnPublicUrl,
     downloadFile,
     createProfile,
+    getPublicUrl,
   };
 
   return (
