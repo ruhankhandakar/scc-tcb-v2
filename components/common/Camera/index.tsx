@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import { Camera, CameraType } from 'expo-camera';
 import { Image, TouchableOpacity, View } from 'react-native';
 import { Text, Button } from 'react-native-paper';
-import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
+import {
+  manipulateAsync,
+  FlipType,
+  SaveFormat,
+  Action,
+} from 'expo-image-manipulator';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 import styles from './style';
@@ -42,11 +47,14 @@ const CameraCapture: React.FC<Props> = ({ cameraType = 'back', keyName }) => {
 
   const handleStoreCapturedImage = async () => {
     setIsManip(true);
-    const manipResult = await manipulateAsync(
-      capturedImage,
-      [{ flip: FlipType.Horizontal }],
-      { compress: 0.3, format: SaveFormat.PNG }
-    );
+    const actions: Action[] = [{ flip: FlipType.Horizontal }];
+    if (keyName === 'profilePicture') {
+      actions.push({ resize: { width: 200, height: 200 } });
+    }
+    const manipResult = await manipulateAsync(capturedImage, actions, {
+      compress: 0.3,
+      format: SaveFormat.PNG,
+    });
     handleUpdateData({
       [keyName]: manipResult.uri,
     });

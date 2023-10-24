@@ -1,13 +1,13 @@
 import React from 'react';
 import { SafeAreaView, TouchableOpacity } from 'react-native';
 import { Stack, router, useGlobalSearchParams } from 'expo-router';
+import { CameraType } from 'expo-camera';
+import { Ionicons } from '@expo/vector-icons';
 
 import { useAppContext } from 'context/AppContext';
 
 import { COLORS } from 'constants/theme';
 import CameraCapture from 'components/common/Camera';
-import { CameraType } from 'expo-camera';
-import { Ionicons } from '@expo/vector-icons';
 
 const camera = () => {
   const { key = '' } = useGlobalSearchParams();
