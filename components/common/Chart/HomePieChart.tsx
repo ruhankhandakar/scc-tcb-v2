@@ -16,7 +16,7 @@ interface Props {
   registeredCustomer: number;
 }
 
-const CustomPieChart = ({ privilegedCustomer, registeredCustomer }: Props) => {
+const HomePieChart = ({ privilegedCustomer, registeredCustomer }: Props) => {
   const series = [registeredCustomer, privilegedCustomer];
 
   return (
@@ -45,7 +45,7 @@ const CustomPieChart = ({ privilegedCustomer, registeredCustomer }: Props) => {
   );
 };
 
-export default CustomPieChart;
+export default HomePieChart;
 
 const styles = StyleSheet.create({
   container: {

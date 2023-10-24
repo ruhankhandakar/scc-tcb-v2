@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import Stats from 'components/home/Stats';
 
 import styles from './styles';
-import CustomPieChart from 'components/common/Chart/CustomPieChart';
+import HomePieChart from 'components/common/Chart/HomePieChart';
 
 const Dealer = () => {
   const privilegedCustomer = 1500;
@@ -18,7 +18,7 @@ const Dealer = () => {
           privilegedCustomer={privilegedCustomer}
           registeredCustomer={registeredCustomer}
         />
-        <CustomPieChart
+        <HomePieChart
           privilegedCustomer={privilegedCustomer}
           registeredCustomer={registeredCustomer}
         />
