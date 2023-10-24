@@ -30,3 +30,14 @@ export const getExtensionFromUrl = (url: string): string => {
   const lastDotIndex = url.lastIndexOf('.');
   return lastDotIndex === -1 ? '' : url.substring(lastDotIndex + 1);
 };
+
+export const calculatePercentage = (
+  approvedCustomers: number,
+  registeredCustomers: number
+): { approvedPercentage: number; registeredPercentage: number } => {
+  const totalCustomers = registeredCustomers;
+  const approvedPercentage = (approvedCustomers / totalCustomers) * 100;
+  const registeredPercentage = 100;
+
+  return { approvedPercentage, registeredPercentage };
+};

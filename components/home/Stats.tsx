@@ -4,8 +4,13 @@ import { View } from 'react-native';
 
 import CustomCard from 'components/home/Card';
 
-// @ts-ignore
-const Stats = ({ styles }) => {
+interface Props {
+  privilegedCustomer: number;
+  registeredCustomer: number;
+  styles: any;
+}
+
+const Stats = ({ styles, privilegedCustomer, registeredCustomer }: Props) => {
   return (
     <View style={styles.dealerContainer}>
       <CustomCard>
@@ -14,7 +19,7 @@ const Stats = ({ styles }) => {
             নিবন্ধিত {'\n'} উপকারভোগী
           </Text>
           <Text variant="headlineMedium" style={styles.dealerCardTextValue}>
-            2001
+            {registeredCustomer}
           </Text>
         </>
       </CustomCard>
@@ -24,7 +29,7 @@ const Stats = ({ styles }) => {
             সুবিধাপ্রাপ্ত {'\n'} উপকারভোগী
           </Text>
           <Text variant="headlineMedium" style={styles.dealerCardTextValue}>
-            2001
+            {privilegedCustomer}
           </Text>
         </>
       </CustomCard>
