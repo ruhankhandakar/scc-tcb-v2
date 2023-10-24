@@ -161,7 +161,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       .eq('user_id', userId);
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage('getLoggedInUserProfileData' + error.message);
       return;
     }
 
@@ -192,10 +192,10 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
           password,
         });
         if (signInError) {
-          setErrorMessage(signInError.message);
+          setErrorMessage('signUpWithEmail' + signInError.message);
         }
       } else {
-        setErrorMessage(error.message);
+        setErrorMessage('signUpWithEmail' + error.message);
       }
     }
     setState((prevState) => ({
@@ -220,7 +220,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       });
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage('getWards' + error.message);
       return [];
     } else {
       const wards = data as IWards[];
@@ -238,7 +238,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       });
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage('getOnlyWards' + error.message);
       return [];
     } else {
       const wards = data as TWards[];
@@ -259,7 +259,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     const { count, error } = await query;
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage('getTotalCustomers' + error.message);
     }
 
     return count || 0;
@@ -293,7 +293,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
 
     const { data, error } = await query;
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage('getCustomers' + error.message);
     } else {
       customers = data as Customer[];
     }
@@ -307,7 +307,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       .eq('is_active', true);
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage('getProducts' + error.message);
     } else {
       setState((prevState) => ({
         ...prevState,
@@ -323,7 +323,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       .eq('customer_id', customerId);
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage('getCustomerDetails' + error.message);
     } else {
       return data[0] as Customer;
     }
@@ -363,7 +363,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       });
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage('downloadFile' + error.message);
     } else {
       return data.signedUrl;
     }
@@ -409,7 +409,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       password,
     });
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage('signUpWithPhoneAndPassword' + error.message);
       return {
         success: false,
       };
@@ -428,7 +428,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       type: 'sms',
     });
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage('verifyOtp' + error.message);
       return {
         success: false,
       };
@@ -450,7 +450,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) {
-        setErrorMessage(error.message);
+        setErrorMessage('loginWithPhoneAndPassword' + error.message);
         return {
           success: false,
         };
@@ -460,7 +460,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
         data,
       };
     } catch (error: any) {
-      setErrorMessage(error.message);
+      setErrorMessage('loginWithPhoneAndPassword' + error.message);
       return {
         success: false,
       };
@@ -475,7 +475,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) {
-        setErrorMessage(error.message);
+        setErrorMessage('updateUserPassword' + error.message);
         return {
           success: false,
         };
@@ -485,7 +485,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
         data,
       };
     } catch (error: any) {
-      setErrorMessage(error.message);
+      setErrorMessage('updateUserPassword' + error.message);
       return {
         success: false,
       };
@@ -497,7 +497,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       const { error } = await supabase.from('profiles').insert(payload);
 
       if (error) {
-        setErrorMessage(error.message);
+        setErrorMessage('createProfile' + error.message);
         return {
           success: false,
         };
@@ -507,7 +507,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
         };
       }
     } catch (err: any) {
-      setErrorMessage(err.message);
+      setErrorMessage('createProfile' + err.message);
       return {
         success: false,
       };
