@@ -51,10 +51,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: COLORS.darkBlue,
+    backgroundColor: 'rgba(35, 43, 93, 0.7)',
     borderRadius: SIZES.medium,
     marginTop: SIZES.large,
-    ...SHADOWS.medium,
     padding: SIZES.large,
   },
   infoContainer: {

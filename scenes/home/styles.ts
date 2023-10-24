@@ -5,6 +5,7 @@ import { COLORS, FONT, SIZES } from 'constants/theme';
 const styles = StyleSheet.create({
   parentContainer: {
     padding: SIZES.xLarge,
+    marginBottom: 100,
   },
   dealerContainer: {
     flexDirection: 'row',

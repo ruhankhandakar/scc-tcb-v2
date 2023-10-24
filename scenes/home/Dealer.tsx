@@ -2,9 +2,10 @@ import React from 'react';
 import { View } from 'react-native';
 
 import Stats from 'components/home/Stats';
+import HomePieChart from 'components/common/Chart/HomePieChart';
+import Products from 'components/home/Products';
 
 import styles from './styles';
-import HomePieChart from 'components/common/Chart/HomePieChart';
 
 const Dealer = () => {
   const privilegedCustomer = 1500;
@@ -22,6 +23,7 @@ const Dealer = () => {
           privilegedCustomer={privilegedCustomer}
           registeredCustomer={registeredCustomer}
         />
+        <Products />
       </View>
     </>
   );
