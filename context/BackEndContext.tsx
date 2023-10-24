@@ -349,7 +349,6 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     } catch (err: any) {
       errorMsg += err.message;
     }
-    console.log('uploadFile error ->', errorMsg);
     return {
       pathName,
       errorMsg,
@@ -379,7 +378,6 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
         .from(bucketName || BUCKET_NAME)
         .getPublicUrl(filePath);
 
-      console.log(data);
       return data.publicUrl;
     } catch (error: any) {
       setErrorMessage('getPublicUrl' + error.message);

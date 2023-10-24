@@ -16,9 +16,14 @@ export const isValidBangladeshiMobileNumber = (
   return bdMobileRegex.test(mobileNumber);
 };
 
-export const bytesToKB = (bytes: number): string => {
-  const kilobytes = Math.round(bytes / 1024);
-  return kilobytes.toFixed(2) + ' KB';
+export const bytesToSize = (bytes: number): string => {
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  let i = 0;
+  while (bytes >= 1024 && i < sizes.length - 1) {
+    bytes /= 1024;
+    i++;
+  }
+  return bytes.toFixed(0) + ' ' + sizes[i];
 };
 
 export const getExtensionFromUrl = (url: string): string => {

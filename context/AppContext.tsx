@@ -29,7 +29,7 @@ type FileUploadConfig = {
   multiple?: boolean;
   type?: string[];
   maxFileSize?: number;
-  numberOfFilesAllowedFromFilePicker?: number;
+  maxFileSizeAllowed?: number;
   pathName?: string;
   keyName?: string;
   documentKeyName: FileUploadDocumentKeyName;

@@ -28,7 +28,7 @@ import { uploadingLottie } from 'constants/lottie_files';
 import OtpInput from 'components/auth/OtpInput';
 import FileUploadModal from 'components/common/FileUploadModal';
 
-import { MAX_FILE_SIZE } from 'constants/data';
+import { MB_2 } from 'constants/data';
 
 const register = () => {
   const {
@@ -150,7 +150,8 @@ const register = () => {
     !lastName ||
     !password ||
     !selectedWard ||
-    nidDocuments.length !== 2;
+    !nidDocuments.length ||
+    !deoDocuments.length;
 
   return (
     <>
@@ -188,9 +189,9 @@ const register = () => {
                           documentKeyName: 'profilePicture',
                           keyName: 'selectedProfilePicture',
                           pathName: 'camera',
-                          maxFileSize: MAX_FILE_SIZE * 4,
+                          maxFileSize: MB_2,
                           multiple: false,
-                          numberOfFilesAllowedFromFilePicker: 1,
+                          maxFileSizeAllowed: 1,
                           type: ['image/*'],
                         });
                       }}
@@ -286,9 +287,10 @@ const register = () => {
                       <Button
                         onPress={() => {
                           setFileUploadConfig({
-                            numberOfFilesAllowedFromFilePicker: 2,
+                            maxFileSizeAllowed: 2,
                             multiple: true,
                             documentKeyName: 'nidDocuments',
+                            maxFileSize: MB_2,
                           });
                         }}
                         style={{
@@ -325,7 +327,7 @@ const register = () => {
                       <Entypo name="dot-single" size={10} color="black" />{' '}
                       অনুগ্রহ করে, কার্ডের উভয় দিক আপলোড করুন {'\n'}
                       <Entypo name="dot-single" size={10} color="black" />{' '}
-                      প্রতিটি ফাইল সাইজ সর্বোচ্চ 500 KB
+                      প্রতিটি ফাইল সাইজ সর্বোচ্চ 2 MB
                     </Text>
                   </View>
                   <View className="deo">
@@ -339,8 +341,8 @@ const register = () => {
                       <Button
                         onPress={() => {
                           setFileUploadConfig({
-                            maxFileSize: 1024000,
-                            numberOfFilesAllowedFromFilePicker: 1,
+                            maxFileSize: MB_2,
+                            maxFileSizeAllowed: 1,
                             documentKeyName: 'deoDocument',
                           });
                         }}
@@ -374,6 +376,10 @@ const register = () => {
                         ))}
                       </View>
                     )}
+                    <Text style={styles.filePickerInfoText}>
+                      <Entypo name="dot-single" size={10} color="black" />{' '}
+                      প্রতিটি ফাইল সাইজ সর্বোচ্চ 2 MB
+                    </Text>
                     <Text style={styles.filePickerInfoText}></Text>
                   </View>
                   {!!wardsList?.length && (

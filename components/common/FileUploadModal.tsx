@@ -10,7 +10,7 @@ import { Button } from 'react-native-paper';
 
 import { COLORS, SIZES } from 'constants/theme';
 import { useAppContext } from 'context/AppContext';
-import { bytesToKB } from 'utils';
+import { bytesToSize } from 'utils';
 import { FileUploadDocumentKeyName } from 'types';
 import { MAX_FILE_SIZE } from 'constants/data';
 
@@ -22,7 +22,7 @@ interface Props {
   multiple?: boolean;
   type?: string[];
   maxFileSize?: number;
-  numberOfFilesAllowedFromFilePicker?: number;
+  maxFileSizeAllowed?: number;
   pathName?: string;
   keyName?: string;
   handleSubmit: (
@@ -44,7 +44,7 @@ const FileUploadModal = ({
     'application/*',
   ],
   maxFileSize = MAX_FILE_SIZE,
-  numberOfFilesAllowedFromFilePicker = 2,
+  maxFileSizeAllowed = 1,
   pathName,
   keyName,
   handleSubmit,
@@ -79,7 +79,7 @@ const FileUploadModal = ({
 
       const files = result.assets || [];
 
-      if (files?.length === numberOfFilesAllowedFromFilePicker) {
+      if (files?.length <= maxFileSizeAllowed) {
         let errorFileNames: string[] = [];
 
         files.forEach((file) => {
@@ -90,7 +90,7 @@ const FileUploadModal = ({
 
         if (errorFileNames.length) {
           handleErrorMessage(
-            `${errorFileNames.join(', ')} ফাইলর সাইজ ${bytesToKB(
+            `${errorFileNames.join(', ')} ফাইলর সাইজ ${bytesToSize(
               maxFileSize
             )} এর থেকে বেশি`
           );
@@ -99,7 +99,7 @@ const FileUploadModal = ({
         }
       } else {
         handleErrorMessage(
-          `শুধুমাত্র ${numberOfFilesAllowedFromFilePicker} ফাইল সিলেক্ট করুন`
+          `শুধুমাত্র ${maxFileSizeAllowed} ফাইল সিলেক্ট করতে পারবেন`
         );
       }
     } catch (error) {}
@@ -175,7 +175,6 @@ const FileUploadModal = ({
             <Pressable
               style={styles.file}
               onPress={() => {
-                console.log('delete');
                 handleUpdateData({
                   [keyName]: null,
                 });

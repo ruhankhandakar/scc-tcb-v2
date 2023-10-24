@@ -102,7 +102,7 @@ const OnBoarding = () => {
 
     let files: ExtendedDocumentPickerAsset[] = [];
 
-    if (data.deoDocuments) {
+    if (data.deoDocuments?.length) {
       files = [
         ...files,
         ...data.deoDocuments.map((document, index) => ({
@@ -112,7 +112,7 @@ const OnBoarding = () => {
         })),
       ];
     }
-    if (data.nidDocuments) {
+    if (data.nidDocuments?.length) {
       files = [
         ...files,
         ...data.nidDocuments.map((document, index) => ({

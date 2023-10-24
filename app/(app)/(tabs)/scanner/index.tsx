@@ -50,12 +50,6 @@ const CustomerEntry = () => {
     handleScannerRedirection();
   }, []);
 
-  useEffect(() => {
-    return () => {
-      console.log('unmounting');
-    };
-  }, []);
-
   const fetchCustomerDetails = async (familyCardNo: string) => {
     const splittedData = familyCardNo.split('_');
     if (splittedData[0] !== 'scc') {
