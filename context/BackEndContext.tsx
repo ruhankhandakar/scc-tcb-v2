@@ -6,15 +6,24 @@ import {
   useEffect,
 } from 'react';
 import { Snackbar } from 'react-native-paper';
-import { Session, User } from '@supabase/supabase-js';
+import { Session, User, UserAttributes } from '@supabase/supabase-js';
 import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system';
 
 import { supabase } from 'lib/supabase';
 import { ProfileData, SelectedProfileData } from 'types/profile';
 import { Customer, DealerConfig, IWards, Products, TWards } from 'types';
-import { ProfileDBPayload, StoreFileInBucketParamType } from 'utils/types';
+import {
+  ProfileDBPayload,
+  StoreFileInBucketParamType,
+  UpdateParams,
+} from 'utils/types';
 import { BUCKET_NAME, PUBLIC_BUCKET_NAME } from 'constants/supabase';
+import Spinner from 'react-native-loading-spinner-overlay';
+import { Text, View } from 'react-native';
+import AnimatedLottieView from 'lottie-react-native';
+import { logoutLottie } from 'constants/lottie_files';
+import { COLORS, FONT, SIZES } from 'constants/theme';
 
 type CustomerParams = {
   startOffset?: number;
@@ -131,6 +140,15 @@ type ContextType = {
       success: boolean;
     }>;
     getDealerConfig: () => Promise<DealerConfig[]>;
+    updateProfile: (
+      userId: string,
+      profileData: Partial<UpdateParams>
+    ) => Promise<{
+      success: boolean;
+    }>;
+    updateUser: (params: UserAttributes) => Promise<{
+      success: boolean;
+    }>;
   };
 };
 
@@ -147,8 +165,9 @@ const initialState: StateType = {
 export const BackEndContext = createContext<ContextType | null>(null);
 
 const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState(() => ({ ...initialState }));
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     if (
@@ -200,6 +219,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       [key]: data,
     }));
   }
+
   const signUpWithEmail = async ({ email, password }: AuthParams) => {
     setState((prevState) => ({
       ...prevState,
@@ -230,7 +250,10 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    setIsLoggingOut(true);
     await supabase.auth.signOut();
+    setState(initialState);
+    setIsLoggingOut(false);
   };
 
   const getWards = async () => {
@@ -515,7 +538,9 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) {
-        setErrorMessage('loginWithPhoneAndPassword' + error.message);
+        setErrorMessage(
+          'অনুগ্রহ করে valid নাম্বার এবং পাসওয়ার্ড ব্যবহার করুন'
+        );
         return {
           success: false,
         };
@@ -579,6 +604,47 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateProfile = async (
+    userId: string,
+    profileData: Partial<UpdateParams>
+  ) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update(profileData)
+      .eq('user_id', userId);
+
+    if (error) {
+      setErrorMessage(error.message);
+      return {
+        success: false,
+      };
+    } else {
+      return {
+        success: true,
+      };
+    }
+  };
+
+  const updateUser = async (params: UserAttributes) => {
+    try {
+      const { error } = await supabase.auth.updateUser(params);
+      if (error) {
+        setErrorMessage(error.message);
+        return {
+          success: false,
+        };
+      }
+      return {
+        success: true,
+      };
+    } catch (err: any) {
+      setErrorMessage(err.message);
+      return {
+        success: false,
+      };
+    }
+  };
+
   const actions = {
     getLoggedInUserProfileData,
     signUpWithEmail,
@@ -599,10 +665,41 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     createProfile,
     getPublicUrl,
     getDealerConfig,
+    updateProfile,
+    updateUser,
   };
 
   return (
     <BackEndContext.Provider value={{ state, actions }}>
+      <Spinner visible={isLoggingOut} overlayColor="rgba(0,0,0,0.5)">
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <AnimatedLottieView
+            source={logoutLottie}
+            autoPlay
+            loop
+            style={{
+              height: 300,
+              width: 300,
+            }}
+          />
+          <Text
+            style={{
+              fontFamily: FONT.bold,
+              fontSize: SIZES.medium,
+              marginTop: SIZES.xLarge,
+              color: COLORS.error,
+              textAlign: 'center',
+              backgroundColor: COLORS.white,
+              padding: SIZES.medium,
+              width: '100%',
+            }}
+          >
+            Logging out...
+          </Text>
+        </View>
+      </Spinner>
       {children}
       {!!errorMessage && (
         <Snackbar

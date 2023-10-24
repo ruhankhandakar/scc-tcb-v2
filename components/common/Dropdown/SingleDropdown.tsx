@@ -10,10 +10,18 @@ interface Props {
   data: ItemType[];
   handleChange: (item: number | string) => void;
   placeholder: string;
+  selectedValue?: string | null;
 }
 
-const SingleDropdown = ({ data, handleChange, placeholder }: Props) => {
-  const [value, setValue] = useState<string | null>(null);
+const SingleDropdown = ({
+  data,
+  handleChange,
+  placeholder,
+  selectedValue,
+}: Props) => {
+  const [value, setValue] = useState<string | null>(
+    () => selectedValue || null
+  );
   const [isFocus, setIsFocus] = useState(false);
 
   return (
@@ -29,7 +37,7 @@ const SingleDropdown = ({ data, handleChange, placeholder }: Props) => {
         maxHeight={300}
         labelField="label"
         valueField="value"
-        placeholder={!isFocus ? placeholder : '...'}
+        placeholder={!isFocus ? `ওয়ার্ড ${value}` || placeholder : '...'}
         searchPlaceholder="Search..."
         value={value}
         onFocus={() => setIsFocus(true)}

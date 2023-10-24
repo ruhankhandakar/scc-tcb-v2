@@ -32,8 +32,9 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontFamily: FONT.bold,
-    fontSize: SIZES.xxLarge,
+    fontSize: SIZES.medium,
     color: COLORS.darkBlue,
+    padding: 3,
   },
   btn: {
     marginTop: SIZES.xxLarge,

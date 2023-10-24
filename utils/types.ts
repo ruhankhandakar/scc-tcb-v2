@@ -1,3 +1,5 @@
+import { DocumentPickerAsset } from 'expo-document-picker';
+
 export type ROLE = 'ADMIN' | 'CUSTOMER' | 'DEALER';
 export interface StoreFileInBucketParamType {
   fileURI: string;
@@ -18,4 +20,14 @@ export interface ProfileDBPayload {
   document_proof_link: string[] | null;
   profile_picture: string | null;
   deo_documents: string[] | null;
+}
+
+export interface UpdateParams {
+  firstName: string;
+  lastName: string;
+  password: string;
+  profilePicture: DocumentPickerAsset | null | undefined;
+  profile_picture?: string;
+  first_name?: string;
+  last_name?: string;
 }

@@ -5,3 +5,4 @@ export const otpVerificationLottie = require('assets/assets/otp_verification.jso
 export const loadingLottie = require('assets/assets/loading.json');
 export const waitingLottie = require('assets/assets/waiting.json');
 export const processingLottie = require('assets/assets/processing.json');
+export const logoutLottie = require('assets/assets/logout.json');

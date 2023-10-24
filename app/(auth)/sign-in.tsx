@@ -79,11 +79,6 @@ export default function SignIn() {
               placeholder="পাসওয়ার্ড"
               placeholderTextColor={COLORS.darkBlue}
               secureTextEntry={!showPassword}
-              onKeyPress={() => {
-                if (!isDisabled) {
-                  handleLogin();
-                }
-              }}
             />
             <MaterialCommunityIcons
               name={showPassword ? 'eye-off' : 'eye'}
