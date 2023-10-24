@@ -44,7 +44,7 @@ const index: React.FC<Props> = ({ item, handleNavigate }) => {
           <View style={styles.textView}>
             <Text style={styles.labelText}>মোবাইল নম্বর: </Text>
             <Text style={styles.valueText} numberOfLines={1}>
-              {item.mobile_number}
+              {item.phone_number}
             </Text>
           </View>
           <View style={styles.textView}>

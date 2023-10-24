@@ -31,3 +31,29 @@ export interface UpdateParams {
   first_name?: string;
   last_name?: string;
 }
+
+export type ConfigName = 'max_num_scanned_allowed_month';
+
+export type OtherConfigsData = {
+  config_name: ConfigName;
+  config_value: string;
+};
+
+export type OtherConfigsState = {
+  maxNumScannedAllowedMonth: number;
+};
+
+export type CustomerEntrySubmitParams = {
+  productLists: {
+    name: string;
+    quantity: string;
+  }[];
+  customerId: number;
+};
+
+export interface ScannedDataParam {
+  user_id: string;
+  customer_id: number;
+  dealer_id: number;
+  other_data: any;
+}

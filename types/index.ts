@@ -27,7 +27,7 @@ export interface Customer {
   gurdian_name: string;
   id: number;
   is_active: boolean;
-  mobile_number: string;
+  phone_number: string;
   name: string;
   union: string;
   ward: number;
@@ -55,4 +55,10 @@ export interface DealerConfig {
   privileged_customer: number;
   registered_customer: number;
   other_config: any;
+}
+
+export interface CardAndDealerCheck {
+  dealerId: number;
+  customerId: number;
+  wardNumber: number;
 }

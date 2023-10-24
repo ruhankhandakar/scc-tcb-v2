@@ -23,8 +23,8 @@ const Dealer = () => {
   const refetchText = refetch || 'dealer_config';
 
   useEffect(() => {
-    if (refetchText.includes('dealer_config')) {
-      getDealerConfig().then((response) => {
+    if (refetchText.includes('dealer_config') && profile) {
+      getDealerConfig(profile.id).then((response) => {
         if (response.length) {
           setCustomerNumber({
             privilegedCustomer: response[0].privileged_customer,
@@ -33,7 +33,7 @@ const Dealer = () => {
         }
       });
     }
-  }, [refetchText]);
+  }, [refetchText, profile]);
 
   return (
     <>

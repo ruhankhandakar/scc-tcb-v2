@@ -41,7 +41,7 @@ const Scanner = () => {
         [keyName]: data,
       });
     } finally {
-      router.back();
+      router.replace('/(app)/(tabs)/scanner');
     }
   };
 

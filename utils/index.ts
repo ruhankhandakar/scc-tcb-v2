@@ -1,3 +1,16 @@
+import dayjs from 'dayjs';
+
+export const getCurrentMonthStartAndEndDate = (): {
+  startDate: string;
+  endDate: string;
+} => {
+  const currentDate = dayjs();
+  const startDate = currentDate.startOf('month').toISOString();
+  const endDate = currentDate.endOf('month').toISOString();
+
+  return { startDate, endDate };
+};
+
 export const validateEmail = (email: string) => {
   return String(email)
     .toLowerCase()

@@ -12,9 +12,17 @@ import CustomerDetailsWithEntry from 'components/CustomerEntry';
 import { COLORS, FONT, SIZES } from 'constants/theme';
 import { useAppContext } from 'context/AppContext';
 import { useBackEndContext } from 'context/BackEndContext';
-import { Customer, StatusType } from 'types';
+import { CardAndDealerCheck, Customer, StatusType } from 'types';
 import { noDataIllustration } from 'constants/icons';
-import { successLottie, tryAgainLottie } from 'constants/lottie_files';
+import {
+  oopsLottie,
+  submittingLottie,
+  successLottie,
+  tryAgainLottie,
+} from 'constants/lottie_files';
+import { CustomerEntrySubmitParams, ScannedDataParam } from 'utils/types';
+import Spinner from 'react-native-loading-spinner-overlay';
+import AnimatedLottieView from 'lottie-react-native';
 
 const screenHeight = Dimensions.get('screen');
 
@@ -22,10 +30,17 @@ const CustomerEntry = () => {
   const router = useRouter();
   const {
     state,
-    action: { handleErrorMessage, handleUpdateData },
+    action: { handleUpdateData },
   } = useAppContext();
   const {
-    actions: { getCustomerDetails },
+    state: { profile, user, otherConfigs },
+    actions: {
+      getCustomerDetails,
+      getDealerConfig,
+      getScannedDataTableCountOfACustomer,
+      storeScannedData,
+      updateDealerConfig,
+    },
   } = useBackEndContext();
 
   const [loading, setLoading] = useState(false);
@@ -33,13 +48,17 @@ const CustomerEntry = () => {
     Customer | undefined
   >();
   const [status, setStatus] = useState<StatusType>('');
+  const [infoErrorMessage, setInfoErrorMessage] = useState('');
+  const [_dealerId, setDealerId] = useState<number | null>(null);
+  const [priviledgedCustomerNumber, setPriviledgedCustomerNumber] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const familyCardNo = state?.familyCard;
 
   const handleScannerRedirection = () => {
     // @ts-ignore
     router.push({
-      pathname: 'qr-scanner',
+      pathname: '/(public)/qr-scanner',
       params: {
         key: 'familyCard',
       },
@@ -47,26 +66,88 @@ const CustomerEntry = () => {
   };
 
   useEffect(() => {
-    handleScannerRedirection();
-  }, []);
+    if (!familyCardNo) {
+      handleScannerRedirection();
+    }
+  }, [familyCardNo]);
+
+  const cardAndDealerCheck = async ({
+    dealerId,
+    customerId,
+    wardNumber,
+  }: CardAndDealerCheck) => {
+    const result = await getDealerConfig(dealerId);
+
+    if (!result.length) {
+      setInfoErrorMessage('এই ডিলার বৈধ নয়');
+      return;
+    }
+
+    const { registered_customer, privileged_customer } = result[0];
+    const { maxNumScannedAllowedMonth } = otherConfigs;
+
+    // * If privileged_customer  >= registered_customer * maxNumScannedAllowedMonth -> true, then show error, otherwise continue
+    if (
+      privileged_customer >=
+      registered_customer * maxNumScannedAllowedMonth
+    ) {
+      setInfoErrorMessage('আপনি এই মাসের সমস্ত কোটা শেষ করেছেন');
+      return;
+    }
+
+    //! ------------------- Now Customer details check -----------------------
+    // * If scanned number of the customer of the current month >= maxNumScannedAllowedMonth -> true, then show error, otherwise continue
+    const numOfScannedOfThisMonth = await getScannedDataTableCountOfACustomer(
+      customerId
+    );
+    if (numOfScannedOfThisMonth >= maxNumScannedAllowedMonth) {
+      setInfoErrorMessage(
+        'এই ফ্যামিলি কার্ডটি ইতিমধ্যে এই মাসে 2 মাস ব্যবহার করা হয়েছে।'
+      );
+      return;
+    }
+
+    setPriviledgedCustomerNumber(privileged_customer);
+  };
 
   const fetchCustomerDetails = async (familyCardNo: string) => {
+    setLoading(true);
     const splittedData = familyCardNo.split('_');
     if (splittedData[0] !== 'scc') {
-      handleErrorMessage('এই ফ্যামিলি কার্ডটি বৈধ নয়');
+      setInfoErrorMessage('এই ফ্যামিলি কার্ডটি বৈধ নয়');
+      setLoading(false);
+
       return;
     }
     const wardNum = +splittedData[1];
     const cardNum = +splittedData[2];
 
     if (!wardNum || !cardNum) {
-      handleErrorMessage('এই ফ্যামিলি কার্ডটি বৈধ নয়');
+      setInfoErrorMessage('এই ফ্যামিলি কার্ডটি বৈধ নয়');
+      setLoading(false);
       return;
     }
 
-    // TODO: Check ward number for dealer, if it is not same then show error
-
-    setLoading(true);
+    const loggedInUserRole = profile?.user_role || 'DEALER';
+    //* 1st check whether user is admin or dealer
+    if (loggedInUserRole === 'ADMIN') {
+      console.log('Admin Flow');
+    }
+    if (loggedInUserRole === 'DEALER') {
+      //* Now check ward matching
+      if (wardNum !== profile?.ward) {
+        setInfoErrorMessage(`এই পরিবার কার্ড এর অ্যাক্সেস আপনার কাছে নেই।`);
+        setLoading(false);
+      } else {
+        setDealerId(profile.id);
+        // * Now check more condition
+        await cardAndDealerCheck({
+          customerId: cardNum,
+          dealerId: profile.id,
+          wardNumber: wardNum,
+        });
+      }
+    }
     const response = await getCustomerDetails(cardNum);
     setCustomerDetails(response);
     setLoading(false);
@@ -82,6 +163,49 @@ const CustomerEntry = () => {
     setTimeout(() => {
       setStatus('IDLE');
     }, 2000);
+  };
+
+  const handleSubmit = async ({
+    productLists,
+    customerId,
+  }: CustomerEntrySubmitParams) => {
+    // * Update process starting from submit button -----
+    /* 
+      1. create one entry in scanned_data table
+      2. Increase privileged_customer by 1
+      3. call handleRefresh and router.replace('/') -> Do after 2 sec of success animation
+    */
+    const scannedDataPayload: ScannedDataParam = {
+      user_id: user!.id,
+      customer_id: customerId,
+      dealer_id: _dealerId!,
+      other_data: {
+        product_lists: productLists,
+      },
+    };
+    setIsSubmitting(true);
+
+    const response = await storeScannedData(scannedDataPayload);
+
+    if (response.success) {
+      // * Do Step 2
+      const result = await updateDealerConfig(_dealerId!, {
+        privileged_customer: priviledgedCustomerNumber + 1,
+      });
+      if (result.success) {
+        setStatus('SUCCESS');
+        setTimeout(() => {
+          router.replace('/');
+          setCustomerDetails(undefined);
+          handleUpdateData({
+            familyCard: '',
+          });
+          setStatus('IDLE');
+        }, 3000);
+      }
+    }
+
+    setIsSubmitting(false);
   };
 
   const getEl = () => {
@@ -106,23 +230,31 @@ const CustomerEntry = () => {
           {status === 'SUCCESS' && (
             <Text style={styles.reScanText}>এন্ট্রি সফল হয়েছে</Text>
           )}
-          <Text
-            style={[
-              styles.reScanText,
-              {
-                fontSize: SIZES.medium,
-              },
-            ]}
-          >
-            আবার স্ক্যান করুন
-          </Text>
-          <Button
-            onPress={() => handleScannerRedirection()}
-            style={styles.reScanBtn}
-            mode="contained"
-          >
-            <Ionicons name="qr-code-outline" size={24} color={COLORS.white} />
-          </Button>
+          {status === 'CANCEL' && (
+            <>
+              <Text
+                style={[
+                  styles.reScanText,
+                  {
+                    fontSize: SIZES.medium,
+                  },
+                ]}
+              >
+                আবার স্ক্যান করুন
+              </Text>
+              <Button
+                onPress={() => handleScannerRedirection()}
+                style={styles.reScanBtn}
+                mode="contained"
+              >
+                <Ionicons
+                  name="qr-code-outline"
+                  size={24}
+                  color={COLORS.white}
+                />
+              </Button>
+            </>
+          )}
         </View>
       );
     }
@@ -165,6 +297,7 @@ const CustomerEntry = () => {
               <CustomerDetailsWithEntry
                 customerDetails={customerDetails!}
                 handleClearState={handleClearState}
+                handleSubmit={handleSubmit}
               />
             ) : familyCardNo ? (
               <View style={styles.noDataImgContainer}>
@@ -194,10 +327,40 @@ const CustomerEntry = () => {
   return (
     <>
       <WaterMarkBackground>
+        <Spinner visible={isSubmitting} overlayColor="rgba(0,0,0,0.5)">
+          <View
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          >
+            <AnimatedLottieView
+              source={submittingLottie}
+              autoPlay
+              loop
+              style={{
+                height: 300,
+                width: 300,
+              }}
+            />
+          </View>
+        </Spinner>
         <View
           style={[styles.container, !customerDetails && styles.centerContainer]}
         >
-          {getEl()}
+          {infoErrorMessage ? (
+            <View style={styles.infoErrorContainer}>
+              <LottieView
+                source={oopsLottie}
+                autoPlay
+                loop
+                style={{
+                  height: 150,
+                  width: 150,
+                }}
+              />
+              <Text style={styles.infoErrorText}>{infoErrorMessage}</Text>
+            </View>
+          ) : (
+            getEl()
+          )}
         </View>
       </WaterMarkBackground>
 
@@ -276,5 +439,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: SIZES.medium,
+  },
+  infoErrorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
+  },
+  infoErrorText: {
+    color: COLORS.error,
+    fontFamily: FONT.medium,
+    fontSize: SIZES.large,
+    textAlign: 'center',
+    padding: SIZES.medium,
   },
 });

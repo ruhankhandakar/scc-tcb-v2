@@ -14,7 +14,10 @@ import { supabase } from 'lib/supabase';
 import { ProfileData, SelectedProfileData } from 'types/profile';
 import { Customer, DealerConfig, IWards, Products, TWards } from 'types';
 import {
+  OtherConfigsData,
+  OtherConfigsState,
   ProfileDBPayload,
+  ScannedDataParam,
   StoreFileInBucketParamType,
   UpdateParams,
 } from 'utils/types';
@@ -24,6 +27,7 @@ import { Text, View } from 'react-native';
 import AnimatedLottieView from 'lottie-react-native';
 import { logoutLottie } from 'constants/lottie_files';
 import { COLORS, FONT, SIZES } from 'constants/theme';
+import { getCurrentMonthStartAndEndDate } from 'utils';
 
 type CustomerParams = {
   startOffset?: number;
@@ -51,6 +55,7 @@ type StateType = {
   products: Products[] | null;
   selectedProfile: SelectedProfileData | null;
   loggedInProfileData: SelectedProfileData | null;
+  otherConfigs: OtherConfigsState;
 };
 type ContextType = {
   state: StateType;
@@ -139,7 +144,7 @@ type ContextType = {
     createProfile: (payload: ProfileDBPayload) => Promise<{
       success: boolean;
     }>;
-    getDealerConfig: () => Promise<DealerConfig[]>;
+    getDealerConfig: (dealerId: number) => Promise<DealerConfig[]>;
     updateProfile: (
       userId: string,
       profileData: Partial<UpdateParams>
@@ -147,6 +152,18 @@ type ContextType = {
       success: boolean;
     }>;
     updateUser: (params: UserAttributes) => Promise<{
+      success: boolean;
+    }>;
+    getScannedDataTableCountOfACustomer: (
+      customerId: number
+    ) => Promise<number>;
+    storeScannedData: (payload: ScannedDataParam) => Promise<{
+      success: boolean;
+    }>;
+    updateDealerConfig: (
+      dealerId: number,
+      params: any
+    ) => Promise<{
       success: boolean;
     }>;
   };
@@ -160,6 +177,9 @@ const initialState: StateType = {
   products: null,
   selectedProfile: null,
   loggedInProfileData: null,
+  otherConfigs: {
+    maxNumScannedAllowedMonth: 1,
+  },
 };
 
 export const BackEndContext = createContext<ContextType | null>(null);
@@ -175,6 +195,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       state.profile?.user_role === 'DEALER'
     ) {
       getProducts();
+      getOtherConfigs();
     }
   }, [state.profile?.user_role]);
 
@@ -197,6 +218,29 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
   }, [state.user, state.profile]);
 
   /* ----------Actions ------------- */
+
+  const getOtherConfigs = async () => {
+    let { data } = await supabase
+      .from('other_configs')
+      .select('config_name, config_value');
+
+    const result = (data || []) as OtherConfigsData[];
+
+    let maxNumScannedAllowedMonth = 1;
+
+    result.forEach((config) => {
+      if (config.config_name === 'max_num_scanned_allowed_month') {
+        maxNumScannedAllowedMonth = +config.config_value;
+      }
+    });
+
+    setState((prevState) => ({
+      ...prevState,
+      otherConfigs: {
+        maxNumScannedAllowedMonth,
+      },
+    }));
+  };
 
   const getLoggedInUserProfileData = async (userId: string) => {
     const { error, data } = await supabase
@@ -366,24 +410,50 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const getDealerConfig = async () => {
-    const userRole = state.profile?.user_role || 'DEALER';
+  const getDealerConfig = async (dealerId: number) => {
+    try {
+      let query = supabase.from('dealer_config').select('*');
 
-    let query = supabase.from('dealer_config').select('*');
+      query = query.eq('dealer_id', dealerId);
 
-    if (userRole === 'DEALER') {
-      query = query.eq('dealer_id', state.user?.id);
+      const { error, data } = await query;
+
+      let result: DealerConfig[] = [];
+
+      if (error) {
+        setErrorMessage('getDealerConfig' + error.message);
+      } else {
+        result = data;
+      }
+      return result;
+    } catch (error) {
+      return [];
     }
-    const { error, data } = await query;
+  };
 
-    let result: DealerConfig[] = [];
+  const updateDealerConfig = async (dealerId: number, params: any) => {
+    try {
+      const { data, error } = await supabase
+        .from('dealer_config')
+        .update(params)
+        .eq('dealer_id', dealerId);
 
-    if (error) {
-      setErrorMessage('getDealerConfig' + error.message);
-    } else {
-      result = data;
+      if (error) {
+        setErrorMessage('updateDealerConfig' + error.message);
+        return {
+          success: false,
+        };
+      } else {
+        return {
+          success: true,
+        };
+      }
+    } catch (err: any) {
+      setErrorMessage('updateDealerConfig' + err.message);
+      return {
+        success: true,
+      };
     }
-    return result;
   };
 
   const getCustomerDetails = async (customerId: number) => {
@@ -645,6 +715,40 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getScannedDataTableCountOfACustomer = async (customerId: number) => {
+    const { startDate, endDate } = getCurrentMonthStartAndEndDate();
+    const { data, error } = await supabase
+      .from('scanned_data')
+      .select('id')
+      .eq('customer_id', customerId)
+      .lt('created_at', endDate)
+      .gt('created_at', startDate);
+
+    let scannedCount = 0;
+    if (error) {
+      setErrorMessage('getScannedDataTableCountOfACustomer ->' + error.message);
+    } else {
+      scannedCount = data.length;
+    }
+
+    return scannedCount;
+  };
+
+  const storeScannedData = async (payload: ScannedDataParam) => {
+    const { data, error } = await supabase.from('scanned_data').insert(payload);
+
+    if (error) {
+      setErrorMessage(error.message);
+      return {
+        success: false,
+      };
+    } else {
+      return {
+        success: true,
+      };
+    }
+  };
+
   const actions = {
     getLoggedInUserProfileData,
     signUpWithEmail,
@@ -667,6 +771,9 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     getDealerConfig,
     updateProfile,
     updateUser,
+    getScannedDataTableCountOfACustomer,
+    storeScannedData,
+    updateDealerConfig,
   };
 
   return (

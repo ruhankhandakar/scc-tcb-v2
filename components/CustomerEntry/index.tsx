@@ -10,15 +10,21 @@ import { useBackEndContext } from 'context/BackEndContext';
 import { COLORS } from 'constants/theme';
 
 import styles from './style';
+import { CustomerEntrySubmitParams } from 'utils/types';
 
 interface Props {
   customerDetails: Customer;
   handleClearState: (status: StatusType) => void;
+  handleSubmit: ({
+    productLists,
+    customerId,
+  }: CustomerEntrySubmitParams) => void;
 }
 
 const CustomerDetailsWithEntry = ({
   customerDetails,
   handleClearState,
+  handleSubmit,
 }: Props) => {
   const {
     state: { products },
@@ -49,7 +55,13 @@ const CustomerDetailsWithEntry = ({
     handleClearState('CANCEL');
   };
   const handleOk = () => {
-    handleClearState('SUCCESS');
+    handleSubmit({
+      productLists: productLists.map((product) => ({
+        name: product.product_name,
+        quantity: product.quantity,
+      })),
+      customerId: customerDetails.customer_id,
+    });
   };
 
   return (
@@ -88,7 +100,7 @@ const CustomerDetailsWithEntry = ({
         <View style={styles.textView}>
           <Text style={styles.labelText}>মোবাইল নম্বর: </Text>
           <Text style={styles.valueText} numberOfLines={1}>
-            {customerDetails.mobile_number}
+            {customerDetails.phone_number}
           </Text>
         </View>
         <View style={styles.textView}>
