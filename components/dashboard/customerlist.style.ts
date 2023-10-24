@@ -16,13 +16,14 @@ const styles = StyleSheet.create({
     marginTop: SIZES.xxLarge,
   },
   noDataImg: {
-    height: '90%',
+    height: '80%',
     width: '50%',
   },
   noDataText: {
     color: COLORS.error,
     fontFamily: FONT.medium,
     fontSize: SIZES.xLarge,
+    paddingTop: 20,
   },
 
   item: {

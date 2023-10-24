@@ -295,6 +295,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const { data, error } = await query;
+
     if (error) {
       setErrorMessage('getCustomers' + error.message);
     } else {

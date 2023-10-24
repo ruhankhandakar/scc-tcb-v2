@@ -8,7 +8,6 @@ import styles from 'styles/style';
 const index = () => {
   return (
     <View style={styles.sceneContainer}>
-      {/* TODO: Filter */}
       <CustomerList />
     </View>
   );
