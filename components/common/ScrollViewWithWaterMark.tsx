@@ -33,7 +33,7 @@ const ScrollViewWithWaterMark: React.FC<Props> = ({ children }) => {
         resizeMode="contain"
       >
         <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={{ minHeight: height }}>{children}</View>
+          <View style={{ minHeight: height - 100 }}>{children}</View>
         </ScrollView>
       </ImageBackground>
     </SafeAreaView>

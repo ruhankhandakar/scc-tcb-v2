@@ -1,12 +1,41 @@
+import { useEffect } from 'react';
 import { Redirect, Stack } from 'expo-router';
 import { View } from 'react-native';
 import LottieView from 'lottie-react-native';
+import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+
+import ScreenHeaderBtn from 'components/common/header/ScreenHeaderBtn';
 
 import { useAuth } from 'context/AuthContext';
 import { loadingLottie } from 'constants/lottie_files';
+import { COLORS, SIZES } from 'constants/theme';
+import { logoIcon } from 'constants/icons';
+
+const headerStyle: NativeStackNavigationOptions = {
+  headerStyle: {
+    backgroundColor: COLORS.white,
+  },
+  headerTitleStyle: {
+    fontWeight: 'bold',
+    fontSize: SIZES.medium,
+  },
+  headerShadowVisible: false,
+  headerBackVisible: false,
+  title: '(TCB) সিলেট সিটি কর্পোরেশন',
+  headerLeft: () => (
+    <View style={{ marginRight: 5 }}>
+      <ScreenHeaderBtn iconUrl={logoIcon} dimension="100%" />
+    </View>
+  ),
+  headerRight: () => '',
+};
 
 export default function AppLayout() {
-  const { authInitialized, session } = useAuth();
+  const { authInitialized, session, handleRefresh } = useAuth();
+
+  useEffect(() => {
+    handleRefresh();
+  }, []);
 
   if (!authInitialized) {
     return (
@@ -40,11 +69,5 @@ export default function AppLayout() {
   }
 
   // This layout can be deferred because it's not the root layout.
-  return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
-  );
+  return <Stack screenOptions={headerStyle} />;
 }

@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-import { COLORS, SIZES } from 'constants/theme';
+import { COLORS, FONT, SIZES } from 'constants/theme';
 
 const styles = StyleSheet.create({
   parentContainer: {
@@ -20,12 +20,10 @@ const styles = StyleSheet.create({
   },
   dealerCardTitle: {
     color: COLORS.onBackground,
-    fontFamily: 'DMRegular',
+    fontFamily: FONT.bold,
     fontSize: SIZES.medium,
     textAlign: 'center',
     fontWeight: '500',
-    paddingLeft: SIZES.medium,
-    paddingRight: SIZES.medium,
     paddingBottom: SIZES.medium,
   },
   spinnerTextStyle: {
