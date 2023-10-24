@@ -48,3 +48,11 @@ export type FileUploadDocumentKeyName =
   | 'profilePicture'
   | 'nidDocuments'
   | 'deoDocument';
+
+export interface DealerConfig {
+  id: number;
+  dealer_id: string;
+  privileged_customer: number;
+  registered_customer: number;
+  other_config: any;
+}

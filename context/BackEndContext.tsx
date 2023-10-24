@@ -12,7 +12,7 @@ import * as FileSystem from 'expo-file-system';
 
 import { supabase } from 'lib/supabase';
 import { ProfileData } from 'types/profile';
-import { Customer, IWards, Products, TWards } from 'types';
+import { Customer, DealerConfig, IWards, Products, TWards } from 'types';
 import { ProfileDBPayload, StoreFileInBucketParamType } from 'utils/types';
 import { BUCKET_NAME, PUBLIC_BUCKET_NAME } from 'constants/supabase';
 
@@ -36,6 +36,7 @@ type PhoneVerifyParams = {
 };
 type StateType = {
   loading: boolean;
+  refetch: string;
   user: User | null;
   profile: ProfileData | null;
   products: Products[] | null;
@@ -127,11 +128,13 @@ type ContextType = {
     createProfile: (payload: ProfileDBPayload) => Promise<{
       success: boolean;
     }>;
+    getDealerConfig: () => Promise<DealerConfig[]>;
   };
 };
 
 const initialState: StateType = {
   loading: false,
+  refetch: '',
   user: null,
   profile: null,
   products: null,
@@ -314,6 +317,26 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
         products: data as Products[],
       }));
     }
+  };
+
+  const getDealerConfig = async () => {
+    const userRole = state.profile?.user_role || 'DEALER';
+
+    let query = supabase.from('dealer_config').select('*');
+
+    if (userRole === 'DEALER') {
+      query = query.eq('dealer_id', state.user?.id);
+    }
+    const { error, data } = await query;
+
+    let result: DealerConfig[] = [];
+
+    if (error) {
+      setErrorMessage('getDealerConfig' + error.message);
+    } else {
+      result = data;
+    }
+    return result;
   };
 
   const getCustomerDetails = async (customerId: number) => {
@@ -551,6 +574,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     downloadFile,
     createProfile,
     getPublicUrl,
+    getDealerConfig,
   };
 
   return (

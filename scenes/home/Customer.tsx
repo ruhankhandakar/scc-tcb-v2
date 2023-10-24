@@ -16,9 +16,9 @@ const Customer = ({ user, signOut }: Props) => {
   return (
     <View style={styles.container}>
       <Text style={styles.textStyle}>
-        আপনার ইমেইল {'\n'}
-        {user?.email} {'\n'}
-        আমাদের database এ যুক্ত নেই {'\n'} সিলেট সিটি কর্পোরেশনে যোগাযোগ করুন
+        আপনার তথ্য {'\n'}
+        আমাদের database এ যুক্ত নেই {'\n'} অনুগ্রহ করে সিলেট সিটি কর্পোরেশনে
+        যোগাযোগ করুন
       </Text>
       <Button mode="contained" style={styles.btn} onPress={signOut}>
         Log out
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     height: deviceHeight - 100,
   },
   textStyle: {
-    paddingHorizontal: SIZES.xLarge,
+    paddingHorizontal: SIZES.medium,
     textAlign: 'center',
     fontFamily: FONT.bold,
     fontSize: SIZES.medium,
