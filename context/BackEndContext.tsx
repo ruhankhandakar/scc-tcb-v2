@@ -251,13 +251,14 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
 
   const getTotalCustomers = async () => {
     const userRole = state.profile?.user_role || 'DEALER';
+    const wardNum = state.profile?.ward;
 
     let query = supabase
       .from('customers')
-      .select('id', { count: 'planned', head: true });
+      .select('id', { count: 'exact', head: true });
 
     if (userRole !== 'ADMIN') {
-      query = query.eq('ward', state.profile?.ward);
+      query = query.eq('ward', wardNum);
     }
     const { count, error } = await query;
 
