@@ -29,7 +29,7 @@ const Item = ({ title }: ItemProps) => (
 
 const CustomerList = () => {
   const {
-    actions: { getCustomers, getTotalCustomers },
+    actions: { getCustomers, getTotalCustomers, updateState },
   } = useBackEndContext();
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -80,6 +80,12 @@ const CustomerList = () => {
     });
     setUsers(response);
     setLoading(false);
+  };
+
+  const handleCardClick = (item: Customer) => {
+    updateState('selectedProfile', item);
+    // @ts-ignore
+    router.replace('/details');
   };
 
   useEffect(() => {
@@ -139,8 +145,7 @@ const CustomerList = () => {
             <DashboardCard
               item={item}
               handleNavigate={() => {
-                // @ts-ignore
-                router.replace(`/profile/details/${item.id}`);
+                handleCardClick(item);
               }}
             />
           )}

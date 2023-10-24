@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
     fontFamily: FONT.regular,
     color: COLORS.lightWhite,
     fontSize: SIZES.medium,
+    minWidth: '50%',
   },
   valueText: {
     fontFamily: FONT.regular,

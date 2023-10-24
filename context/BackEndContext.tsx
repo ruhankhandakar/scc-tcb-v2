@@ -41,6 +41,7 @@ type StateType = {
   profile: ProfileData | null;
   products: Products[] | null;
   selectedProfile: SelectedProfileData | null;
+  loggedInProfileData: SelectedProfileData | null;
 };
 type ContextType = {
   state: StateType;
@@ -140,6 +141,7 @@ const initialState: StateType = {
   profile: null,
   products: null,
   selectedProfile: null,
+  loggedInProfileData: null,
 };
 
 export const BackEndContext = createContext<ContextType | null>(null);
@@ -166,7 +168,11 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
           phone_number: state.user?.phone!,
         } as SelectedProfileData;
 
-        return { ...prevState, selectedProfile: selectedProfileData };
+        return {
+          ...prevState,
+          selectedProfile: selectedProfileData,
+          loggedInProfileData: selectedProfileData,
+        };
       });
     }
   }, [state.user, state.profile]);

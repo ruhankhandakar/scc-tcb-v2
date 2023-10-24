@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -6,8 +6,14 @@ import { router } from 'expo-router';
 import WaterMarkBackground from 'components/common/WaterMarkBackground';
 import ProfileComponent from 'components/profile';
 import { COLORS, SIZES } from 'constants/theme';
+import { useBackEndContext } from 'context/BackEndContext';
 
 const UserDetails = () => {
+  const {
+    state: { selectedProfile },
+    actions: { updateState },
+  } = useBackEndContext();
+
   return (
     <WaterMarkBackground>
       <TouchableOpacity
@@ -17,11 +23,16 @@ const UserDetails = () => {
         onPress={() => {
           // @ts-ignore
           router.replace('/dashboard');
+          updateState('selectedProfile', null);
         }}
       >
         <AntDesign name="back" size={24} color={COLORS.lightBlue} />
       </TouchableOpacity>
-      <ProfileComponent isReadOnly isEditAccess={false} />
+      <ProfileComponent
+        isReadOnly
+        isEditAccess={false}
+        selectedProfile={selectedProfile}
+      />
     </WaterMarkBackground>
   );
 };

@@ -129,6 +129,7 @@ const styles = StyleSheet.create({
     fontFamily: FONT.regular,
     fontSize: SIZES.medium,
     color: COLORS.black,
+    padding: 3,
   },
   personalInformationContainer: {
     marginTop: SIZES.xxLarge,

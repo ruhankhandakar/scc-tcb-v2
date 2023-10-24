@@ -19,7 +19,7 @@ export interface Customer {
   address: string;
   created_at: string;
   customer_id: number;
-  document_proof_link?: string | string[];
+  document_proof_link?: string[];
   document_proof_name: string;
   document_proof_number: string;
   family_card?: string;

@@ -17,18 +17,23 @@ import ListCard from 'components/common/ListCard';
 import { useAppContext } from 'context/AppContext';
 import { useBackEndContext } from 'context/BackEndContext';
 import { placeholderUser } from 'constants/icons';
+import { SelectedProfileData } from 'types/profile';
 
 interface Props {
   isReadOnly?: boolean;
   isEditAccess?: boolean;
+  selectedProfile: SelectedProfileData | null;
 }
 
-const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
+const UserDetails: React.FC<Props> = ({
+  isReadOnly,
+  isEditAccess = true,
+  selectedProfile,
+}) => {
   const {
     action: { handleUpdateData },
   } = useAppContext();
   const {
-    state: { selectedProfile },
     actions: { signOut, downloadFile },
   } = useBackEndContext();
 
@@ -50,17 +55,27 @@ const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
       <View style={styles.profileHeader}>
         <View style={styles.profileImageContainer}>
           <Image
-            source={selectedProfile.profile_picture || placeholderUser}
+            source={
+              selectedProfile.profile_picture ||
+              selectedProfile.profile_pic ||
+              placeholderUser
+            }
             contentFit="cover"
             style={styles.profileImage}
           />
         </View>
         <Text variant="displayMedium" style={styles.userTitle}>
-          {selectedProfile.first_name} {selectedProfile.last_name}
+          {selectedProfile.first_name} {selectedProfile.last_name}{' '}
+          {selectedProfile.name}
         </Text>
         {selectedProfile.dateOfBirth ? (
           <Text variant="bodyMedium" style={styles.userDob}>
             Date of birth - {selectedProfile.dateOfBirth}
+          </Text>
+        ) : null}
+        {selectedProfile.customer_id ? (
+          <Text variant="bodyMedium" style={styles.userDob}>
+            পরিবার কার্ড নাম্বার - {selectedProfile.customer_id}
           </Text>
         ) : null}
       </View>
@@ -98,6 +113,20 @@ const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
               numberOfLines={2}
             />
           )}
+          {!!selectedProfile.gurdian_name && (
+            <ListCard
+              label="পরিবার প্রধানের নামে"
+              value={selectedProfile.gurdian_name}
+              icon={
+                <AntDesign
+                  name="user"
+                  size={SIZES.medium}
+                  color={COLORS.lightWhite}
+                />
+              }
+              numberOfLines={2}
+            />
+          )}
           {selectedProfile.phone_number && (
             <ListCard
               label="মোবাইল"
@@ -113,8 +142,21 @@ const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
           )}
           {!!selectedProfile.document_proof_number && (
             <ListCard
-              label="NID নাম্বার"
+              label={selectedProfile.document_proof_name || 'NID নাম্বার'}
               value={selectedProfile.document_proof_number}
+              icon={
+                <Octicons
+                  name="number"
+                  size={SIZES.medium}
+                  color={COLORS.lightWhite}
+                />
+              }
+            />
+          )}
+          {!!selectedProfile.customer_id && (
+            <ListCard
+              label="পরিবার card নাম্বার"
+              value={selectedProfile.customer_id.toString()}
               icon={
                 <Octicons
                   name="number"
@@ -140,7 +182,7 @@ const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
           {(selectedProfile?.ward || selectedProfile?.address) && (
             <ListCard
               label="ঠিকানা"
-              value={`${selectedProfile?.wards.name} ${
+              value={`${selectedProfile?.wards?.name} ${
                 selectedProfile?.address ? `, ${selectedProfile?.address}` : ``
               }`}
               icon={
