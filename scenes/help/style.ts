@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     marginTop: SIZES.xSmall,
     marginBottom: SIZES.xxLarge,
     paddingLeft: SIZES.medium,
-    paddingTop: SIZES.medium,
+    paddingTop: SIZES.small,
   },
   linkWrapper: {
     flexDirection: 'row',
@@ -36,6 +36,7 @@ const styles = StyleSheet.create({
     fontFamily: FONT.regular,
     fontWeight: 'bold',
     flexShrink: 1,
+    padding: 6,
   },
   linkTextLink: {
     color: COLORS.error,
