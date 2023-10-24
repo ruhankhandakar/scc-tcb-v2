@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
-import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { TouchableOpacity, View, Linking } from 'react-native';
 import { Text } from 'react-native-paper';
 import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -9,12 +9,14 @@ import { SimpleLineIcons } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import { Foundation } from '@expo/vector-icons';
+import { ActivityIndicator } from 'react-native-paper';
 
 import styles from './styles';
 import { COLORS, SIZES } from 'constants/theme';
 import ListCard from 'components/common/ListCard';
 import { useAppContext } from 'context/AppContext';
 import { useBackEndContext } from 'context/BackEndContext';
+import { placeholderUser } from 'constants/icons';
 
 interface Props {
   isReadOnly?: boolean;
@@ -26,32 +28,41 @@ const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
     action: { handleUpdateData },
   } = useAppContext();
   const {
-    actions: { signOut },
+    state: { selectedProfile },
+    actions: { signOut, downloadFile },
   } = useBackEndContext();
-  const userDetails = {};
 
-  const tcbCard = 'avail'; // TODO: fetch from API
+  const [downloadingFile, setDownloadingFile] = useState('');
+
+  const handleDownload = async (fileName: string, filePath: string) => {
+    setDownloadingFile(fileName);
+    const url = await downloadFile(filePath);
+    if (url) {
+      await Linking.openURL(url);
+    }
+    setDownloadingFile('');
+  };
+
+  if (!selectedProfile) return null;
 
   return (
     <View style={styles.container}>
       <View style={styles.profileHeader}>
         <View style={styles.profileImageContainer}>
           <Image
-            source={{
-              uri:
-                userDetails?.profilePic ||
-                'https://www.mecgale.com/wp-content/uploads/2017/08/dummy-profile.png',
-            }}
+            source={selectedProfile.profile_picture || placeholderUser}
             contentFit="cover"
             style={styles.profileImage}
           />
         </View>
         <Text variant="displayMedium" style={styles.userTitle}>
-          Niaz Morshed
+          {selectedProfile.first_name} {selectedProfile.last_name}
         </Text>
-        <Text variant="bodyMedium" style={styles.userDob}>
-          Date of birth - Jan, 1995
-        </Text>
+        {selectedProfile.dateOfBirth ? (
+          <Text variant="bodyMedium" style={styles.userDob}>
+            Date of birth - {selectedProfile.dateOfBirth}
+          </Text>
+        ) : null}
       </View>
       <View style={styles.personalInformationContainer}>
         <View style={styles.personalInformationTitleView}>
@@ -73,67 +84,78 @@ const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
           )}
         </View>
         <View>
-          <ListCard
-            label="ইমেইল"
-            value="niaz@morshed.com"
-            icon={
-              <MaterialIcons
-                name="email"
-                size={SIZES.medium}
-                color={COLORS.lightWhite}
-              />
-            }
-            borderPosition="top"
-            numberOfLines={2}
-          />
-          <ListCard
-            label="মোবাইল"
-            value="0172476-7477"
-            icon={
-              <MaterialIcons
-                name="phone"
-                size={SIZES.medium}
-                color={COLORS.lightWhite}
-              />
-            }
-          />
-          <ListCard
-            label="NID নাম্বার"
-            value="4648798868"
-            icon={
-              <Octicons
-                name="number"
-                size={SIZES.medium}
-                color={COLORS.lightWhite}
-              />
-            }
-          />
-          <ListCard
-            label="ফাউন্ডেশন নাম"
-            value="জানিনা ফাউন্ডেশন"
-            icon={
-              <Octicons
-                name="number"
-                size={SIZES.medium}
-                color={COLORS.lightWhite}
-              />
-            }
-          />
-          <ListCard
-            label="ঠিকানা"
-            value="ওয়ার্ড ১, মিয়া ফাজিল চিস্ত, ১৯৯ শুভেচ্ছা"
-            icon={
-              <Entypo
-                name="location"
-                size={SIZES.medium}
-                color={COLORS.lightWhite}
-              />
-            }
-            borderPosition="bottom"
-            numberOfLines={2}
-          />
+          {!!selectedProfile.email && (
+            <ListCard
+              label="ইমেইল"
+              value={selectedProfile.email}
+              icon={
+                <MaterialIcons
+                  name="email"
+                  size={SIZES.medium}
+                  color={COLORS.lightWhite}
+                />
+              }
+              numberOfLines={2}
+            />
+          )}
+          {selectedProfile.phone_number && (
+            <ListCard
+              label="মোবাইল"
+              value={`+${selectedProfile.phone_number}`}
+              icon={
+                <MaterialIcons
+                  name="phone"
+                  size={SIZES.medium}
+                  color={COLORS.lightWhite}
+                />
+              }
+            />
+          )}
+          {!!selectedProfile.document_proof_number && (
+            <ListCard
+              label="NID নাম্বার"
+              value={selectedProfile.document_proof_number}
+              icon={
+                <Octicons
+                  name="number"
+                  size={SIZES.medium}
+                  color={COLORS.lightWhite}
+                />
+              }
+            />
+          )}
+          {!!selectedProfile?.foundation_name && (
+            <ListCard
+              label="ফাউন্ডেশন নাম"
+              value={selectedProfile?.foundation_name}
+              icon={
+                <Octicons
+                  name="number"
+                  size={SIZES.medium}
+                  color={COLORS.lightWhite}
+                />
+              }
+            />
+          )}
+          {(selectedProfile?.ward || selectedProfile?.address) && (
+            <ListCard
+              label="ঠিকানা"
+              value={`${selectedProfile?.wards.name} ${
+                selectedProfile?.address ? `, ${selectedProfile?.address}` : ``
+              }`}
+              icon={
+                <Entypo
+                  name="location"
+                  size={SIZES.medium}
+                  color={COLORS.lightWhite}
+                />
+              }
+              numberOfLines={2}
+            />
+          )}
         </View>
       </View>
+
       <View style={styles.utilitiesContainer}>
         <View style={styles.personalInformationTitleView}>
           <Text variant="headlineSmall" style={styles.personalInformationText}>
@@ -141,57 +163,87 @@ const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
           </Text>
         </View>
         <View>
-          {!isReadOnly && (
+          {!!selectedProfile.document_proof_link && (
             <ListCard
-              label="লগ আউট"
+              label="NID কার্ড"
               icon={
-                <SimpleLineIcons
-                  name="logout"
+                <Feather
+                  name="image"
                   size={SIZES.medium}
                   color={COLORS.lightWhite}
                 />
               }
               rightIcon={
-                <TouchableOpacity
-                  onPress={() => {
-                    signOut();
-                  }}
-                >
-                  <AntDesign
-                    name="right"
-                    size={SIZES.medium}
-                    color={COLORS.lightWhite}
-                  />
-                </TouchableOpacity>
+                <View style={styles.multiDocsContainer}>
+                  {selectedProfile.document_proof_link.map(
+                    (pathName, index) => (
+                      <TouchableOpacity
+                        onPress={() => {
+                          handleDownload(`nidDocument_${index}`, pathName);
+                        }}
+                        key={pathName}
+                        style={styles.utilsIcon}
+                      >
+                        {downloadingFile === `nidDocument_${index}` ? (
+                          <ActivityIndicator
+                            animating={true}
+                            color={COLORS.white}
+                            size="small"
+                          />
+                        ) : (
+                          <Feather
+                            name="download"
+                            size={SIZES.large}
+                            color={COLORS.lightWhite}
+                          />
+                        )}
+                      </TouchableOpacity>
+                    )
+                  )}
+                </View>
               }
-              borderPosition="top"
             />
           )}
-          <ListCard
-            label="NID কার্ড"
-            icon={
-              <Feather
-                name="image"
-                size={SIZES.medium}
-                color={COLORS.lightWhite}
-              />
-            }
-            rightIcon={
-              <TouchableOpacity
-                onPress={() => {
-                  console.log('downloading');
-                }}
-              >
+          {!!selectedProfile.deo_documents && (
+            <ListCard
+              label="DEO কার্ড"
+              icon={
                 <Feather
-                  name="download"
+                  name="image"
                   size={SIZES.medium}
                   color={COLORS.lightWhite}
                 />
-              </TouchableOpacity>
-            }
-            borderPosition={isReadOnly ? 'both' : ''}
-          />
-          {!!tcbCard && (
+              }
+              rightIcon={
+                <View style={styles.multiDocsContainer}>
+                  {selectedProfile.deo_documents.map((link, index) => (
+                    <TouchableOpacity
+                      onPress={() => {
+                        handleDownload(`deoDocument_${index}`, link);
+                      }}
+                      key={link}
+                      style={styles.utilsIcon}
+                    >
+                      {downloadingFile === `deoDocument_${index}` ? (
+                        <ActivityIndicator
+                          animating={true}
+                          color={COLORS.white}
+                          size="small"
+                        />
+                      ) : (
+                        <Feather
+                          name="download"
+                          size={SIZES.large}
+                          color={COLORS.lightWhite}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              }
+            />
+          )}
+          {!!selectedProfile.family_card && (
             <ListCard
               label="TCB কার্ড"
               icon={
@@ -204,17 +256,25 @@ const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
               rightIcon={
                 <TouchableOpacity
                   onPress={() => {
-                    console.log('downloading');
+                    handleDownload(`tcbCard_0`, selectedProfile.family_card!);
                   }}
+                  style={styles.utilsIcon}
                 >
-                  <Feather
-                    name="download"
-                    size={SIZES.medium}
-                    color={COLORS.lightWhite}
-                  />
+                  {downloadingFile === `tcbCard_0` ? (
+                    <ActivityIndicator
+                      animating={true}
+                      color={COLORS.white}
+                      size="small"
+                    />
+                  ) : (
+                    <Feather
+                      name="download"
+                      size={SIZES.large}
+                      color={COLORS.lightWhite}
+                    />
+                  )}
                 </TouchableOpacity>
               }
-              borderPosition={isReadOnly ? 'both' : ''}
             />
           )}
 
@@ -233,15 +293,41 @@ const UserDetails: React.FC<Props> = ({ isReadOnly, isEditAccess = true }) => {
                   onPress={() => {
                     console.log('logout');
                   }}
+                  style={styles.utilsIcon}
                 >
                   <AntDesign
                     name="right"
-                    size={SIZES.medium}
+                    size={SIZES.large}
                     color={COLORS.lightWhite}
                   />
                 </TouchableOpacity>
               }
-              borderPosition="bottom"
+            />
+          )}
+          {!isReadOnly && (
+            <ListCard
+              label="লগ আউট"
+              icon={
+                <SimpleLineIcons
+                  name="logout"
+                  size={SIZES.medium}
+                  color={COLORS.lightWhite}
+                />
+              }
+              rightIcon={
+                <TouchableOpacity
+                  onPress={() => {
+                    signOut();
+                  }}
+                  style={styles.utilsIcon}
+                >
+                  <AntDesign
+                    name="logout"
+                    size={SIZES.large}
+                    color={COLORS.lightWhite}
+                  />
+                </TouchableOpacity>
+              }
             />
           )}
         </View>

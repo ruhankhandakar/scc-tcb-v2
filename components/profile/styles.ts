@@ -152,6 +152,16 @@ const styles = StyleSheet.create({
   utilitiesContainer: {
     marginTop: SIZES.xxLarge,
   },
+  multiDocsContainer: {
+    flexDirection: 'row',
+    gap: 20,
+  },
+  utilsIcon: {
+    borderWidth: 1,
+    borderColor: COLORS.tertiaryContainer,
+    padding: 2,
+    borderRadius: 4,
+  },
 });
 
 export default styles;

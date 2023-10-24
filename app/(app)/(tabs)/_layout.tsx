@@ -152,6 +152,7 @@ export default function TabLayout() {
 
       <Tabs.Screen
         name="profile"
+        getId={({}) => new Date().getTime().toString()}
         options={{
           title: '',
           tabBarIcon: ({ focused }: { focused: boolean }) => {

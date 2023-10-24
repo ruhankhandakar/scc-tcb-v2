@@ -11,7 +11,7 @@ import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system';
 
 import { supabase } from 'lib/supabase';
-import { ProfileData } from 'types/profile';
+import { ProfileData, SelectedProfileData } from 'types/profile';
 import { Customer, DealerConfig, IWards, Products, TWards } from 'types';
 import { ProfileDBPayload, StoreFileInBucketParamType } from 'utils/types';
 import { BUCKET_NAME, PUBLIC_BUCKET_NAME } from 'constants/supabase';
@@ -40,6 +40,7 @@ type StateType = {
   user: User | null;
   profile: ProfileData | null;
   products: Products[] | null;
+  selectedProfile: SelectedProfileData | null;
 };
 type ContextType = {
   state: StateType;
@@ -138,6 +139,7 @@ const initialState: StateType = {
   user: null,
   profile: null,
   products: null,
+  selectedProfile: null,
 };
 
 export const BackEndContext = createContext<ContextType | null>(null);
@@ -154,6 +156,20 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       getProducts();
     }
   }, [state.profile?.user_role]);
+
+  useEffect(() => {
+    if (state.user && state.profile) {
+      setState((prevState) => {
+        const selectedProfileData = {
+          ...prevState.profile,
+          email: state.user?.email,
+          phone_number: state.user?.phone!,
+        } as SelectedProfileData;
+
+        return { ...prevState, selectedProfile: selectedProfileData };
+      });
+    }
+  }, [state.user, state.profile]);
 
   /* ----------Actions ------------- */
 

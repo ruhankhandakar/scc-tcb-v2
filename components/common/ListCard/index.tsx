@@ -16,7 +16,7 @@ const ListCard: React.FC<Props> = ({
   icon,
   label,
   value,
-  borderPosition,
+  borderPosition = 'both',
   rightIcon,
   numberOfLines = 1,
 }) => {

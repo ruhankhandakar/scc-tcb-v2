@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 0.2,
+    marginBottom: 0.5,
     ...(borderPosition === 'top'
       ? {
           borderTopLeftRadius: SIZES.xSmall,
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
       : {}),
     ...(borderPosition === 'both'
       ? {
-          borderRadius: SIZES.xSmall,
+          borderRadius: 3,
         }
       : {}),
   }),

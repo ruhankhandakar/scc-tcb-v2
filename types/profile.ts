@@ -1,11 +1,9 @@
-import { IWards } from 'types';
+import { Customer, IWards } from 'types';
 
 export type ROLE = 'ADMIN' | 'CUSTOMER' | 'DEALER';
 
-export interface ProfileData {
-  created_at: string;
+export interface ProfileData extends Partial<Customer> {
   deo_documents?: string[];
-  document_proof_link?: string[];
   first_name: string;
   id: number;
   is_active: boolean;
@@ -15,5 +13,15 @@ export interface ProfileData {
   user_id: string;
   user_role: ROLE;
   ward: number;
-  wards: Omit<IWards, 'profiles'>;
+  dateOfBirth?: string;
+  foundation_name?: string;
+}
+
+export interface SelectedProfileData
+  extends Partial<Customer>,
+    Partial<ProfileData> {
+  email?: string;
+  phone_number: string;
+  document_proof_number?: string;
+  address?: string;
 }
