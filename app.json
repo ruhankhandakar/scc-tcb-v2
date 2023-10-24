@@ -4,7 +4,7 @@
     "slug": "tcb-sylhet-city-corporation",
     "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/app-assets/playstore.png",
+    "icon": "./assets/app-assets/playstore_v2.png",
     "scheme": "scc",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -23,7 +23,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/app-assets/playstore.png",
+        "foregroundImage": "./assets/app-assets/playstore_v2.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
