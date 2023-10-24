@@ -14,7 +14,7 @@ import { supabase } from 'lib/supabase';
 import { ProfileData } from 'types/profile';
 import { Customer, IWards, Products, TWards } from 'types';
 import { ProfileDBPayload, StoreFileInBucketParamType } from 'utils/types';
-import { BUCKET_NAME } from 'constants/supabase';
+import { BUCKET_NAME, PUBLIC_BUCKET_NAME } from 'constants/supabase';
 
 type CustomerParams = {
   startOffset?: number;
@@ -48,7 +48,7 @@ type ContextType = {
     ) => Promise<ProfileData[] | undefined>;
     signUpWithEmail: ({ email, password }: AuthParams) => void;
     downloadFile: (filePath: string) => Promise<string | undefined>;
-    getPublicUrl: (filePath: string) => Promise<void>;
+    getPublicUrl: (filePath: string, bucketName?: string) => Promise<string>;
     signUpWithPhoneAndPassword: ({
       phone,
       password,
@@ -332,13 +332,14 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
   const uploadFile = async (
     filePath: string,
     base64: string,
-    contentType: string
+    contentType: string,
+    bucketName?: string
   ) => {
     let pathName = '';
     let errorMsg = '';
     try {
       const { data, error } = await supabase.storage
-        .from(BUCKET_NAME)
+        .from(bucketName || BUCKET_NAME)
         .upload(filePath, decode(base64), { contentType, upsert: true });
 
       if (error) {
@@ -348,7 +349,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     } catch (err: any) {
       errorMsg += err.message;
     }
-
+    console.log('uploadFile error ->', errorMsg);
     return {
       pathName,
       errorMsg,
@@ -369,12 +370,21 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const getPublicUrl = async (filePath: string) => {
-    const { data } = await supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(filePath);
+  const getPublicUrl = async (
+    filePath: string,
+    bucketName: string = PUBLIC_BUCKET_NAME
+  ) => {
+    try {
+      const { data } = await supabase.storage
+        .from(bucketName || BUCKET_NAME)
+        .getPublicUrl(filePath);
 
-    console.log(data);
+      console.log(data);
+      return data.publicUrl;
+    } catch (error: any) {
+      setErrorMessage('getPublicUrl' + error.message);
+      return '';
+    }
   };
 
   const storeFileInBucketAndReturnPublicUrl = async ({
@@ -383,6 +393,8 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     contentType,
     folderName,
     keyName,
+    bucketName,
+    isPublic,
   }: StoreFileInBucketParamType) => {
     const base64 = await FileSystem.readAsStringAsync(fileURI, {
       encoding: 'base64',
@@ -391,11 +403,19 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     const { pathName, errorMsg } = await uploadFile(
       `${folderName}/${filePath}`,
       base64,
-      contentType
+      contentType,
+      bucketName
     );
+
+    let publicUrl = '';
+
+    if (isPublic && pathName) {
+      publicUrl = await getPublicUrl(pathName, bucketName);
+    }
+
     return {
       keyName,
-      pathName,
+      pathName: publicUrl || pathName,
       errorMsg,
     };
   };

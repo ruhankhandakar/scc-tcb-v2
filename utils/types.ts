@@ -5,6 +5,8 @@ export interface StoreFileInBucketParamType {
   contentType: string;
   folderName: string;
   keyName: string;
+  bucketName?: string;
+  isPublic?: boolean;
 }
 
 export interface ProfileDBPayload {

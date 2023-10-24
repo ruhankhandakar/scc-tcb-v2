@@ -4,16 +4,17 @@ import AnimatedLottieView from 'lottie-react-native';
 import { Button } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { DocumentPickerAsset } from 'expo-document-picker';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import ScrollViewWithWaterMark from 'components/common/ScrollViewWithWaterMark';
 import { processingLottie, waitingLottie } from 'constants/lottie_files';
 import { COLORS, FONT, SIZES } from 'constants/theme';
 import { useAppContext } from 'context/AppContext';
 import { useAuth } from 'context/AuthContext';
-import Spinner from 'react-native-loading-spinner-overlay';
 import { useBackEndContext } from 'context/BackEndContext';
 import { getExtensionFromUrl } from 'utils';
 import { ProfileDBPayload } from 'utils/types';
+import { PUBLIC_BUCKET_NAME } from 'constants/supabase';
 
 type registrationDataType = {
   number: string;
@@ -38,6 +39,8 @@ interface FulfilledResult {
 type ExtendedDocumentPickerAsset = DocumentPickerAsset & {
   keyName: string;
   fileName: string;
+  bucketName?: string;
+  isPublic?: boolean;
 };
 
 const OnBoarding = () => {
@@ -49,7 +52,7 @@ const OnBoarding = () => {
   const { handleRefresh } = useAuth();
   const {
     state: { user },
-    actions: { storeFileInBucketAndReturnPublicUrl, createProfile },
+    actions: { storeFileInBucketAndReturnPublicUrl, createProfile, signOut },
   } = useBackEndContext();
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -69,6 +72,8 @@ const OnBoarding = () => {
             file.uri
           )}`,
           keyName: file.keyName,
+          bucketName: file.bucketName,
+          isPublic: file.isPublic,
         });
       })
     );
@@ -122,6 +127,8 @@ const OnBoarding = () => {
         ...data.profilePicture,
         keyName: 'profilePicture',
         fileName: 'profilePicture',
+        bucketName: PUBLIC_BUCKET_NAME,
+        isPublic: true,
       };
       files = [...files, ...[upatedPic]];
     }
@@ -209,17 +216,31 @@ const OnBoarding = () => {
             আপনার verification এখনো pending আছে {'\n'} সিলেট সিটি কর্পোরেশনে
             যোগাযোগ করুন
           </Text>
-          <Button
-            mode="contained"
-            buttonColor={COLORS.primary}
-            style={styles.btn}
-            onPress={() => {
-              handleRefresh();
-              router.replace('/');
+          <View
+            style={{
+              flexDirection: 'row-reverse',
+              alignItems: 'flex-end',
             }}
           >
-            Refresh
-          </Button>
+            <Button
+              mode="contained"
+              buttonColor={COLORS.primary}
+              style={styles.btn}
+              onPress={() => {
+                handleRefresh();
+                router.replace('/');
+              }}
+            >
+              Refresh
+            </Button>
+            <Button
+              onPress={() => {
+                signOut();
+              }}
+            >
+              Logout
+            </Button>
+          </View>
         </View>
       )}
     </ScrollViewWithWaterMark>
