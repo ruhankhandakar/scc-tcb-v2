@@ -14,6 +14,7 @@ import { useBackEndContext } from 'context/BackEndContext';
 import { Customer } from 'types';
 import { noDataIllustration } from 'constants/icons';
 import { CustomerType } from 'utils/types';
+import CardSkeleton from 'components/common/CardSkeleton';
 
 const PAGE_SIZE = 10;
 
@@ -164,11 +165,7 @@ const CustomerList = ({ customerType }: Props) => {
       )}
       {loading && !users.length && (
         <View>
-          <ActivityIndicator
-            animating={true}
-            size="large"
-            color={COLORS.primary}
-          />
+          <CardSkeleton />
         </View>
       )}
       {!loading && !users.length && (
