@@ -15,6 +15,11 @@ export interface IWards {
 
 export type TWards = Omit<IWards, 'profiles'>;
 
+interface Product {
+  name: string;
+  quantity: string;
+}
+
 export interface Customer {
   address: string;
   created_at: string;
@@ -32,6 +37,22 @@ export interface Customer {
   union: string;
   ward: number;
   wards: IWards;
+  other_data?: {
+    product_lists: Product[];
+  };
+  scanned_date?: string;
+}
+
+export interface ScannedData {
+  id: number;
+  created_at: string;
+  user_id: string;
+  other_data: {
+    product_lists: Product[];
+  };
+  dealer_id: number;
+  customer_id: number;
+  customers: Customer;
 }
 
 export interface Products {

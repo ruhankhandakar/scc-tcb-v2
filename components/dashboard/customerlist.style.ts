@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     marginTop: SIZES.xxLarge,
   },
   noDataImg: {
-    height: '80%',
+    height: '70%',
     width: '50%',
   },
   noDataText: {
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   totalNumberText: {
     color: COLORS.darkBlue,
     fontFamily: FONT.bold,
-    fontSize: SIZES.medium,
+    fontSize: SIZES.small,
   },
 });
 

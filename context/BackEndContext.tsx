@@ -9,11 +9,21 @@ import { Snackbar } from 'react-native-paper';
 import { Session, User, UserAttributes } from '@supabase/supabase-js';
 import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system';
+import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 
 import { supabase } from 'lib/supabase';
 import { ProfileData, SelectedProfileData } from 'types/profile';
-import { Customer, DealerConfig, IWards, Products, TWards } from 'types';
 import {
+  Customer,
+  DealerConfig,
+  IWards,
+  Products,
+  ScannedData,
+  TWards,
+} from 'types';
+import {
+  CustomerType,
+  GetTotalCustomerParams,
   OtherConfigsData,
   OtherConfigsState,
   ProfileDBPayload,
@@ -34,6 +44,9 @@ type CustomerParams = {
   endOffset?: number;
   searchTerm?: string;
   column?: string;
+  customerType: CustomerType;
+  dealerId?: number;
+  wardNum?: number;
 };
 type AuthParams = {
   email: string;
@@ -123,6 +136,10 @@ type ContextType = {
     >;
     signOut: () => void;
     getTotalCustomers: () => Promise<number>;
+    getTotalCustomersV2: ({
+      customerType,
+      wardNum,
+    }: GetTotalCustomerParams) => Promise<number>;
     getCustomers: ({
       startOffset,
       endOffset,
@@ -358,22 +375,90 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     return count || 0;
   };
 
+  const getTotalCustomersV2 = async ({
+    customerType,
+    wardNum,
+    dealerId,
+  }: GetTotalCustomerParams) => {
+    const userRole = state.profile?.user_role || 'DEALER';
+    const { startDate, endDate } = getCurrentMonthStartAndEndDate();
+
+    /* 
+      1. If user is dealer then filter by wardNum, otherwise not
+      2. If customerType is privileged then first get data from scanned_data
+    */
+
+    let query: PostgrestFilterBuilder<
+      any,
+      any,
+      {
+        id: any;
+      }[],
+      unknown
+    >;
+
+    let result = 0;
+    try {
+      if (customerType === 'privileged') {
+        query = supabase
+          .from('scanned_data')
+          .select('*', { count: 'exact', head: true })
+          .lt('created_at', endDate)
+          .gt('created_at', startDate);
+
+        if (userRole !== 'ADMIN') {
+          query = query.eq('dealer_id', dealerId);
+        }
+      } else {
+        query = supabase
+          .from('customers')
+          .select('*', { count: 'exact', head: true });
+        if (userRole !== 'ADMIN') {
+          query = query.eq('ward', wardNum);
+        }
+      }
+
+      const { count } = await query;
+      result = count || 0;
+    } catch (error) {}
+
+    return result;
+  };
+
   const getCustomers = async ({
     startOffset,
     endOffset,
     column,
     searchTerm,
+    customerType,
+    wardNum,
+    dealerId,
   }: CustomerParams) => {
     const userRole = state.profile?.user_role || 'DEALER';
+    const { startDate, endDate } = getCurrentMonthStartAndEndDate();
 
-    let customers: Customer[] = [];
+    let query: PostgrestFilterBuilder<any, any, ScannedData[], unknown>;
 
-    let query = supabase.from('customers').select('*, wards (*)').order('id', {
-      ascending: true,
-    });
+    if (customerType === 'privileged') {
+      query = supabase
+        .from('scanned_data')
+        .select('*, customers(*, wards(*))')
+        .lt('created_at', endDate)
+        .gt('created_at', startDate)
+        .order('id', {
+          ascending: true,
+        });
+      if (userRole !== 'ADMIN') {
+        query = query.eq('dealer_id', dealerId);
+      }
+    } else {
+      query = supabase.from('customers').select('*, wards (*)').order('id', {
+        ascending: true,
+      });
 
-    if (userRole !== 'ADMIN') {
-      query = query.eq('ward', state.profile?.ward);
+      if (userRole !== 'ADMIN') {
+        query = query.eq('ward', wardNum);
+      }
     }
 
     if (endOffset) {
@@ -384,14 +469,31 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       query = query.ilike('customer_search', `%${searchTerm}%`);
     }
 
-    const { data, error } = await query;
+    const { error, data } = await query;
+
+    let customersData: Customer[] = [];
 
     if (error) {
-      setErrorMessage('getCustomers' + error.message);
+      setErrorMessage('Something went wrong ' + error.message);
     } else {
-      customers = data as Customer[];
+      customersData = data.map((item) => {
+        if (item.customers) {
+          const {
+            customers: customerDataCopy,
+            id,
+            created_at: scanned_date,
+            ...otherItems
+          } = item;
+          return {
+            ...otherItems,
+            scanned_date,
+            ...customerDataCopy,
+          };
+        }
+        return item;
+      }) as Customer[];
     }
-    return customers;
+    return customersData;
   };
 
   const getProducts = async () => {
@@ -774,6 +876,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     getScannedDataTableCountOfACustomer,
     storeScannedData,
     updateDealerConfig,
+    getTotalCustomersV2,
   };
 
   return (

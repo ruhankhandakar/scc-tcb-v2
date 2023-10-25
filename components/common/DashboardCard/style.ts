@@ -13,6 +13,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.medium,
     shadowColor: COLORS.white,
     marginBottom: SIZES.medium,
+    marginTop: SIZES.medium,
   },
   leftContainer: {
     flexDirection: 'row',
@@ -32,6 +33,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     flex: 1,
+    marginBottom: 2,
   },
   labelText: {
     color: COLORS.darkBlue,

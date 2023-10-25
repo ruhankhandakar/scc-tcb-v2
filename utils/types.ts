@@ -57,3 +57,11 @@ export interface ScannedDataParam {
   dealer_id: number;
   other_data: any;
 }
+
+export type CustomerType = 'registered' | 'privileged';
+
+export type GetTotalCustomerParams = {
+  customerType: CustomerType;
+  wardNum?: number;
+  dealerId?: number;
+};

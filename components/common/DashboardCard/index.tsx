@@ -1,10 +1,12 @@
 import React from 'react';
 import { TouchableOpacity, View, Text } from 'react-native';
 import { Image } from 'expo-image';
+import 'dayjs/locale/bn-bd';
 
 import styles from './style';
 import { placeholderUser } from 'constants/icons';
 import { Customer } from 'types';
+import dayjs from 'dayjs';
 
 interface Props {
   item: Customer;
@@ -60,6 +62,29 @@ const index: React.FC<Props> = ({ item, handleNavigate }) => {
               {item.wards.name} - {item.address}
             </Text>
           </View>
+          {!!item.scanned_date && (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.textView}>
+                <Text style={styles.labelText}>
+                  সর্বশেষ পণ্য নেওয়ার তারিখ:{' '}
+                </Text>
+                <Text style={styles.valueText} numberOfLines={2}>
+                  {dayjs(item.scanned_date)
+                    .locale('bn-bd')
+                    .format('DD  MMMM YY, A h:m')}
+                </Text>
+              </View>
+              <View style={styles.textView}>
+                <Text style={styles.labelText}>নেওয়া পণ্য: </Text>
+                <Text style={styles.valueText} numberOfLines={3}>
+                  {item.other_data?.product_lists
+                    .map((list) => `${list.name} (${list.quantity})`)
+                    .join(', ')}
+                </Text>
+              </View>
+            </>
+          )}
         </View>
       </View>
     </TouchableOpacity>
