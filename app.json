@@ -2,7 +2,7 @@
   "expo": {
     "name": "TCB a SCC app",
     "slug": "tcb-sylhet-city-corporation",
-    "version": "1.0.1",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/app-assets/playstore-icon.png",
     "scheme": "scc",
@@ -19,7 +19,7 @@
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",
         "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone"
       },
-      "bundleIdentifier": "tcb.scc"
+      "bundleIdentifier": "nyr.tcb.scc"
     },
     "android": {
       "adaptiveIcon": {
@@ -30,7 +30,7 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "tcb.scc"
+      "package": "nyr.tcb.scc"
     },
     "plugins": [
       "expo-router",
