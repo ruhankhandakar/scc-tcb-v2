@@ -127,6 +127,7 @@ const CustomerList = ({ customerType }: Props) => {
   }, [customerType]);
 
   useEffect(() => {
+    if (customerType === 'registered') return;
     setIsFetchingData(true);
     getTotalCustomersV2({
       customerType,
@@ -146,16 +147,16 @@ const CustomerList = ({ customerType }: Props) => {
       {isFetchingData && (
         <ActivityIndicator size="small" color={COLORS.primary} />
       )}
-      {totalNumberOfCustomers > 0 && !isFetchingData && (
-        <View>
-          <Text style={styles.totalNumberText}>
-            {customerType === 'registered'
-              ? 'মোট নিবন্ধিত উপকারভোগী গ্রাহকের সংখ্যা:'
-              : 'এই মাসে সুবিধাপ্রাপ্ত উপকারভোগী গ্রাহকের সংখ্যা:'}{' '}
-            {totalNumberOfCustomers}
-          </Text>
-        </View>
-      )}
+      {totalNumberOfCustomers > 0 &&
+        !isFetchingData &&
+        customerType === 'privileged' && (
+          <View>
+            <Text style={styles.totalNumberText}>
+              এই মাসে সুবিধাপ্রাপ্ত উপকারভোগী গ্রাহকের সংখ্যা:{' '}
+              {totalNumberOfCustomers}
+            </Text>
+          </View>
+        )}
       {customerType === 'registered' && (
         <SearchBox
           searchTerm={searchTerm}

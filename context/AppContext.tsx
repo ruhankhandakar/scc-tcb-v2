@@ -20,6 +20,7 @@ type ContextType = typeof initialState & {
     FileUploadConfig: FileUploadConfig | null;
     registeredFormData: RegisterFormData;
     fileUploadConfig: FileUploadConfig | null;
+    [key: string]: any;
   };
   action: {
     handleErrorMessage: (message: string) => void;
