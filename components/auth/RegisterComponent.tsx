@@ -57,33 +57,24 @@ const RegisterComponent = ({
   } = useBackEndContext();
   const {
     state,
-    action: { handleErrorMessage, handleUpdateData, setFileUploadConfig },
+    action: {
+      handleErrorMessage,
+      handleUpdateData,
+      setFileUploadConfig,
+      onRegisteredFormDataChange,
+    },
   } = useAppContext();
   const router = useRouter();
 
-  const [number, setNumber] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [selectedWard, setSelectedWard] = useState<null | number>(null);
   const [wardsList, setWardsList] = useState<TWards[]>([]);
   const [showPassword, setShowPassword] = useState(false);
-  const [nidDocuments, setNidDocuments] = useState<
-    DocumentPicker.DocumentPickerAsset[]
-  >([]);
-  const [deoDocuments, setDeoDocuments] = useState<
-    DocumentPicker.DocumentPickerAsset[]
-  >([]);
   const [submitting, setSubmitting] = useState(false);
   const [isOtpVerification, setIsOtpVerification] = useState(false);
-  const [profilePicture, setProfilePicture] =
-    useState<DocumentPicker.DocumentPickerAsset | null>();
 
-  const { fileUploadConfig } = state;
+  const { fileUploadConfig, registeredFormData } = state;
 
   const handleChange = (item: number | string) => {
-    setSelectedWard(+item);
+    onRegisteredFormDataChange('selectedWard', +item);
   };
 
   const toggleShowPassword = () => {
@@ -92,7 +83,10 @@ const RegisterComponent = ({
 
   const handleSubmit = async () => {
     if (!isEditing) {
-      if (password !== confirmPassword || password.length < 6) {
+      if (
+        registeredFormData.password !== registeredFormData.confirmPassword ||
+        registeredFormData.password.length < 6
+      ) {
         handleErrorMessage(
           'পাসওয়ার্ড same হতে হবে এবং মিনিমাম ৬ সংখ্যার হতে হবে'
         );
@@ -100,9 +94,14 @@ const RegisterComponent = ({
       }
     }
     if (isEditing) {
-      console.log('password', password, confirmPassword);
-      if (password.length > 0 || confirmPassword.length > 0) {
-        if (password !== confirmPassword || password.length < 6) {
+      if (
+        registeredFormData.password.length > 0 ||
+        registeredFormData.confirmPassword.length > 0
+      ) {
+        if (
+          registeredFormData.password !== registeredFormData.confirmPassword ||
+          registeredFormData.password.length < 6
+        ) {
           handleErrorMessage(
             'পাসওয়ার্ড same হতে হবে এবং মিনিমাম ৬ সংখ্যার হতে হবে'
           );
@@ -110,27 +109,30 @@ const RegisterComponent = ({
         }
       }
     }
-    if (!isValidBangladeshiMobileNumber(number) && !isEditing) {
+    if (
+      !isValidBangladeshiMobileNumber(registeredFormData.number) &&
+      !isEditing
+    ) {
       handleErrorMessage('দয়া করে, বৈধ নম্বর প্রদান করুন');
       return;
     }
 
     if (isEditing && handleUpdate) {
       handleUpdate({
-        firstName,
-        lastName,
-        password,
-        profilePicture,
+        firstName: registeredFormData.firstName,
+        lastName: registeredFormData.lastName,
+        password: registeredFormData.password,
+        profilePicture: registeredFormData.profilePicture,
       });
       return;
     }
     setSubmitting(true);
 
-    const phoneNumber = `+880${number}`;
+    const phoneNumber = `+880${registeredFormData.number}`;
 
     const response = await signUpWithPhoneAndPassword({
       phone: phoneNumber,
-      password,
+      password: registeredFormData.password,
     });
 
     if (response.success) {
@@ -141,7 +143,7 @@ const RegisterComponent = ({
   };
 
   const handleVerify = async (otp: string) => {
-    const phoneNumber = `+880${number}`;
+    const phoneNumber = `+880${registeredFormData.number}`;
 
     setSubmitting(true);
     const verifyResponse = await verifyOtp({
@@ -152,14 +154,14 @@ const RegisterComponent = ({
       //? Store all data into context
       handleUpdateData({
         dealerRegistrationData: {
-          number,
-          firstName,
-          lastName,
-          password,
-          selectedWard,
-          nidDocuments,
-          profilePicture,
-          deoDocuments,
+          number: registeredFormData.number,
+          firstName: registeredFormData.firstName,
+          lastName: registeredFormData.lastName,
+          password: registeredFormData.password,
+          selectedWard: registeredFormData.selectedWard,
+          nidDocuments: registeredFormData.nidDocuments,
+          profilePicture: registeredFormData.profilePicture,
+          deoDocuments: registeredFormData.deoDocuments,
         },
       });
       router.replace('/');
@@ -172,11 +174,11 @@ const RegisterComponent = ({
     files: DocumentPicker.DocumentPickerAsset[]
   ) => {
     if (documentKeyName === 'profilePicture') {
-      setProfilePicture(files[0]);
+      onRegisteredFormDataChange('profilePicture', files[0]);
     } else if (documentKeyName === 'deoDocument') {
-      setDeoDocuments(files);
+      onRegisteredFormDataChange('deoDocuments', files);
     } else if (documentKeyName === 'nidDocuments') {
-      setNidDocuments(files);
+      onRegisteredFormDataChange('nidDocuments', files);
     }
   };
 
@@ -189,23 +191,26 @@ const RegisterComponent = ({
   }, []);
   useEffect(() => {
     if (loggedInProfileData) {
-      setFirstName(loggedInProfileData.first_name!);
-      setLastName(loggedInProfileData.last_name!);
-      setProfilePicture({
+      onRegisteredFormDataChange('firstName', loggedInProfileData.first_name!);
+      onRegisteredFormDataChange('lastName', loggedInProfileData.last_name!);
+      onRegisteredFormDataChange('profilePicture', {
         uri: loggedInProfileData.profile_picture!,
         name: 'profile_picture.png',
       });
+      onRegisteredFormDataChange('password', '');
+      onRegisteredFormDataChange('confirmPassword', '');
     }
   }, [loggedInProfileData]);
 
   const isDisabled =
-    (!number && !isEditing) ||
-    !firstName ||
-    !lastName ||
-    (!password && !isEditing) ||
-    (!selectedWard && !isEditing) ||
-    (!nidDocuments.length && !isEditing) ||
-    (!deoDocuments.length && !isEditing);
+    (!registeredFormData.number && !isEditing) ||
+    !registeredFormData.firstName ||
+    !registeredFormData.lastName ||
+    (!registeredFormData.password && !isEditing) ||
+    (!registeredFormData.confirmPassword && !isEditing) ||
+    (!registeredFormData.nidDocuments.length && !isEditing) ||
+    (!registeredFormData.deoDocuments.length && !isEditing) ||
+    (!registeredFormData.selectedWard && !isEditing);
 
   return (
     <>
@@ -228,7 +233,10 @@ const RegisterComponent = ({
       />
       <View style={[styles.container, containerStyle]}>
         {isOtpVerification ? (
-          <OtpInput handleVerify={handleVerify} number={`+880${number}`} />
+          <OtpInput
+            handleVerify={handleVerify}
+            number={`+880${registeredFormData.number}`}
+          />
         ) : (
           <>
             {/* Registration Form */}
@@ -249,11 +257,12 @@ const RegisterComponent = ({
                       });
                     }}
                   >
-                    {profilePicture ? (
+                    {registeredFormData.profilePicture ? (
                       <Avatar.Image
                         size={80}
                         source={{
-                          uri: profilePicture.uri,
+                          uri: registeredFormData.profilePicture.uri,
+                          cache: 'default',
                         }}
                       />
                     ) : (
@@ -269,8 +278,10 @@ const RegisterComponent = ({
                 <View style={styles.inputContainer}>
                   <TextInput
                     style={styles.input}
-                    onChangeText={setFirstName}
-                    value={firstName}
+                    onChangeText={(text: string) =>
+                      onRegisteredFormDataChange('firstName', text)
+                    }
+                    value={registeredFormData.firstName}
                     placeholder="ফার্স্ট নাম"
                     placeholderTextColor={COLORS.gray}
                   />
@@ -278,8 +289,10 @@ const RegisterComponent = ({
                 <View style={styles.inputContainer}>
                   <TextInput
                     style={styles.input}
-                    onChangeText={setLastName}
-                    value={lastName}
+                    onChangeText={(text: string) =>
+                      onRegisteredFormDataChange('lastName', text)
+                    }
+                    value={registeredFormData.lastName}
                     placeholder="পদবি (বংশনাম)"
                     placeholderTextColor={COLORS.gray}
                   />
@@ -289,8 +302,10 @@ const RegisterComponent = ({
                     <Text style={styles.mobilePrefix}>+880</Text>
                     <TextInput
                       style={styles.input}
-                      onChangeText={setNumber}
-                      value={number}
+                      onChangeText={(text: string) =>
+                        onRegisteredFormDataChange('number', text)
+                      }
+                      value={registeredFormData.number}
                       placeholder="মোবাইল নাম্বার"
                       keyboardType="phone-pad"
                       placeholderTextColor={COLORS.gray}
@@ -300,8 +315,10 @@ const RegisterComponent = ({
                 <View style={styles.inputContainer}>
                   <TextInput
                     style={styles.input}
-                    onChangeText={setPassword}
-                    value={password}
+                    onChangeText={(text: string) =>
+                      onRegisteredFormDataChange('password', text)
+                    }
+                    value={registeredFormData.password}
                     placeholder="পাসওয়ার্ড"
                     placeholderTextColor={COLORS.gray}
                     secureTextEntry={!showPassword}
@@ -317,8 +334,10 @@ const RegisterComponent = ({
                 <View style={styles.inputContainer}>
                   <TextInput
                     style={styles.input}
-                    onChangeText={setConfirmPassword}
-                    value={confirmPassword}
+                    onChangeText={(text: string) =>
+                      onRegisteredFormDataChange('confirmPassword', text)
+                    }
+                    value={registeredFormData.confirmPassword}
                     placeholder="কনফার্ম পাসওয়ার্ড"
                     placeholderTextColor={COLORS.gray}
                     secureTextEntry={!showPassword}
@@ -347,6 +366,8 @@ const RegisterComponent = ({
                             multiple: true,
                             documentKeyName: 'nidDocuments',
                             maxFileSize: MB_2,
+                            keyName: 'nidDocuments',
+                            pathName: 'camera',
                           });
                         }}
                         style={{
@@ -368,9 +389,9 @@ const RegisterComponent = ({
                         />
                       </Button>
                     </View>
-                    {!!nidDocuments.length && (
+                    {!!registeredFormData.nidDocuments.length && (
                       <View style={styles.uploadedFileContainer}>
-                        {nidDocuments.map((document) => (
+                        {registeredFormData.nidDocuments.map((document) => (
                           <View style={styles.fileView} key={document.uri}>
                             <Text style={styles.uploadFileName}>
                               {document.name}
@@ -402,6 +423,8 @@ const RegisterComponent = ({
                             maxFileSize: MB_2,
                             maxFileSizeAllowed: 1,
                             documentKeyName: 'deoDocument',
+                            keyName: 'deoDocument',
+                            pathName: 'camera',
                           });
                         }}
                         style={{
@@ -423,9 +446,9 @@ const RegisterComponent = ({
                         />
                       </Button>
                     </View>
-                    {!!deoDocuments.length && (
+                    {!!registeredFormData.deoDocuments.length && (
                       <View style={styles.uploadedFileContainer}>
-                        {nidDocuments.map((document) => (
+                        {registeredFormData.deoDocuments.map((document) => (
                           <View style={styles.fileView} key={document.uri}>
                             <Text style={styles.uploadFileName}>
                               {document.name}
@@ -450,7 +473,9 @@ const RegisterComponent = ({
                     handleChange={handleChange}
                     placeholder="ওয়ার্ড সিলেক্ট করুন"
                     selectedValue={
-                      selectedWard ? selectedWard.toString() : null
+                      registeredFormData.selectedWard
+                        ? registeredFormData.selectedWard.toString()
+                        : null
                     }
                   />
                 )}

@@ -669,7 +669,13 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       password,
     });
     if (error) {
-      setErrorMessage('signUpWithPhoneAndPassword' + error.message);
+      if (error.status === 400) {
+        setErrorMessage(
+          'এই নাম্বার রেজিস্টার করা আছে । অনুগ্রহ করে লগইন করুন।'
+        );
+      } else {
+        setErrorMessage('signUpWithPhoneAndPassword' + error.message);
+      }
       return {
         success: false,
       };

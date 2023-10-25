@@ -2,6 +2,7 @@ import React, { ReactNode, createContext, useContext, useState } from 'react';
 import { Snackbar } from 'react-native-paper';
 
 import { FileUploadDocumentKeyName } from 'types';
+import { RegisterFormData } from 'utils/types';
 
 const initialState = {
   state: {
@@ -17,11 +18,16 @@ type ContextType = typeof initialState & {
   state: {
     isShowRegistrationForm: boolean;
     FileUploadConfig: FileUploadConfig | null;
-    [key: string]: any;
+    registeredFormData: RegisterFormData;
+    fileUploadConfig: FileUploadConfig | null;
   };
   action: {
     handleErrorMessage: (message: string) => void;
     setFileUploadConfig: (filConfig: FileUploadConfig | null) => void;
+    onRegisteredFormDataChange: (
+      key: keyof RegisterFormData,
+      value: RegisterFormData[typeof key]
+    ) => void;
   };
 };
 
@@ -42,11 +48,33 @@ const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [fileUploadConfig, _setFileUploadConfig] =
     useState<FileUploadConfig | null>(null);
+  const [registeredFormData, setRegisteredFormData] =
+    useState<RegisterFormData>({
+      number: '',
+      firstName: '',
+      lastName: '',
+      password: '',
+      confirmPassword: '',
+      selectedWard: null,
+      nidDocuments: [],
+      deoDocuments: [],
+      profilePicture: null,
+    });
 
   const handleUpdateData = (params: Pick<ContextType, 'state'>): undefined => {
     setData((prevData) => ({
       ...prevData,
       ...params,
+    }));
+  };
+
+  const onRegisteredFormDataChange = (
+    key: keyof RegisterFormData,
+    value: RegisterFormData[typeof key]
+  ) => {
+    setRegisteredFormData((prevState) => ({
+      ...prevState,
+      [key]: value,
     }));
   };
 
@@ -61,8 +89,13 @@ const AppContextProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AppContext.Provider
       value={{
-        state: { ...data, fileUploadConfig },
-        action: { handleUpdateData, handleErrorMessage, setFileUploadConfig },
+        state: { ...data, fileUploadConfig, registeredFormData },
+        action: {
+          handleUpdateData,
+          handleErrorMessage,
+          setFileUploadConfig,
+          onRegisteredFormDataChange,
+        },
       }}
     >
       {children}

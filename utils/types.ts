@@ -1,6 +1,8 @@
 import { DocumentPickerAsset } from 'expo-document-picker';
+import * as DocumentPicker from 'expo-document-picker';
 
 export type ROLE = 'ADMIN' | 'CUSTOMER' | 'DEALER';
+
 export interface StoreFileInBucketParamType {
   fileURI: string;
   filePath: string;
@@ -65,3 +67,15 @@ export type GetTotalCustomerParams = {
   wardNum?: number;
   dealerId?: number;
 };
+
+export interface RegisterFormData {
+  number: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  confirmPassword: string;
+  selectedWard: number | null;
+  nidDocuments: DocumentPicker.DocumentPickerAsset[];
+  deoDocuments: DocumentPicker.DocumentPickerAsset[];
+  profilePicture: DocumentPicker.DocumentPickerAsset | null;
+}
