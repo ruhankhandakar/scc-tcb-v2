@@ -37,7 +37,9 @@ const SingleDropdown = ({
         maxHeight={300}
         labelField="label"
         valueField="value"
-        placeholder={!isFocus ? `ওয়ার্ড ${value}` || placeholder : '...'}
+        placeholder={
+          !isFocus ? (value ? `ওয়ার্ড ${value}` : placeholder) : '...'
+        }
         searchPlaceholder="Search..."
         value={value}
         onFocus={() => setIsFocus(true)}

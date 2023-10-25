@@ -23,7 +23,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/app-assets/playstore-icon.png",
+        "foregroundImage": "./assets/app-assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
