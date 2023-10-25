@@ -96,6 +96,7 @@ const CustomerList = ({ customerType }: Props) => {
       column,
       searchTerm,
       customerType,
+      wardNum: profile?.ward,
     });
     setUsers(response);
     setLoading(false);
@@ -122,6 +123,7 @@ const CustomerList = ({ customerType }: Props) => {
   useEffect(() => {
     setUsers([]);
     setPage(1);
+    setSearchTerm('');
   }, [customerType]);
 
   useEffect(() => {

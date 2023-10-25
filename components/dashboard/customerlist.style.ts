@@ -16,8 +16,8 @@ const styles = StyleSheet.create({
     marginTop: SIZES.xxLarge,
   },
   noDataImg: {
-    height: '70%',
-    width: '50%',
+    height: 100,
+    width: 100,
   },
   noDataText: {
     color: COLORS.error,
