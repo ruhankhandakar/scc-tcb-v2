@@ -73,7 +73,6 @@ const CustomerList = ({ customerType }: Props) => {
         setUsers((prevState) => {
           let result = [...prevState, ...response];
           result = _.uniqBy(result, 'id');
-          console.log('result', result);
           return result;
         });
       }
@@ -95,6 +94,7 @@ const CustomerList = ({ customerType }: Props) => {
     const response = await getCustomers({
       column,
       searchTerm,
+      customerType,
     });
     setUsers(response);
     setLoading(false);
@@ -109,7 +109,6 @@ const CustomerList = ({ customerType }: Props) => {
   useEffect(() => {
     const wardNum = profile?.ward;
     const dealerId = profile?.id;
-    console.log(wardNum, dealerId, customerType);
     if (page <= 2) {
       fetchCustomers({
         wardNum,
