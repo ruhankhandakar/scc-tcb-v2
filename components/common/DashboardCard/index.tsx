@@ -19,6 +19,7 @@ const index: React.FC<Props> = ({ item, handleNavigate }) => {
           source={item.profile_pic || placeholderUser}
           contentFit="cover"
           style={styles.logoImage}
+          cachePolicy="none"
         />
 
         <View style={styles.textViewsContainer}>

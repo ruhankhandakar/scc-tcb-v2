@@ -60,6 +60,7 @@ const UserDetails: React.FC<Props> = ({
               selectedProfile.profile_pic ||
               placeholderUser
             }
+            cachePolicy="none"
             contentFit="cover"
             style={styles.profileImage}
           />
