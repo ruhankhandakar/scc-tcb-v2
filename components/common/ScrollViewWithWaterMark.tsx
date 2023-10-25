@@ -24,7 +24,7 @@ const ScrollViewWithWaterMark: React.FC<Props> = ({ children }) => {
       <StatusBar
         animated={true}
         backgroundColor={COLORS.darkBlue}
-        barStyle="dark-content"
+        barStyle="light-content"
         showHideTransition="fade"
       />
       <ImageBackground
