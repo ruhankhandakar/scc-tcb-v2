@@ -213,8 +213,8 @@ const OnBoarding = () => {
             }}
           />
           <Text style={styles.text}>
-            আপনার verification এখনো pending আছে {'\n'} সিলেট সিটি কর্পোরেশনে
-            যোগাযোগ করুন
+            আপনার verification এখনো pending আছে, {'\n'} সিলেট সিটি কর্পোরেশনে
+            যোগাযোগ করুন ।
           </Text>
           <View
             style={{
