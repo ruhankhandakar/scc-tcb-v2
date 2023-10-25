@@ -49,6 +49,8 @@ export type CustomerEntrySubmitParams = {
   productLists: {
     name: string;
     quantity: string;
+    unit: string;
+    per_unit_price: string;
   }[];
   customerId: number;
 };

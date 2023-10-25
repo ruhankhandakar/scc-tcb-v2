@@ -79,7 +79,10 @@ const index: React.FC<Props> = ({ item, handleNavigate }) => {
                 <Text style={styles.labelText}>নেওয়া পণ্য: </Text>
                 <Text style={styles.valueText} numberOfLines={3}>
                   {item.other_data?.product_lists
-                    .map((list) => `${list.name} (${list.quantity})`)
+                    .map(
+                      (list) =>
+                        `${list.name} (${list.quantity} ${list.unit || ''})`
+                    )
                     .join(', ')}
                 </Text>
               </View>

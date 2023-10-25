@@ -5,6 +5,7 @@ import { COLORS, FONT, SIZES } from 'constants/theme';
 import CustomCard from './Card';
 
 import { useBackEndContext } from 'context/BackEndContext';
+import { multiplyNumbersInBangla } from 'utils';
 
 const Products = () => {
   const {
@@ -25,11 +26,28 @@ const Products = () => {
             {!products?.length && (
               <Text style={styles.emptyText}>কোন পণ্য এড করা হয়নি</Text>
             )}
+
             {!!products?.length &&
               products.map((product) => (
                 <View style={styles.listItem} key={product.id}>
-                  <Text style={styles.item}>{product.product_name}</Text>
-                  <Text style={styles.item}>{product.quantity}</Text>
+                  <View style={{ justifyContent: 'center' }}>
+                    <Text style={styles.item}>
+                      {product.product_name} {product.quantity} {product.unit}{' '}
+                    </Text>
+                    <Text
+                      style={{ color: COLORS.gray, fontSize: SIZES.medium - 3 }}
+                    >
+                      (প্রতি {product.unit} {product.per_unit_price} টাকা)
+                    </Text>
+                  </View>
+                  <Text style={styles.item}>
+                    মোট{' '}
+                    {multiplyNumbersInBangla(
+                      product.quantity,
+                      product.per_unit_price
+                    )}{' '}
+                    টাকা
+                  </Text>
                 </View>
               ))}
           </View>

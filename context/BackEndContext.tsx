@@ -488,6 +488,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
             ...otherItems,
             scanned_date,
             ...customerDataCopy,
+            id,
           };
         }
         return item;

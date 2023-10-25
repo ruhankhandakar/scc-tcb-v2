@@ -38,7 +38,7 @@ export interface Customer {
   ward: number;
   wards: IWards;
   other_data?: {
-    product_lists: Product[];
+    product_lists: Products[];
   };
   scanned_date?: string;
 }
@@ -59,8 +59,11 @@ export interface Products {
   id: number;
   is_active: boolean;
   product_name: string;
+  name?: string;
   created_at: string;
   quantity: string;
+  unit: string;
+  per_unit_price: string;
 }
 
 export type StatusType = 'IDLE' | 'CANCEL' | 'SUCCESS' | 'VIEW' | '';

@@ -54,3 +54,45 @@ export const calculatePercentage = (
 
   return { approvedPercentage, registeredPercentage };
 };
+
+function convertBanglaToNumber(banglaNumber: string): number {
+  const banglaDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+
+  // Replace Bengali digits with regular digits
+  for (let i = 0; i < banglaDigits.length; i++) {
+    banglaNumber = banglaNumber.replace(
+      new RegExp(banglaDigits[i], 'g'),
+      i.toString()
+    );
+  }
+
+  return parseFloat(banglaNumber);
+}
+
+function convertNumberToBangla(number: number): string {
+  const banglaDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+
+  const numberString = number.toString();
+  let result = '';
+
+  for (let i = 0; i < numberString.length; i++) {
+    const digit = numberString[i];
+    const banglaDigit = banglaDigits[parseInt(digit, 10)];
+    result += banglaDigit;
+  }
+
+  return result;
+}
+export const multiplyNumbersInBangla = (num1: string, num2: string): string => {
+  // Convert the Bengali numbers to regular numbers
+  const number1 = convertBanglaToNumber(num1);
+  const number2 = convertBanglaToNumber(num2);
+
+  // Multiply the numbers
+  const result = number1 * number2;
+
+  // Convert the result back to Bengali
+  const resultInBangla = convertNumberToBangla(result);
+
+  return resultInBangla;
+};

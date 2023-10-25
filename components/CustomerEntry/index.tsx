@@ -59,6 +59,8 @@ const CustomerDetailsWithEntry = ({
       productLists: productLists.map((product) => ({
         name: product.product_name,
         quantity: product.quantity,
+        unit: product.unit,
+        per_unit_price: product.per_unit_price,
       })),
       customerId: customerDetails.customer_id,
     });
@@ -131,7 +133,7 @@ const CustomerDetailsWithEntry = ({
           {productLists.map((product) => (
             <Checkbox.Item
               key={product.id}
-              label={`${product.product_name} (${product.quantity})`}
+              label={`${product.product_name} (${product.quantity} ${product.unit})`}
               status={product.is_selected ? 'checked' : 'unchecked'}
               color={COLORS.primary}
               labelStyle={styles.checkBoxLabel}
