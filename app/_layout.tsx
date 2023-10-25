@@ -8,7 +8,6 @@ import { useEffect } from 'react';
 import { AuthProvider } from 'context/AuthContext';
 import AppContextProvider from 'context/AppContext';
 import BackEndContextProvider from 'context/BackEndContext';
-import ThemeProvider from 'context/ThemeProvider';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -36,7 +35,9 @@ export default function Root() {
 
   useEffect(() => {
     if (fontLoaded) {
-      SplashScreen.hideAsync();
+      setTimeout(async () => {
+        await SplashScreen.hideAsync();
+      }, 2000);
     }
   }, [fontLoaded]);
 

@@ -1,4 +1,5 @@
-export const logoIcon = require('assets/app-assets/playstore.png') as string;
+export const logoIcon =
+  require('assets/app-assets/playstore-icon.png') as string;
 export const placeholderUser =
   require('assets/images/placeholder_user.png') as string;
 export const illustration1 =
