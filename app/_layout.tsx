@@ -6,6 +6,7 @@ import { useFonts } from 'expo-font';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 import { AuthProvider } from 'context/AuthContext';
 import AppContextProvider from 'context/AppContext';
@@ -51,7 +52,9 @@ export default function Root() {
       <AuthProvider>
         <AppContextProvider>
           <BackEndContextProvider>
-            <Slot />
+            <BottomSheetModalProvider>
+              <Slot />
+            </BottomSheetModalProvider>
           </BackEndContextProvider>
         </AppContextProvider>
       </AuthProvider>

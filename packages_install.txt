@@ -18,3 +18,4 @@ npx expo install lottie-react-native
 npx expo install expo-document-picker
 npx expo install expo-file-system
 npx expo install expo-image-manipulator
+npx expo install react-native-reanimated react-native-gesture-handler
