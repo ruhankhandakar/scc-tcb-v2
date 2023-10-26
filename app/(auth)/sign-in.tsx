@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingLeft: SIZES.medium,
     paddingRight: SIZES.medium,
+    marginTop: 50,
   },
   imgContainer: {
     height: 300,

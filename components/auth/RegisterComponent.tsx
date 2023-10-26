@@ -25,7 +25,10 @@ import { useBackEndContext } from 'context/BackEndContext';
 import { FileUploadDocumentKeyName, TWards } from 'types';
 import { useAppContext } from 'context/AppContext';
 import _ from 'lodash';
-import { isValidBangladeshiMobileNumber } from 'utils';
+import {
+  isMediumStrengthPassword,
+  isValidBangladeshiMobileNumber,
+} from 'utils';
 import { uploadingLottie } from 'constants/lottie_files';
 import OtpInput from 'components/auth/OtpInput';
 import FileUploadModal from 'components/common/FileUploadModal';
@@ -85,11 +88,9 @@ const RegisterComponent = ({
     if (!isEditing) {
       if (
         registeredFormData.password !== registeredFormData.confirmPassword ||
-        registeredFormData.password.length < 6
+        !isMediumStrengthPassword(registeredFormData.password)
       ) {
-        handleErrorMessage(
-          'পাসওয়ার্ড same হতে হবে এবং মিনিমাম ৬ সংখ্যার হতে হবে'
-        );
+        handleErrorMessage('বৈধ পাসওয়ার্ড প্রদান করুন');
         return;
       }
     }
@@ -100,10 +101,10 @@ const RegisterComponent = ({
       ) {
         if (
           registeredFormData.password !== registeredFormData.confirmPassword ||
-          registeredFormData.password.length < 6
+          !isMediumStrengthPassword(registeredFormData.password)
         ) {
           handleErrorMessage(
-            'পাসওয়ার্ড same হতে হবে এবং মিনিমাম ৬ সংখ্যার হতে হবে'
+            'বৈধ পাসওয়ার্ড প্রদান করুনবৈধ পাসওয়ার্ড প্রদান করুন'
           );
           return;
         }
@@ -312,24 +313,38 @@ const RegisterComponent = ({
                     />
                   </View>
                 )}
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(text: string) =>
-                      onRegisteredFormDataChange('password', text)
-                    }
-                    value={registeredFormData.password}
-                    placeholder="পাসওয়ার্ড"
-                    placeholderTextColor={COLORS.gray}
-                    secureTextEntry={!showPassword}
-                  />
-                  <MaterialCommunityIcons
-                    name={showPassword ? 'eye-off' : 'eye'}
-                    size={24}
-                    color="#aaa"
-                    style={styles.icon}
-                    onPress={toggleShowPassword}
-                  />
+                <View className="password">
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      onChangeText={(text: string) =>
+                        onRegisteredFormDataChange('password', text)
+                      }
+                      value={registeredFormData.password}
+                      placeholder="পাসওয়ার্ড"
+                      placeholderTextColor={COLORS.gray}
+                      secureTextEntry={!showPassword}
+                    />
+                    <MaterialCommunityIcons
+                      name={showPassword ? 'eye-off' : 'eye'}
+                      size={24}
+                      color="#aaa"
+                      style={styles.icon}
+                      onPress={toggleShowPassword}
+                    />
+                  </View>
+                  <Text style={styles.filePickerInfoText}>
+                    <Entypo name="dot-single" size={10} color="black" />
+                    সর্বনিম্ন ৬ সঙ্খার {'\n'}
+                    <Entypo name="dot-single" size={10} color="black" /> একটি
+                    বড় হাতের অক্ষর {'\n'}
+                    <Entypo name="dot-single" size={10} color="black" /> একটি
+                    ছোটো হাতের অক্ষর {'\n'}
+                    <Entypo name="dot-single" size={10} color="black" /> একটি
+                    সঙ্খা {'\n'}
+                    <Entypo name="dot-single" size={10} color="black" /> একটি
+                    বিশেষ সঙ্খা (@/# ..)
+                  </Text>
                 </View>
                 <View style={styles.inputContainer}>
                   <TextInput

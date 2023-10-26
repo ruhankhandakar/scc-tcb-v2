@@ -96,3 +96,34 @@ export const multiplyNumbersInBangla = (num1: string, num2: string): string => {
 
   return resultInBangla;
 };
+
+export const isMediumStrengthPassword = (password: string): boolean => {
+  // Check if the password has at least 6 characters
+  if (password.length < 6) {
+    return false;
+  }
+
+  // Check if the password contains at least one uppercase letter
+  if (!/[A-Z]/.test(password)) {
+    return false;
+  }
+
+  // Check if the password contains at least one lowercase letter
+  if (!/[a-z]/.test(password)) {
+    return false;
+  }
+
+  // Check if the password contains at least one digit
+  if (!/\d/.test(password)) {
+    return false;
+  }
+
+  // Check if the password contains at least one special character
+  if (!/[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]/.test(password)) {
+    return false;
+  }
+
+  return true;
+};
+
+// P@ssw0rd
