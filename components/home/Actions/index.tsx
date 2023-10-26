@@ -3,12 +3,18 @@ import { StyleSheet, Text, View } from 'react-native';
 import { COLORS, FONT, SIZES } from 'constants/theme';
 import Card from './Card';
 
+const numbers = Array.from({ length: 70 }, (_, index) => index + 1);
+
 const Actions = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.pendingActionsText}>Pending Actions</Text>
       <View style={styles.cardListContainer}>
-        <Card />
+        {numbers.map((num) => (
+          <View style={styles.cardView} key={num}>
+            <Card />
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -32,5 +38,8 @@ const styles = StyleSheet.create({
   },
   cardListContainer: {
     marginTop: SIZES.medium,
+  },
+  cardView: {
+    marginBottom: SIZES.medium,
   },
 });

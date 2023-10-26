@@ -153,7 +153,7 @@ const Card = () => {
                 <TextInput
                   style={styles.input}
                   value={registeredCustomerNumber}
-                  placeholder="এখানে লিখুন"
+                  placeholder="এখানে নাম্বার লিখুন"
                   placeholderTextColor={COLORS.gray}
                   onChangeText={(text: string) => {
                     setRegisteredCustomerNumber(text);
@@ -183,7 +183,7 @@ const Card = () => {
                 <TextInput
                   style={styles.input}
                   value={remarks}
-                  placeholder="এখানে লিখুন"
+                  placeholder="এখানে কারণ লিখুন"
                   placeholderTextColor={COLORS.gray}
                   onChangeText={(text: string) => {
                     setRemarks(text);
