@@ -33,7 +33,8 @@ export default function Index() {
     }
   }, [session]);
 
-  const isOnBoardingPending = !profile || !profile.is_verified;
+  const isOnBoardingPending =
+    profile?.user_role === 'ADMIN' ? false : !profile || !profile.is_verified;
   const href = isOnBoardingPending ? '/on-boarding' : '/(app)/(tabs)/home';
 
   return (

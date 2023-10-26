@@ -517,7 +517,9 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     try {
       let query = supabase.from('dealer_config').select('*');
 
-      query = query.eq('dealer_id', dealerId);
+      if (dealerId) {
+        query = query.eq('dealer_id', dealerId);
+      }
 
       const { error, data } = await query;
 

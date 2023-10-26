@@ -26,9 +26,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '500',
     paddingBottom: SIZES.medium,
+    lineHeight: 25,
   },
   spinnerTextStyle: {
     color: COLORS.primary,
+  },
+
+  // admin,
+  adminFetchingDataText: {
+    color: COLORS.white,
+    fontSize: SIZES.large,
+    fontFamily: FONT.bold,
   },
 });
 

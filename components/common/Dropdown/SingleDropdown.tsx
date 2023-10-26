@@ -50,6 +50,7 @@ const SingleDropdown = ({
           setIsFocus(false);
           handleChange(item.value);
         }}
+        autoScroll={false}
         renderLeftIcon={() => (
           <Entypo
             name="list"

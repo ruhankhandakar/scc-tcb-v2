@@ -12,6 +12,7 @@ import { COLORS, SIZES } from 'constants/theme';
 import { useBackEndContext } from 'context/BackEndContext';
 import { isValidBangladeshiMobileNumber } from 'utils';
 import { useAppContext } from 'context/AppContext';
+import { TESTING_MB_NUMBER } from 'constants/data';
 
 export default function SignIn() {
   const {
@@ -27,13 +28,15 @@ export default function SignIn() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async () => {
-    if (!isValidBangladeshiMobileNumber(number)) {
+    const isTestingNumberGiven = number === TESTING_MB_NUMBER;
+
+    if (!isValidBangladeshiMobileNumber(number) && !isTestingNumberGiven) {
       handleErrorMessage('দয়া করে, বৈধ নম্বর প্রদান করুন');
       return;
     }
     setIsSubmitting(true);
     const response = await loginWithPhoneAndPassword({
-      phone: `+880${number}`,
+      phone: isTestingNumberGiven ? TESTING_MB_NUMBER : `+880${number}`,
       password,
     });
 

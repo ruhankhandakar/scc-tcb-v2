@@ -8,3 +8,4 @@ export const processingLottie = require('assets/assets/processing.json');
 export const logoutLottie = require('assets/assets/logout.json');
 export const oopsLottie = require('assets/assets/oops.json');
 export const submittingLottie = require('assets/assets/submitting.json');
+export const fetchingDataLottie = require('assets/assets/data_fetching.json');
