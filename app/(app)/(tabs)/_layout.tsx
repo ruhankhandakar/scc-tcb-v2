@@ -74,6 +74,7 @@ export default function TabLayout() {
                   paddingTop: 16,
                   borderTopColor: focused ? COLORS.primary : COLORS.white,
                   borderTopWidth: 2,
+                  minWidth: 60,
                 }}
               >
                 <MaterialIcons
@@ -136,6 +137,7 @@ export default function TabLayout() {
                   paddingTop: 16,
                   borderTopColor: focused ? COLORS.primary : COLORS.white,
                   borderTopWidth: 2,
+                  minWidth: 60,
                 }}
               >
                 <Icon
@@ -171,6 +173,7 @@ export default function TabLayout() {
                   paddingTop: 16,
                   borderTopColor: focused ? COLORS.primary : COLORS.white,
                   borderTopWidth: 2,
+                  minWidth: 60,
                 }}
               >
                 <AntDesign
