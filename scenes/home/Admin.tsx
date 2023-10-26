@@ -1,18 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
+import { Text } from 'react-native-paper';
+import AnimatedLottieView from 'lottie-react-native';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import Stats from 'components/home/Stats';
-import DropdownComponent from 'components/common/Dropdown';
-import WardDealerList from 'components/home/WardDealerList';
+import SingleDropdown from 'components/common/Dropdown/SingleDropdown';
+import Actions from 'components/home/Actions';
 
-import styles from './styles';
 import { useBackEndContext } from 'context/BackEndContext';
 import type { DealerConfig, IWards } from 'types';
-import SingleDropdown from 'components/common/Dropdown/SingleDropdown';
-import Spinner from 'react-native-loading-spinner-overlay';
-import AnimatedLottieView from 'lottie-react-native';
 import { fetchingDataLottie } from 'constants/lottie_files';
-import { Text } from 'react-native-paper';
+
+import styles from './styles';
 
 const Admin = () => {
   const {
@@ -117,6 +117,7 @@ const Admin = () => {
           placeholder="ওয়ার্ড সিলেক্ট করুন"
         />
         <Stats styles={styles} {...getTotalCustomerNumbers} />
+        <Actions />
       </View>
     </>
   );
