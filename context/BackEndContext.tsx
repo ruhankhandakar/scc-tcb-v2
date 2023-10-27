@@ -22,6 +22,7 @@ import {
   TWards,
 } from 'types';
 import {
+  ActivateDealerParam,
   CustomerType,
   GetTotalCustomerParams,
   OtherConfigsData,
@@ -38,6 +39,7 @@ import AnimatedLottieView from 'lottie-react-native';
 import { logoutLottie } from 'constants/lottie_files';
 import { COLORS, FONT, SIZES } from 'constants/theme';
 import { getCurrentMonthStartAndEndDate } from 'utils';
+import { convertBlob } from 'lib/files';
 
 type CustomerParams = {
   startOffset?: number;
@@ -183,6 +185,10 @@ type ContextType = {
     ) => Promise<{
       success: boolean;
     }>;
+    getPendingDealerList: () => Promise<ProfileData[]>;
+    activateDealer: (
+      payload: ActivateDealerParam
+    ) => Promise<{ success: boolean }>;
   };
 };
 
@@ -604,7 +610,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
       .createSignedUrl(filePath, 60, {
-        download: true,
+        download: false,
       });
 
     if (error) {
@@ -860,7 +866,98 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getPendingDealerList = async () => {
+    let dealerProfileData: ProfileData[] = [];
+
+    try {
+      let { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('*, wards(*)')
+        .eq('user_role', 'DEALER')
+        .eq('is_verified', false);
+
+      if (error) {
+        setErrorMessage('Pending Dealer Fetching Issue: ' + error.message);
+      }
+      if (profiles) {
+        dealerProfileData = profiles;
+      }
+    } catch {}
+
+    return dealerProfileData;
+  };
+
+  const activateDealer = async (payload: ActivateDealerParam) => {
+    try {
+      if (payload.actionType == 'reject') {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ remarks: payload.remarks })
+          .eq('id', payload.dealerId);
+
+        if (error) {
+          setErrorMessage('Something went wrong: ' + error.message);
+          return {
+            success: false,
+          };
+        }
+
+        return {
+          success: true,
+        };
+      }
+      const { error } = await supabase.from('dealer_config').upsert({
+        registered_customer: payload.registered_customer,
+        dealer_id: payload.dealerId,
+      });
+      if (error) {
+        if (error.code == '23505') {
+          await supabase
+            .from('dealer_config')
+            .update({
+              registered_customer: payload.registered_customer,
+            })
+            .eq('dealer_id', payload.dealerId);
+          return {
+            success: true,
+          };
+        } else {
+          setErrorMessage(
+            'Something went wrong with dealer activation: ' + error.message
+          );
+        }
+        return {
+          success: false,
+        };
+      }
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ is_verified: true })
+        .eq('id', payload.dealerId);
+      if (profileError) {
+        setErrorMessage(
+          'Something went wrong with profile update: ' + profileError.message
+        );
+        return {
+          success: false,
+        };
+      }
+      return {
+        success: true,
+      };
+    } catch (err: any) {
+      setErrorMessage(
+        'Something went wrong with dealer activation: ' + err.message
+      );
+      return {
+        success: false,
+      };
+    }
+  };
+
   const actions = {
+    activateDealer,
+    getPendingDealerList,
     getLoggedInUserProfileData,
     signUpWithEmail,
     signOut,

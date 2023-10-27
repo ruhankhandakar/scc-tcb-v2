@@ -81,3 +81,10 @@ export interface RegisterFormData {
   deoDocuments: DocumentPicker.DocumentPickerAsset[];
   profilePicture: DocumentPicker.DocumentPickerAsset | null;
 }
+
+export interface ActivateDealerParam {
+  registered_customer?: number;
+  dealerId: number;
+  actionType: 'accept' | 'reject';
+  remarks?: string;
+}

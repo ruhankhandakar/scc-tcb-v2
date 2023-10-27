@@ -11,12 +11,13 @@ import Actions from 'components/home/Actions';
 import { useBackEndContext } from 'context/BackEndContext';
 import type { DealerConfig, IWards } from 'types';
 import { fetchingDataLottie } from 'constants/lottie_files';
+import { ProfileData } from 'types/profile';
 
 import styles from './styles';
 
 const Admin = () => {
   const {
-    actions: { getWards, getDealerConfig },
+    actions: { getWards, getDealerConfig, getPendingDealerList },
   } = useBackEndContext();
   const [wardsList, setWardsList] = useState<IWards[]>([]);
   const [selectedWard, setSelectedWard] = useState<number | string>();
@@ -25,6 +26,9 @@ const Admin = () => {
   const [selectedDealerIds, setSelectedDealerIds] = useState<number[] | null>(
     null
   );
+  const [pendingDealerListData, setPendingDealerListData] = useState<
+    ProfileData[]
+  >([]);
 
   const handleChange = (item: number | string) => {
     setSelectedWard(item);
@@ -43,8 +47,12 @@ const Admin = () => {
     try {
       const wardsData = await getWards();
       setWardsList(wardsData!);
+
       const dealerConfigData = await getDealerConfig(0);
       setDealerConfigList(dealerConfigData);
+
+      const pendingDealerData = await getPendingDealerList();
+      setPendingDealerListData(pendingDealerData);
     } catch {
     } finally {
       setLoading(false);
@@ -73,6 +81,11 @@ const Admin = () => {
     }
     return result;
   }, [dealerConfigList, selectedDealerIds]);
+
+  const filterPendingDealerListData = (id: number) => {
+    const filteredData = pendingDealerListData.filter((item) => item.id !== id);
+    setPendingDealerListData(filteredData);
+  };
 
   useEffect(() => {
     prepareData();
@@ -117,7 +130,12 @@ const Admin = () => {
           placeholder="ওয়ার্ড সিলেক্ট করুন"
         />
         <Stats styles={styles} {...getTotalCustomerNumbers} />
-        <Actions />
+        {pendingDealerListData.length > 0 && (
+          <Actions
+            pendingDealerListData={pendingDealerListData}
+            filterPendingDealerListData={filterPendingDealerListData}
+          />
+        )}
       </View>
     </>
   );

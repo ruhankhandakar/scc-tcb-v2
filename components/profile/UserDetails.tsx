@@ -69,9 +69,9 @@ const UserDetails: React.FC<Props> = ({
           {selectedProfile.first_name} {selectedProfile.last_name}{' '}
           {selectedProfile.name}
         </Text>
-        {selectedProfile.dateOfBirth ? (
+        {selectedProfile.date_of_birth ? (
           <Text variant="bodyMedium" style={styles.userDob}>
-            Date of birth - {selectedProfile.dateOfBirth}
+            Date of birth - {selectedProfile.date_of_birth}
           </Text>
         ) : null}
         {selectedProfile.customer_id ? (

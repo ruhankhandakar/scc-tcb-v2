@@ -2,6 +2,7 @@ import { Customer, IWards } from 'types';
 
 export type ROLE = 'ADMIN' | 'CUSTOMER' | 'DEALER';
 
+// @ts-ignore
 export interface ProfileData extends Partial<Customer> {
   deo_documents?: string[];
   first_name: string;
@@ -13,10 +14,13 @@ export interface ProfileData extends Partial<Customer> {
   user_id: string;
   user_role: ROLE;
   ward: number;
-  dateOfBirth?: string;
+  date_of_birth?: string;
   foundation_name?: string;
+  remarks?: string | null;
+  wards?: Partial<IWards>;
 }
 
+// @ts-ignore
 export interface SelectedProfileData
   extends Partial<Customer>,
     Partial<ProfileData> {

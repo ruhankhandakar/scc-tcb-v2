@@ -4,18 +4,39 @@ import 'dayjs/locale/bn-bd';
 import dayjs from 'dayjs';
 import { AntDesign } from '@expo/vector-icons';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import * as WebBrowser from 'expo-web-browser';
 
 import { COLORS, SIZES, SHADOWS, FONT } from 'constants/theme';
 import { useRef, useState } from 'react';
 import { Button } from 'react-native-paper';
+import { ProfileData } from 'types/profile';
+import { useBackEndContext } from 'context/BackEndContext';
+import Spinner from 'react-native-loading-spinner-overlay';
+import AnimatedLottieView from 'lottie-react-native';
+import { submittingLottie } from 'constants/lottie_files';
 
-const profile_pic =
-  'https://jmrqrdddqxuadgbhkfrc.supabase.co/storage/v1/object/public/public_documents/profilePicture/8801728007477_profilePicture.jpg';
-const created_at = new Date();
-const ward = 'ওয়ার্ড ১';
-const foundation_name = 'এহসান ফাউন্ডেশন';
+interface Props {
+  profileData: ProfileData;
+  filterPendingDealerListData: (id: number) => void;
+}
 
-const Card = () => {
+const Card = ({ profileData, filterPendingDealerListData }: Props) => {
+  const {
+    actions: { activateDealer, downloadFile },
+  } = useBackEndContext();
+
+  const {
+    profile_picture,
+    created_at,
+    wards,
+    foundation_name,
+    deo_documents,
+    document_proof_link,
+    id: dealerId,
+    first_name,
+    last_name,
+  } = profileData;
+
   const [bottomSheetViewType, setBottomSheetViewType] = useState<
     'accept' | 'reject'
   >('accept');
@@ -24,6 +45,7 @@ const Card = () => {
   >(undefined);
   const [remarks, setRemarks] = useState<string | undefined>(undefined);
   const [infoMSg, setInfoMSg] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
@@ -36,8 +58,7 @@ const Card = () => {
     setBottomSheetViewType('reject');
   };
 
-  const handleAcceptSubmit = () => {
-    console.log('registeredCustomerNumber', registeredCustomerNumber);
+  const handleAcceptSubmit = async () => {
     if (
       !registeredCustomerNumber ||
       isNaN(parseFloat(registeredCustomerNumber))
@@ -45,9 +66,42 @@ const Card = () => {
       setInfoMSg('নাম্বার ভ্যালিড নয়');
       return;
     }
+    setSubmitting(true);
+    const response = await activateDealer({
+      actionType: 'accept',
+      dealerId,
+      registered_customer: +registeredCustomerNumber,
+    });
+
+    if (response.success) {
+      filterPendingDealerListData(dealerId);
+    }
+
+    setSubmitting(false);
   };
-  const handleRejectSubmit = () => {
-    console.log('remarks', remarks);
+
+  const handleRejectSubmit = async () => {
+    setSubmitting(true);
+    const response = await activateDealer({
+      actionType: 'reject',
+      dealerId,
+      remarks,
+    });
+
+    if (response.success) {
+      filterPendingDealerListData(dealerId);
+    }
+
+    setSubmitting(false);
+  };
+
+  const handleDownloadFile = async (filePath: string) => {
+    try {
+      const response = await downloadFile(filePath);
+      if (response) {
+        await WebBrowser.openBrowserAsync(response);
+      }
+    } catch (error) {}
   };
 
   return (
@@ -57,7 +111,7 @@ const Card = () => {
         <View style={styles.profilePicContainer}>
           <Image
             source={{
-              uri: profile_pic,
+              uri: profile_picture,
             }}
             contentFit="cover"
             style={styles.profilePic}
@@ -66,12 +120,14 @@ const Card = () => {
         </View>
 
         {/* Details */}
-        <Text style={styles.nameText}>Niaz Morshed</Text>
+        <Text style={styles.nameText}>
+          {first_name} {last_name}
+        </Text>
         <Text style={styles.joinedAtText}>
           নিবন্ধিত করেছেঃ{' '}
           {dayjs(created_at).locale('bn-bd').format('DD  MMMM YY, A h:m')}
         </Text>
-        <Text style={styles.wardText}>{ward}</Text>
+        <Text style={styles.wardText}>{wards?.name!}</Text>
         <Text style={styles.foundationText}>
           ফাউন্ডেশন নামঃ <Text style={styles.bold}>{foundation_name}</Text>
         </Text>
@@ -80,29 +136,45 @@ const Card = () => {
         <View style={styles.fileListContainer}>
           <View style={styles.fileList}>
             <Text style={styles.fileListText}>জাতীয় পরিচয় পত্র কার্ডঃ</Text>
-            <Pressable
-              android_ripple={{
-                color: COLORS.primary,
-                borderless: true,
-                radius: 25,
-                foreground: true,
-              }}
-            >
-              <AntDesign name="download" size={24} color={COLORS.primary} />
-            </Pressable>
+            <View style={styles.fileViewContainer}>
+              {document_proof_link?.map((link) => (
+                <Pressable
+                  key={link}
+                  android_ripple={{
+                    color: COLORS.primary,
+                    borderless: true,
+                    radius: 25,
+                    foreground: true,
+                  }}
+                  onPress={() => {
+                    handleDownloadFile(link);
+                  }}
+                >
+                  <AntDesign name="eye" size={24} color={COLORS.primary} />
+                </Pressable>
+              ))}
+            </View>
           </View>
           <View style={styles.fileList}>
             <Text style={styles.fileListText}>DEO কার্ডঃ</Text>
-            <Pressable
-              android_ripple={{
-                color: COLORS.primary,
-                borderless: true,
-                radius: 25,
-                foreground: true,
-              }}
-            >
-              <AntDesign name="download" size={24} color={COLORS.primary} />
-            </Pressable>
+            <View style={styles.fileViewContainer}>
+              {deo_documents?.map((link) => (
+                <Pressable
+                  key={link}
+                  android_ripple={{
+                    color: COLORS.primary,
+                    borderless: true,
+                    radius: 25,
+                    foreground: true,
+                  }}
+                  onPress={() => {
+                    handleDownloadFile(link);
+                  }}
+                >
+                  <AntDesign name="eye" size={24} color={COLORS.primary} />
+                </Pressable>
+              ))}
+            </View>
           </View>
         </View>
 
@@ -205,6 +277,21 @@ const Card = () => {
           )}
         </View>
       </BottomSheetModal>
+      <Spinner visible={submitting} overlayColor="rgba(0,0,0,0.5)">
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <AnimatedLottieView
+            source={submittingLottie}
+            autoPlay
+            loop
+            style={{
+              height: 300,
+              width: 300,
+            }}
+          />
+        </View>
+      </Spinner>
     </>
   );
 };
@@ -338,5 +425,9 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     textAlign: 'center',
     marginBottom: SIZES.small,
+  },
+  fileViewContainer: {
+    flexDirection: 'row',
+    gap: SIZES.medium,
   },
 });

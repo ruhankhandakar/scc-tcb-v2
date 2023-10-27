@@ -55,6 +55,14 @@ export const calculatePercentage = (
   return { approvedPercentage, registeredPercentage };
 };
 
+export function isBanglaNumber(numberStr: string): boolean {
+  // Regular expression to match Bangla digits
+  const banglaDigitRegex = /^[০-৯]+$/;
+
+  // Test if the input string matches the Bangla digit regex
+  return banglaDigitRegex.test(numberStr);
+}
+
 function convertBanglaToNumber(banglaNumber: string): number {
   const banglaDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
 
@@ -69,7 +77,7 @@ function convertBanglaToNumber(banglaNumber: string): number {
   return parseFloat(banglaNumber);
 }
 
-function convertNumberToBangla(number: number): string {
+export function convertNumberToBangla(number: number): string {
   const banglaDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
 
   const numberString = number.toString();

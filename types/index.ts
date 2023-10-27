@@ -36,7 +36,7 @@ export interface Customer {
   name: string;
   union: string;
   ward: number;
-  wards: IWards;
+  wards?: IWards | undefined;
   other_data?: {
     product_lists: Products[];
   };
