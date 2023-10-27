@@ -6,6 +6,8 @@ const COLORS = {
   black: '#000',
   lightWhite: '#FAFAFC',
 
+  lightGreenDarken2: '#558b2f',
+
   primary: 'rgb(112, 41, 239)',
   onPrimary: 'rgb(255, 255, 255)',
   primaryContainer: 'rgb(233, 221, 255)',

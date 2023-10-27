@@ -188,6 +188,7 @@ type ContextType = {
       success: boolean;
     }>;
     getPendingDealerList: () => Promise<ProfileData[]>;
+    getDealerList: (limit?: number) => Promise<ProfileData[]>;
     activateDealer: (
       payload: ActivateDealerParam
     ) => Promise<{ success: boolean }>;
@@ -905,6 +906,31 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     return dealerProfileData;
   };
 
+  const getDealerList = async (limit: number) => {
+    let dealerProfileData: ProfileData[] = [];
+
+    try {
+      let query = supabase
+        .from('profiles')
+        .select('*, wards(*)')
+        .eq('user_role', 'DEALER');
+
+      if (limit) {
+        query = query.limit(limit);
+      }
+      let { data: profiles, error } = await query;
+
+      if (error) {
+        setErrorMessage('Dealer List Fetching Issue: ' + error.message);
+      }
+      if (profiles) {
+        dealerProfileData = profiles;
+      }
+    } catch {}
+
+    return dealerProfileData;
+  };
+
   const activateDealer = async (payload: ActivateDealerParam) => {
     try {
       if (payload.actionType == 'reject') {
@@ -1003,6 +1029,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     resendOtp,
     activateDealer,
     getPendingDealerList,
+    getDealerList,
     getLoggedInUserProfileData,
     signUpWithEmail,
     signOut,

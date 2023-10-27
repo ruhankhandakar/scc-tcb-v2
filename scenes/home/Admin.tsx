@@ -7,6 +7,8 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import Stats from 'components/home/Stats';
 import SingleDropdown from 'components/common/Dropdown/SingleDropdown';
 import Actions from 'components/home/Actions';
+import WelcomeText from 'components/home/WelcomeText';
+import Products from 'components/home/Products';
 
 import { useBackEndContext } from 'context/BackEndContext';
 import type { DealerConfig, IWards } from 'types';
@@ -14,11 +16,10 @@ import { fetchingDataLottie } from 'constants/lottie_files';
 import { ProfileData } from 'types/profile';
 
 import styles from './styles';
-import Products from 'components/home/Products';
 
 const Admin = () => {
   const {
-    state: { wardsList },
+    state: { wardsList, profile },
     actions: { getDealerConfig, getPendingDealerList },
   } = useBackEndContext();
   const [selectedWard, setSelectedWard] = useState<number | string>();
@@ -110,6 +111,12 @@ const Admin = () => {
         </View>
       </Spinner>
       <View style={styles.parentContainer}>
+        {!!profile && (
+          <WelcomeText
+            firstName={profile.first_name}
+            lastName={profile.last_name}
+          />
+        )}
         <SingleDropdown
           data={[
             {

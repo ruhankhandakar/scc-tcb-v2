@@ -9,7 +9,7 @@ interface Props {
 
 const WelcomeText = ({ firstName, lastName }: Props) => {
   return (
-    <View>
+    <View style={styles.container}>
       <Text style={styles.text}>
         👋🏻 Welcome{' '}
         <Text style={styles.bold}>
@@ -23,6 +23,9 @@ const WelcomeText = ({ firstName, lastName }: Props) => {
 export default WelcomeText;
 
 const styles = StyleSheet.create({
+  container: {
+    marginBottom: SIZES.medium,
+  },
   text: {
     fontFamily: FONT.medium,
     fontSize: SIZES.medium,

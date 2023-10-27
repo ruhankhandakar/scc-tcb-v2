@@ -1,15 +1,21 @@
-import React from 'react';
-import { View, Text } from 'react-native';
-
 import WaterMarkBackground from 'components/common/WaterMarkBackground';
 import HelpScene from 'scenes/help';
+import Settings from 'scenes/settings';
 
-import styles from 'styles/style';
+import { useBackEndContext } from 'context/BackEndContext';
 
 const HelpPage = () => {
+  const {
+    state: { profile },
+  } = useBackEndContext();
+
+  const userRole = profile?.user_role || 'DEALER';
+
+  console.log('userRole', userRole);
+
   return (
     <WaterMarkBackground>
-      <HelpScene />
+      {userRole === 'ADMIN' ? <Settings /> : <HelpScene />}
     </WaterMarkBackground>
   );
 };

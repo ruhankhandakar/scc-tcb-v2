@@ -18,7 +18,7 @@ import { placeholderUser } from 'constants/icons';
 
 interface Props {
   profileData: ProfileData;
-  filterPendingDealerListData: (id: number) => void;
+  filterPendingDealerListData?: (id: number) => void;
 }
 
 const Card = ({ profileData, filterPendingDealerListData }: Props) => {
@@ -74,7 +74,7 @@ const Card = ({ profileData, filterPendingDealerListData }: Props) => {
       registered_customer: +registeredCustomerNumber,
     });
 
-    if (response.success) {
+    if (response.success && filterPendingDealerListData) {
       filterPendingDealerListData(dealerId);
     }
 
@@ -89,7 +89,7 @@ const Card = ({ profileData, filterPendingDealerListData }: Props) => {
       remarks,
     });
 
-    if (response.success) {
+    if (response.success && filterPendingDealerListData) {
       filterPendingDealerListData(dealerId);
     }
 

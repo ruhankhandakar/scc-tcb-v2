@@ -3,8 +3,15 @@ import { View, Text, Platform } from 'react-native';
 import { Entypo as Icon, MaterialIcons, AntDesign } from '@expo/vector-icons';
 
 import { COLORS } from 'constants/theme';
+import { useBackEndContext } from 'context/BackEndContext';
 
 export default function TabLayout() {
+  const {
+    state: { profile },
+  } = useBackEndContext();
+
+  const userRole = profile?.user_role || 'DEALER';
+
   return (
     <Tabs
       screenOptions={{
@@ -152,7 +159,7 @@ export default function TabLayout() {
                     color: focused ? COLORS.primary : COLORS.gray,
                   }}
                 >
-                  ই-সেবা
+                  {userRole === 'ADMIN' ? 'সেটিংস' : 'ই-সেবা'}
                 </Text>
               </View>
             );
