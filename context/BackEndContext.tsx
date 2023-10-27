@@ -1012,9 +1012,6 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
           success: false,
         };
       }
-
-      console.log('data', data);
-
       return {
         success: true,
       };

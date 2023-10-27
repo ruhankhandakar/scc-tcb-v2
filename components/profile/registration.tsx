@@ -63,7 +63,6 @@ const registration = () => {
     }
 
     const response = await updateProfile(user?.id!, payload);
-    console.log('response', response);
     if (response.success) {
       handleRefresh();
       handleUpdateData({

@@ -11,8 +11,6 @@ const HelpPage = () => {
 
   const userRole = profile?.user_role || 'DEALER';
 
-  console.log('userRole', userRole);
-
   return (
     <WaterMarkBackground>
       {userRole === 'ADMIN' ? <Settings /> : <HelpScene />}
