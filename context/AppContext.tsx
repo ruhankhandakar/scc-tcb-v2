@@ -24,6 +24,7 @@ type ContextType = typeof initialState & {
   };
   action: {
     handleErrorMessage: (message: string) => void;
+    clearState: () => void;
     setFileUploadConfig: (filConfig: FileUploadConfig | null) => void;
     onRegisteredFormDataChange: (
       key: keyof RegisterFormData,
@@ -56,6 +57,7 @@ const AppContextProvider = ({ children }: { children: ReactNode }) => {
       lastName: '',
       password: '',
       confirmPassword: '',
+      foundationName: '',
       selectedWard: null,
       nidDocuments: [],
       deoDocuments: [],
@@ -79,6 +81,21 @@ const AppContextProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
+  const clearState = () => {
+    setRegisteredFormData({
+      number: '',
+      firstName: '',
+      lastName: '',
+      password: '',
+      confirmPassword: '',
+      foundationName: '',
+      selectedWard: null,
+      nidDocuments: [],
+      deoDocuments: [],
+      profilePicture: null,
+    });
+  };
+
   const handleErrorMessage = (message: string): void => {
     setErrorMessage(message);
   };
@@ -96,6 +113,7 @@ const AppContextProvider = ({ children }: { children: ReactNode }) => {
           handleErrorMessage,
           setFileUploadConfig,
           onRegisteredFormDataChange,
+          clearState,
         },
       }}
     >

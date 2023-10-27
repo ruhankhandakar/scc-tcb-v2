@@ -35,6 +35,7 @@ const registration = () => {
       profile_picture: params.profilePicture?.uri,
       first_name: params.firstName,
       last_name: params.lastName,
+      foundation_name: params.foundation_name,
     };
     if (params.password) {
       const updateRes = await updateUser({

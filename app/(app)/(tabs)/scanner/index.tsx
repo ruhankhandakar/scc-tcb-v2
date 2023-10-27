@@ -1,10 +1,11 @@
 import { StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
 import { ActivityIndicator, Button, Text } from 'react-native-paper';
-import { useCallback, useEffect, useState } from 'react';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import LottieView from 'lottie-react-native';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import WaterMarkBackground from 'components/common/WaterMarkBackground';
 import CustomerDetailsWithEntry from 'components/CustomerEntry';
@@ -21,7 +22,6 @@ import {
   tryAgainLottie,
 } from 'constants/lottie_files';
 import { CustomerEntrySubmitParams, ScannedDataParam } from 'utils/types';
-import Spinner from 'react-native-loading-spinner-overlay';
 import AnimatedLottieView from 'lottie-react-native';
 import { ProfileData } from 'types/profile';
 import { convertNumberToBangla } from 'utils';
@@ -175,14 +175,17 @@ const CustomerEntry = () => {
       } else {
         setDealerId(profile.id);
         // * Now check more condition
-        await cardAndDealerCheck({
+        const res = await cardAndDealerCheck({
           customerId: cardNum,
           dealerId: profile.id,
           wardNumber: wardNum,
         });
+        if (res == undefined) {
+          setIsSubmitting(false);
+          return false;
+        }
       }
     }
-    // TODO: Check whether it is calling if any condition matched for Dealer
     const response = await getCustomerDetails(cardNum);
 
     setCustomerDetails(response);

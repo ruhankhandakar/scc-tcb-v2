@@ -180,7 +180,7 @@ const CustomerDetailsWithEntry = ({
           style={[styles.button, styles.cancelText]}
           textColor={COLORS.error}
           onPress={handleCancel}
-          disabled={!selectedDealer}
+          disabled={userRole === 'ADMIN' && !selectedDealer}
         >
           Cancel
         </Button>
@@ -188,7 +188,7 @@ const CustomerDetailsWithEntry = ({
           mode="contained"
           style={styles.button}
           onPress={handleOk}
-          disabled={!selectedDealer}
+          disabled={userRole === 'ADMIN' && !selectedDealer}
         >
           OK
         </Button>

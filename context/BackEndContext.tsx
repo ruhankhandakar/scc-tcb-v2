@@ -191,6 +191,7 @@ type ContextType = {
     activateDealer: (
       payload: ActivateDealerParam
     ) => Promise<{ success: boolean }>;
+    resendOtp: (number: string) => Promise<{ success: boolean }>;
   };
 };
 
@@ -972,7 +973,34 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const resendOtp = async (phone: string) => {
+    try {
+      const { data, error } = await supabase.auth.resend({
+        type: 'sms',
+        phone,
+      });
+
+      if (error) {
+        setErrorMessage('Resend OTP Error: ' + error.message);
+        return {
+          success: false,
+        };
+      }
+
+      console.log('data', data);
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      return {
+        success: false,
+      };
+    }
+  };
+
   const actions = {
+    resendOtp,
     activateDealer,
     getPendingDealerList,
     getLoggedInUserProfileData,

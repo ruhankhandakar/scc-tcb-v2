@@ -22,6 +22,7 @@ type registrationDataType = {
   lastName: string;
   password: string;
   selectedWard: number | null;
+  foundationName: string;
   nidDocuments: DocumentPickerAsset[];
   deoDocuments: DocumentPickerAsset[];
   profilePicture: DocumentPickerAsset;
@@ -47,7 +48,7 @@ const OnBoarding = () => {
   const router = useRouter();
   const {
     state,
-    action: { handleUpdateData },
+    action: { handleUpdateData, clearState },
   } = useAppContext();
   const { handleRefresh } = useAuth();
   const {
@@ -142,6 +143,7 @@ const OnBoarding = () => {
       document_proof_link: null,
       profile_picture: null,
       deo_documents: null,
+      foundation_name: data.foundationName,
     };
 
     if (files.length) {
@@ -164,6 +166,7 @@ const OnBoarding = () => {
       handleUpdateData({
         dealerRegistrationData: null,
       });
+      clearState();
       handleRefresh();
       router.replace('/');
     }

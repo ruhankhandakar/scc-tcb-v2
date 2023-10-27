@@ -22,6 +22,7 @@ export interface ProfileDBPayload {
   document_proof_link: string[] | null;
   profile_picture: string | null;
   deo_documents: string[] | null;
+  foundation_name: string;
 }
 
 export interface UpdateParams {
@@ -32,6 +33,7 @@ export interface UpdateParams {
   profile_picture?: string;
   first_name?: string;
   last_name?: string;
+  foundation_name?: string;
 }
 
 export type ConfigName = 'max_num_scanned_allowed_month';
@@ -78,6 +80,7 @@ export interface RegisterFormData {
   password: string;
   confirmPassword: string;
   selectedWard: number | null;
+  foundationName: string;
   nidDocuments: DocumentPicker.DocumentPickerAsset[];
   deoDocuments: DocumentPicker.DocumentPickerAsset[];
   profilePicture: DocumentPicker.DocumentPickerAsset | null;

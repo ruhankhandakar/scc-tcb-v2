@@ -17,22 +17,21 @@ import { Entypo } from '@expo/vector-icons';
 import Spinner from 'react-native-loading-spinner-overlay';
 import LottieView from 'lottie-react-native';
 import { AntDesign } from '@expo/vector-icons';
+import _ from 'lodash';
 
+import FileUploadModal from 'components/common/FileUploadModal';
+import OtpInput from 'components/auth/OtpInput';
 import SingleDropdown from 'components/common/Dropdown/SingleDropdown';
 
 import { COLORS, FONT, SIZES } from 'constants/theme';
 import { useBackEndContext } from 'context/BackEndContext';
 import { FileUploadDocumentKeyName, TWards } from 'types';
 import { useAppContext } from 'context/AppContext';
-import _ from 'lodash';
 import {
   isMediumStrengthPassword,
   isValidBangladeshiMobileNumber,
 } from 'utils';
 import { uploadingLottie } from 'constants/lottie_files';
-import OtpInput from 'components/auth/OtpInput';
-import FileUploadModal from 'components/common/FileUploadModal';
-
 import { MB_2 } from 'constants/data';
 import { UpdateParams } from 'utils/types';
 
@@ -124,6 +123,7 @@ const RegisterComponent = ({
         lastName: registeredFormData.lastName,
         password: registeredFormData.password,
         profilePicture: registeredFormData.profilePicture,
+        foundation_name: registeredFormData.foundationName,
       });
       return;
     }
@@ -163,6 +163,7 @@ const RegisterComponent = ({
           nidDocuments: registeredFormData.nidDocuments,
           profilePicture: registeredFormData.profilePicture,
           deoDocuments: registeredFormData.deoDocuments,
+          foundationName: registeredFormData.foundationName,
         },
       });
       router.replace('/');
@@ -194,6 +195,10 @@ const RegisterComponent = ({
     if (loggedInProfileData) {
       onRegisteredFormDataChange('firstName', loggedInProfileData.first_name!);
       onRegisteredFormDataChange('lastName', loggedInProfileData.last_name!);
+      onRegisteredFormDataChange(
+        'foundationName',
+        loggedInProfileData.foundation_name!
+      );
       onRegisteredFormDataChange('profilePicture', {
         uri: loggedInProfileData.profile_picture!,
         name: 'profile_picture.png',
@@ -207,6 +212,7 @@ const RegisterComponent = ({
     (!registeredFormData.number && !isEditing) ||
     !registeredFormData.firstName ||
     !registeredFormData.lastName ||
+    !registeredFormData.foundationName ||
     (!registeredFormData.password && !isEditing) ||
     (!registeredFormData.confirmPassword && !isEditing) ||
     (!registeredFormData.nidDocuments.length && !isEditing) ||
@@ -295,6 +301,17 @@ const RegisterComponent = ({
                     }
                     value={registeredFormData.lastName}
                     placeholder="পদবি (বংশনাম)"
+                    placeholderTextColor={COLORS.gray}
+                  />
+                </View>
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={(text: string) =>
+                      onRegisteredFormDataChange('foundationName', text)
+                    }
+                    value={registeredFormData.foundationName}
+                    placeholder="আপনার ফাউন্ডেশন নাম"
                     placeholderTextColor={COLORS.gray}
                   />
                 </View>

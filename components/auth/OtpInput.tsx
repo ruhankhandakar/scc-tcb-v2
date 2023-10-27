@@ -1,11 +1,12 @@
 import AnimatedLottieView from 'lottie-react-native';
 import React, { useState } from 'react';
 import { Button, Text } from 'react-native-paper';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import OTPTextView from 'react-native-otp-textinput';
 
 import { COLORS, SIZES } from 'constants/theme';
 import { otpVerificationLottie } from 'constants/lottie_files';
+import { useBackEndContext } from 'context/BackEndContext';
 
 interface Props {
   handleVerify: (otp: string) => void;
@@ -13,8 +14,24 @@ interface Props {
 }
 
 const OtpInput: React.FC<Props> = ({ handleVerify, number }) => {
+  const {
+    actions: { resendOtp },
+  } = useBackEndContext();
+
   const [inputText, setInputText] = useState<null | string>();
+  const [resendOtpCount, setResendOtpCount] = useState(0);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+
   const isDisabled = inputText?.length !== 6;
+
+  const handleResendOtp = async () => {
+    setIsSendingOtp(true);
+    const res = await resendOtp(number);
+    if (res.success) {
+      setResendOtpCount((prevState) => prevState + 1);
+    }
+    setIsSendingOtp(false);
+  };
 
   return (
     <View style={styles.container}>
@@ -39,6 +56,35 @@ const OtpInput: React.FC<Props> = ({ handleVerify, number }) => {
         inputCount={6}
         tintColor={COLORS.primary}
       />
+      {resendOtpCount < 2 && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: SIZES.medium,
+          }}
+        >
+          <Pressable
+            onPress={() => {
+              if (!isSendingOtp) {
+                handleResendOtp();
+              }
+            }}
+            android_ripple={{
+              color: COLORS.tertiary,
+              borderless: true,
+              radius: 30,
+              foreground: true,
+            }}
+            style={styles.resendBtn}
+          >
+            {isSendingOtp ? <Text>Resending...</Text> : <Text>RESNED OTP</Text>}
+          </Pressable>
+          {!!resendOtpCount && (
+            <Text style={{ color: COLORS.error }}>1 Left</Text>
+          )}
+        </View>
+      )}
       <View style={styles.btnContainer}>
         <Button
           mode="contained"
@@ -91,5 +137,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: COLORS.darkBlue,
     fontSize: SIZES.medium,
+  },
+  resendBtn: {
+    borderWidth: 1,
+    borderColor: COLORS.tertiary,
+    padding: 4,
+    borderRadius: 8,
   },
 });
