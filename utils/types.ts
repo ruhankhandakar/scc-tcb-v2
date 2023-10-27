@@ -53,6 +53,7 @@ export type CustomerEntrySubmitParams = {
     per_unit_price: string;
   }[];
   customerId: number;
+  selectedDealerId?: number;
 };
 
 export interface ScannedDataParam {

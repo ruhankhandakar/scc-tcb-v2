@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native';
 import React, { useState } from 'react';
 import { Image } from 'expo-image';
-import { Button, Checkbox } from 'react-native-paper';
+import { Button, Checkbox, RadioButton } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 
 import { Customer, StatusType } from 'types';
@@ -11,6 +11,7 @@ import { COLORS } from 'constants/theme';
 
 import styles from './style';
 import { CustomerEntrySubmitParams } from 'utils/types';
+import { ProfileData } from 'types/profile';
 
 interface Props {
   customerDetails: Customer;
@@ -19,18 +20,22 @@ interface Props {
     productLists,
     customerId,
   }: CustomerEntrySubmitParams) => void;
+  dealerDetails?: ProfileData[] | null;
 }
 
 const CustomerDetailsWithEntry = ({
   customerDetails,
   handleClearState,
   handleSubmit,
+  dealerDetails,
 }: Props) => {
   const {
-    state: { products },
+    state: { products, profile },
   } = useBackEndContext();
   const router = useRouter();
+  const userRole = profile?.user_role || 'DEALER';
 
+  const [selectedDealer, setSelectedDealer] = useState('');
   const [productLists, setProductLists] = useState(() => {
     if (!products) return [];
 
@@ -63,6 +68,7 @@ const CustomerDetailsWithEntry = ({
         per_unit_price: product.per_unit_price,
       })),
       customerId: customerDetails.customer_id,
+      selectedDealerId: +selectedDealer,
     });
   };
 
@@ -116,7 +122,7 @@ const CustomerDetailsWithEntry = ({
         <View style={styles.textView}>
           <Text style={styles.labelText}>ঠিকানা: </Text>
           <Text style={styles.valueText}>
-            {customerDetails.wards.name} - {customerDetails.address}
+            {customerDetails.wards?.name} - {customerDetails.address}
           </Text>
         </View>
       </View>
@@ -146,6 +152,27 @@ const CustomerDetailsWithEntry = ({
         </View>
       </View>
 
+      {userRole === 'ADMIN' && dealerDetails && (
+        <View style={styles.customerDetailsContainer}>
+          <Text style={styles.dealerSelectText}>Dealer সিলেক্ট করুন</Text>
+          <RadioButton.Group
+            onValueChange={(newValue) => {
+              setSelectedDealer(newValue);
+            }}
+            value={selectedDealer}
+          >
+            {dealerDetails.map((dealer) => (
+              <View key={dealer.id} style={styles.dealerList}>
+                <Text style={styles.dealerName}>
+                  {dealer.first_name} {dealer.last_name}
+                </Text>
+                <RadioButton value={`${dealer.id}`} color={COLORS.primary} />
+              </View>
+            ))}
+          </RadioButton.Group>
+        </View>
+      )}
+
       {/* Actions */}
       <View style={styles.actionContainer}>
         <Button
@@ -153,10 +180,16 @@ const CustomerDetailsWithEntry = ({
           style={[styles.button, styles.cancelText]}
           textColor={COLORS.error}
           onPress={handleCancel}
+          disabled={!selectedDealer}
         >
           Cancel
         </Button>
-        <Button mode="contained" style={styles.button} onPress={handleOk}>
+        <Button
+          mode="contained"
+          style={styles.button}
+          onPress={handleOk}
+          disabled={!selectedDealer}
+        >
           OK
         </Button>
       </View>

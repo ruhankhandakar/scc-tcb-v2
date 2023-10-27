@@ -84,5 +84,5 @@ export interface DealerConfig {
 export interface CardAndDealerCheck {
   dealerId: number;
   customerId: number;
-  wardNumber: number;
+  wardNumber?: number;
 }

@@ -71,6 +71,7 @@ type StateType = {
   selectedProfile: SelectedProfileData | null;
   loggedInProfileData: SelectedProfileData | null;
   otherConfigs: OtherConfigsState;
+  wardsList: IWards[];
 };
 type ContextType = {
   state: StateType;
@@ -174,7 +175,8 @@ type ContextType = {
       success: boolean;
     }>;
     getScannedDataTableCountOfACustomer: (
-      customerId: number
+      customerId: number,
+      dealerId: number
     ) => Promise<number>;
     storeScannedData: (payload: ScannedDataParam) => Promise<{
       success: boolean;
@@ -203,6 +205,7 @@ const initialState: StateType = {
   otherConfigs: {
     maxNumScannedAllowedMonth: 1,
   },
+  wardsList: [],
 };
 
 export const BackEndContext = createContext<ContextType | null>(null);
@@ -219,6 +222,16 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     ) {
       getProducts();
       getOtherConfigs();
+    }
+    if (state.profile?.user_role === 'ADMIN') {
+      getWards().then((response) => {
+        if (response?.length) {
+          setState((prevState) => ({
+            ...prevState,
+            wardsList: response,
+          }));
+        }
+      });
     }
   }, [state.profile?.user_role]);
 
@@ -832,11 +845,15 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const getScannedDataTableCountOfACustomer = async (customerId: number) => {
+  const getScannedDataTableCountOfACustomer = async (
+    customerId: number,
+    dealerId: number
+  ) => {
     const { startDate, endDate } = getCurrentMonthStartAndEndDate();
     const { data, error } = await supabase
       .from('scanned_data')
       .select('id')
+      .eq('dealer_id', dealerId)
       .eq('customer_id', customerId)
       .lt('created_at', endDate)
       .gt('created_at', startDate);

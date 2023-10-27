@@ -23,6 +23,8 @@ import {
 import { CustomerEntrySubmitParams, ScannedDataParam } from 'utils/types';
 import Spinner from 'react-native-loading-spinner-overlay';
 import AnimatedLottieView from 'lottie-react-native';
+import { ProfileData } from 'types/profile';
+import { convertNumberToBangla } from 'utils';
 
 const screenHeight = Dimensions.get('screen');
 
@@ -33,7 +35,7 @@ const CustomerEntry = () => {
     action: { handleUpdateData },
   } = useAppContext();
   const {
-    state: { profile, user, otherConfigs },
+    state: { profile, user, otherConfigs, wardsList },
     actions: {
       getCustomerDetails,
       getDealerConfig,
@@ -52,6 +54,9 @@ const CustomerEntry = () => {
   const [_dealerId, setDealerId] = useState<number | null>(null);
   const [priviledgedCustomerNumber, setPriviledgedCustomerNumber] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [_dealerDetails, setDealerDetails] = useState<ProfileData[] | null>(
+    null
+  );
 
   const familyCardNo = state?.familyCard;
 
@@ -70,6 +75,19 @@ const CustomerEntry = () => {
       handleScannerRedirection();
     }
   }, [familyCardNo]);
+
+  const getDealerIdFromWardNumber = (wardNum: number) => {
+    let dealerDetails: ProfileData[] = [];
+
+    const wardData = wardsList.find((ward) => ward.id === wardNum);
+
+    if (wardData) {
+      dealerDetails = wardData.profiles.filter(
+        (profile) => profile.is_verified
+      );
+    }
+    return dealerDetails;
+  };
 
   const cardAndDealerCheck = async ({
     dealerId,
@@ -98,16 +116,18 @@ const CustomerEntry = () => {
     //! ------------------- Now Customer details check -----------------------
     // * If scanned number of the customer of the current month >= maxNumScannedAllowedMonth -> true, then show error, otherwise continue
     const numOfScannedOfThisMonth = await getScannedDataTableCountOfACustomer(
-      customerId
+      customerId,
+      dealerId
     );
     if (numOfScannedOfThisMonth >= maxNumScannedAllowedMonth) {
       setInfoErrorMessage(
-        'এই ফ্যামিলি কার্ডটি ইতিমধ্যে এই মাসে 2 মাস ব্যবহার করা হয়েছে।'
+        'এই ফ্যামিলি কার্ডটি ইতিমধ্যে এই মাসে 2 বার ব্যবহার করা হয়েছে।'
       );
       return;
     }
 
     setPriviledgedCustomerNumber(privileged_customer);
+    return true;
   };
 
   const fetchCustomerDetails = async (familyCardNo: string) => {
@@ -116,7 +136,6 @@ const CustomerEntry = () => {
     if (splittedData[0] !== 'scc') {
       setInfoErrorMessage('এই ফ্যামিলি কার্ডটি বৈধ নয়');
       setLoading(false);
-
       return;
     }
     const wardNum = +splittedData[1];
@@ -129,9 +148,24 @@ const CustomerEntry = () => {
     }
 
     const loggedInUserRole = profile?.user_role || 'DEALER';
+
     //* 1st check whether user is admin or dealer
     if (loggedInUserRole === 'ADMIN') {
-      console.log('Admin Flow');
+      // * get dealer id from ward number
+      const dealerDetails = getDealerIdFromWardNumber(wardNum);
+
+      // * If dealer details not found -> then show error message, otherwise continue
+      if (!dealerDetails?.length) {
+        setInfoErrorMessage(
+          `ওয়ার্ড ${convertNumberToBangla(
+            wardNum
+          )} এর জন্য কোন Dealer খুঁজে পাওয়া যায়নি।`
+        );
+        setLoading(false);
+        return;
+      }
+
+      setDealerDetails(dealerDetails);
     }
     if (loggedInUserRole === 'DEALER') {
       //* Now check ward matching
@@ -148,7 +182,9 @@ const CustomerEntry = () => {
         });
       }
     }
+    // TODO: Check whether it is calling if any condition matched for Dealer
     const response = await getCustomerDetails(cardNum);
+
     setCustomerDetails(response);
     setLoading(false);
   };
@@ -168,7 +204,27 @@ const CustomerEntry = () => {
   const handleSubmit = async ({
     productLists,
     customerId,
+    selectedDealerId,
   }: CustomerEntrySubmitParams) => {
+    setIsSubmitting(true);
+
+    if (selectedDealerId) {
+      // * That's mean Admin is doing scanning
+      /* 
+        1. First check cardAndDealerCheck
+        2. If all goes well then process next step
+      */
+      const response = await cardAndDealerCheck({
+        dealerId: selectedDealerId,
+        customerId,
+      });
+      if (response == undefined) {
+        setIsSubmitting(false);
+        return false;
+      }
+    }
+
+    const dealer_id = selectedDealerId || _dealerId!;
     // * Update process starting from submit button -----
     /* 
       1. create one entry in scanned_data table
@@ -178,18 +234,17 @@ const CustomerEntry = () => {
     const scannedDataPayload: ScannedDataParam = {
       user_id: user!.id,
       customer_id: customerId,
-      dealer_id: _dealerId!,
+      dealer_id,
       other_data: {
         product_lists: productLists,
       },
     };
-    setIsSubmitting(true);
 
     const response = await storeScannedData(scannedDataPayload);
 
     if (response.success) {
       // * Do Step 2
-      const result = await updateDealerConfig(_dealerId!, {
+      const result = await updateDealerConfig(dealer_id, {
         privileged_customer: priviledgedCustomerNumber + 1,
       });
       if (result.success) {
@@ -298,6 +353,7 @@ const CustomerEntry = () => {
                 customerDetails={customerDetails!}
                 handleClearState={handleClearState}
                 handleSubmit={handleSubmit}
+                dealerDetails={_dealerDetails}
               />
             ) : familyCardNo ? (
               <View style={styles.noDataImgContainer}>
@@ -425,6 +481,7 @@ const styles = StyleSheet.create({
     fontFamily: FONT.medium,
     fontSize: SIZES.xLarge,
     textAlign: 'center',
+    padding: SIZES.medium,
   },
   reScanText: {
     color: COLORS.darkBlue,

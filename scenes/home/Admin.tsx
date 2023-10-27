@@ -18,9 +18,9 @@ import Products from 'components/home/Products';
 
 const Admin = () => {
   const {
-    actions: { getWards, getDealerConfig, getPendingDealerList },
+    state: { wardsList },
+    actions: { getDealerConfig, getPendingDealerList },
   } = useBackEndContext();
-  const [wardsList, setWardsList] = useState<IWards[]>([]);
   const [selectedWard, setSelectedWard] = useState<number | string>();
   const [dealerConfigList, setDealerConfigList] = useState<DealerConfig[]>([]);
   const [loading, setLoading] = useState(false);
@@ -46,9 +46,6 @@ const Admin = () => {
     setLoading(true);
 
     try {
-      const wardsData = await getWards();
-      setWardsList(wardsData!);
-
       const dealerConfigData = await getDealerConfig(0);
       setDealerConfigList(dealerConfigData);
 

@@ -91,6 +91,24 @@ const styles = StyleSheet.create({
     width: 100,
   },
   cancelText: {},
+  dealerSelectText: {
+    fontFamily: FONT.bold,
+    fontSize: SIZES.medium - 2,
+    color: COLORS.primary,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.gray2,
+    paddingBottom: 2,
+  },
+  dealerList: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dealerName: {
+    fontFamily: FONT.regular,
+    color: COLORS.darkBlue,
+    fontSize: SIZES.medium,
+  },
 });
 
 export default styles;
