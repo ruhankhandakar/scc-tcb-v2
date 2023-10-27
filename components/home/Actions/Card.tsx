@@ -14,6 +14,7 @@ import { useBackEndContext } from 'context/BackEndContext';
 import Spinner from 'react-native-loading-spinner-overlay';
 import AnimatedLottieView from 'lottie-react-native';
 import { submittingLottie } from 'constants/lottie_files';
+import { placeholderUser } from 'constants/icons';
 
 interface Props {
   profileData: ProfileData;
@@ -110,9 +111,13 @@ const Card = ({ profileData, filterPendingDealerListData }: Props) => {
         {/* Profile Pic */}
         <View style={styles.profilePicContainer}>
           <Image
-            source={{
-              uri: profile_picture,
-            }}
+            source={
+              profile_picture
+                ? {
+                    uri: profile_picture,
+                  }
+                : placeholderUser
+            }
             contentFit="cover"
             style={styles.profilePic}
             cachePolicy="none"
@@ -316,7 +321,7 @@ const styles = StyleSheet.create({
   btn: {
     flex: 1,
     borderWidth: 1,
-    borderColor: COLORS.gray2,
+    borderColor: COLORS.error,
     padding: SIZES.xSmall - 2,
     alignItems: 'center',
     justifyContent: 'center',
@@ -326,7 +331,7 @@ const styles = StyleSheet.create({
     fontFamily: FONT.regular,
     fontSize: SIZES.small,
     fontWeight: '700',
-    color: COLORS.gray,
+    color: COLORS.error,
   },
   acceptBtnText: {
     color: COLORS.white,
@@ -334,6 +339,7 @@ const styles = StyleSheet.create({
   acceptBtn: {
     backgroundColor: COLORS.primary,
     color: COLORS.white,
+    borderColor: COLORS.primary,
   },
   profilePicContainer: {
     justifyContent: 'center',

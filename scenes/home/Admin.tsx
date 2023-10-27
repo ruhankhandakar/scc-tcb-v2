@@ -14,6 +14,7 @@ import { fetchingDataLottie } from 'constants/lottie_files';
 import { ProfileData } from 'types/profile';
 
 import styles from './styles';
+import Products from 'components/home/Products';
 
 const Admin = () => {
   const {
@@ -136,6 +137,7 @@ const Admin = () => {
             filterPendingDealerListData={filterPendingDealerListData}
           />
         )}
+        <Products />
       </View>
     </>
   );
