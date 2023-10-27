@@ -42,12 +42,14 @@ export function AuthProvider(props: ProviderProps) {
   }, []);
 
   const handleRefresh = async () => {
-    const { data } = await supabase.auth.refreshSession();
+    try {
+      const { data } = await supabase.auth.refreshSession();
 
-    if (!data.session) {
-      await supabase.auth.signOut();
-    }
-    setSession(data.session);
+      if (!data.session) {
+        await supabase.auth.signOut();
+      }
+      setSession(data.session);
+    } catch {}
   };
 
   return (
