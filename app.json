@@ -2,7 +2,7 @@
   "expo": {
     "name": "TCB SCC app",
     "slug": "tcb-sylhet-city-corporation",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "orientation": "portrait",
     "icon": "./assets/app-assets/playstore-icon.png",
     "scheme": "scc",
