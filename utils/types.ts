@@ -92,3 +92,10 @@ export interface ActivateDealerParam {
   actionType: 'accept' | 'reject';
   remarks?: string;
 }
+
+export type PendingTasksType = {
+  id: string;
+  count: number;
+  route: string;
+  text: string;
+};

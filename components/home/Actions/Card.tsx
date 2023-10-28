@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flex: 1,
-    marginBottom: SIZES.small,
+    paddingBottom: SIZES.small,
   },
   profilePic: {
     height: 60,

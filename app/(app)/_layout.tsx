@@ -5,6 +5,7 @@ import LottieView from 'lottie-react-native';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 
 import ScreenHeaderBtn from 'components/common/header/ScreenHeaderBtn';
+import Notification from 'components/common/Notification';
 
 import { useAuth } from 'context/AuthContext';
 import { loadingLottie } from 'constants/lottie_files';
@@ -17,7 +18,7 @@ const headerStyle: NativeStackNavigationOptions = {
   },
   headerTitleStyle: {
     fontWeight: 'bold',
-    fontSize: SIZES.medium,
+    fontSize: SIZES.medium - 2,
   },
   headerShadowVisible: false,
   headerBackVisible: false,
@@ -27,7 +28,7 @@ const headerStyle: NativeStackNavigationOptions = {
       <ScreenHeaderBtn iconUrl={logoIcon} dimension="100%" />
     </View>
   ),
-  headerRight: () => '',
+  headerRight: () => <Notification />,
 };
 
 export default function AppLayout() {

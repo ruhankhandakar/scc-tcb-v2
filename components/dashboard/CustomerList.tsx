@@ -35,7 +35,12 @@ const Item = ({ title }: ItemProps) => (
 const CustomerList = ({ customerType }: Props) => {
   const {
     state: { profile },
-    actions: { getCustomers, updateState, getTotalCustomersV2 },
+    actions: {
+      getCustomers,
+      updateState,
+      getTotalCustomersV2,
+      getTotalCustomers,
+    },
   } = useBackEndContext();
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -43,6 +48,9 @@ const CustomerList = ({ customerType }: Props) => {
   const [users, setUsers] = useState<Customer[]>([]);
   const [totalNumberOfCustomers, setTotalNumberOfCustomers] = useState(0);
   const [isFetchingData, setIsFetchingData] = useState(false);
+  const [totalNumOfCustomerInOurDb, setTotalNumOfCustomerInOurDb] = useState(0);
+
+  const userRole = profile?.user_role || 'DEALER';
 
   const fetchMore = () => {
     setPage((prevPage) => prevPage + 1);
@@ -142,6 +150,14 @@ const CustomerList = ({ customerType }: Props) => {
       });
   }, [customerType, profile?.ward]);
 
+  useEffect(() => {
+    if (userRole === 'ADMIN') {
+      getTotalCustomers().then((response) => {
+        setTotalNumOfCustomerInOurDb(response);
+      });
+    }
+  }, [userRole]);
+
   return (
     <View style={styles.container}>
       {isFetchingData && (
@@ -157,6 +173,13 @@ const CustomerList = ({ customerType }: Props) => {
             </Text>
           </View>
         )}
+      {totalNumOfCustomerInOurDb > 0 && customerType === 'registered' && (
+        <View>
+          <Text style={styles.totalNumberText}>
+            আমাদের ডাটাবেসে গ্রাহকের মোট সংখ্যাঃ {totalNumOfCustomerInOurDb}
+          </Text>
+        </View>
+      )}
       {customerType === 'registered' && (
         <SearchBox
           searchTerm={searchTerm}

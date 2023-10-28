@@ -135,6 +135,7 @@ export default function TabLayout() {
 
       <Tabs.Screen
         name="settings"
+        getId={({ params }) => String(Date.now())}
         options={{
           title: '',
           tabBarIcon: ({ focused }: { focused: boolean }) => {

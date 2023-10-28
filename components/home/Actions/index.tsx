@@ -6,8 +6,6 @@ import Card from './Card';
 import { COLORS, FONT, SIZES } from 'constants/theme';
 import { ProfileData } from 'types/profile';
 
-const numbers = Array.from({ length: 70 }, (_, index) => index + 1);
-
 interface Props {
   pendingDealerListData: ProfileData[];
   filterPendingDealerListData: (id: number) => void;
@@ -19,7 +17,7 @@ const Actions = ({
 }: Props) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.pendingActionsText}>Pending Actions</Text>
+      <Text style={styles.pendingActionsText}>Dealers Pending Approvals: </Text>
       <View style={styles.cardListContainer}>
         {pendingDealerListData.map((dealer) => (
           <View style={styles.cardView} key={dealer.id}>
@@ -37,13 +35,7 @@ const Actions = ({
 export default React.memo(Actions);
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: SIZES.xLarge,
-    borderWidth: 2,
-    borderColor: COLORS.gray2,
-    borderRadius: 3,
-    padding: SIZES.small,
-  },
+  container: {},
   pendingActionsText: {
     fontFamily: FONT.bold,
     color: COLORS.darkBlue,

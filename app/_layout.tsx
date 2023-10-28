@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { MenuProvider } from 'react-native-popup-menu';
 
 import { AuthProvider } from 'context/AuthContext';
 import AppContextProvider from 'context/AppContext';
@@ -53,7 +54,9 @@ export default function Root() {
         <AppContextProvider>
           <BackEndContextProvider>
             <BottomSheetModalProvider>
-              <Slot />
+              <MenuProvider>
+                <Slot />
+              </MenuProvider>
             </BottomSheetModalProvider>
           </BackEndContextProvider>
         </AppContextProvider>

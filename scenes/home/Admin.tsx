@@ -1,26 +1,24 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import AnimatedLottieView from 'lottie-react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 import Stats from 'components/home/Stats';
 import SingleDropdown from 'components/common/Dropdown/SingleDropdown';
-import Actions from 'components/home/Actions';
 import WelcomeText from 'components/home/WelcomeText';
 import Products from 'components/home/Products';
 
 import { useBackEndContext } from 'context/BackEndContext';
-import type { DealerConfig, IWards } from 'types';
+import type { DealerConfig } from 'types';
 import { fetchingDataLottie } from 'constants/lottie_files';
-import { ProfileData } from 'types/profile';
 
 import styles from './styles';
 
 const Admin = () => {
   const {
     state: { wardsList, profile },
-    actions: { getDealerConfig, getPendingDealerList },
+    actions: { getDealerConfig },
   } = useBackEndContext();
   const [selectedWard, setSelectedWard] = useState<number | string>();
   const [dealerConfigList, setDealerConfigList] = useState<DealerConfig[]>([]);
@@ -28,10 +26,6 @@ const Admin = () => {
   const [selectedDealerIds, setSelectedDealerIds] = useState<number[] | null>(
     null
   );
-  const [pendingDealerListData, setPendingDealerListData] = useState<
-    ProfileData[]
-  >([]);
-
   const handleChange = (item: number | string) => {
     setSelectedWard(item);
     const selectedWard = wardsList.find((ward) => ward.id === +item);
@@ -49,9 +43,6 @@ const Admin = () => {
     try {
       const dealerConfigData = await getDealerConfig(0);
       setDealerConfigList(dealerConfigData);
-
-      const pendingDealerData = await getPendingDealerList();
-      setPendingDealerListData(pendingDealerData);
     } catch {
     } finally {
       setLoading(false);
@@ -80,11 +71,6 @@ const Admin = () => {
     }
     return result;
   }, [dealerConfigList, selectedDealerIds]);
-
-  const filterPendingDealerListData = (id: number) => {
-    const filteredData = pendingDealerListData.filter((item) => item.id !== id);
-    setPendingDealerListData(filteredData);
-  };
 
   useEffect(() => {
     prepareData();
@@ -135,12 +121,7 @@ const Admin = () => {
           placeholder="ওয়ার্ড সিলেক্ট করুন"
         />
         <Stats styles={styles} {...getTotalCustomerNumbers} />
-        {pendingDealerListData.length > 0 && (
-          <Actions
-            pendingDealerListData={pendingDealerListData}
-            filterPendingDealerListData={filterPendingDealerListData}
-          />
-        )}
+
         <Products />
       </View>
     </>

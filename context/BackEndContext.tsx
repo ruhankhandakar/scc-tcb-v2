@@ -27,6 +27,7 @@ import {
   GetTotalCustomerParams,
   OtherConfigsData,
   OtherConfigsState,
+  PendingTasksType,
   ProfileDBPayload,
   ScannedDataParam,
   StoreFileInBucketParamType,
@@ -193,6 +194,7 @@ type ContextType = {
       payload: ActivateDealerParam
     ) => Promise<{ success: boolean }>;
     resendOtp: (number: string) => Promise<{ success: boolean }>;
+    getAnyPendingTasks: () => Promise<PendingTasksType[]>;
   };
 };
 
@@ -885,6 +887,35 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getAnyPendingTasks = async () => {
+    const notifications: PendingTasksType[] = [];
+
+    try {
+      const { count, error } = await supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_verified', false)
+        .eq('user_role', 'DEALER');
+
+      if (error) {
+        setErrorMessage(
+          'Pending Notification Fetching Issue: ' + error.message
+        );
+      } else if (count) {
+        notifications.push({
+          id: 'pending_approval',
+          count,
+          route: '/settings/pending_actions',
+          text: 'Pending Approvals',
+        });
+      }
+    } catch (err: any) {
+      setErrorMessage('Pending Notification Fetching Issue: ' + err.message);
+    }
+
+    return notifications;
+  };
+
   const getPendingDealerList = async () => {
     let dealerProfileData: ProfileData[] = [];
 
@@ -906,7 +937,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     return dealerProfileData;
   };
 
-  const getDealerList = async (limit: number) => {
+  const getDealerList = async (limit?: number) => {
     let dealerProfileData: ProfileData[] = [];
 
     try {
@@ -1052,6 +1083,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     storeScannedData,
     updateDealerConfig,
     getTotalCustomersV2,
+    getAnyPendingTasks,
   };
 
   return (
