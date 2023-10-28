@@ -23,12 +23,14 @@ import {
 } from 'types';
 import {
   ActivateDealerParam,
+  CreateProductPayload,
   CustomerType,
   GetTotalCustomerParams,
   OtherConfigsData,
   OtherConfigsState,
   PendingTasksType,
   ProfileDBPayload,
+  RefetchType,
   ScannedDataParam,
   StoreFileInBucketParamType,
   UpdateParams,
@@ -40,7 +42,6 @@ import AnimatedLottieView from 'lottie-react-native';
 import { logoutLottie } from 'constants/lottie_files';
 import { COLORS, FONT, SIZES } from 'constants/theme';
 import { getCurrentMonthStartAndEndDate } from 'utils';
-import { convertBlob } from 'lib/files';
 
 type CustomerParams = {
   startOffset?: number;
@@ -195,6 +196,13 @@ type ContextType = {
     ) => Promise<{ success: boolean }>;
     resendOtp: (number: string) => Promise<{ success: boolean }>;
     getAnyPendingTasks: () => Promise<PendingTasksType[]>;
+    createProduct: (payload: CreateProductPayload) => Promise<
+      | {
+          success: boolean;
+        }
+      | undefined
+    >;
+    refetch: (type: RefetchType) => Promise<void>;
   };
 };
 
@@ -1054,7 +1062,33 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const createProduct = async (payload: CreateProductPayload) => {
+    try {
+      const { error, data } = await supabase.from('products').insert(payload);
+
+      if (error) {
+        setErrorMessage('Creating product error: ' + error.message);
+        return {
+          success: false,
+        };
+      }
+      return {
+        success: true,
+      };
+    } catch (err: any) {
+      setErrorMessage('Creating product error: ' + err.message);
+    }
+  };
+
+  const refetch = async (type: RefetchType) => {
+    const userRole = state.profile?.user_role || 'DEALER';
+    if (type === 'products') {
+      getProducts(userRole);
+    }
+  };
+
   const actions = {
+    refetch,
     resendOtp,
     activateDealer,
     getPendingDealerList,
@@ -1085,6 +1119,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     updateDealerConfig,
     getTotalCustomersV2,
     getAnyPendingTasks,
+    createProduct,
   };
 
   return (

@@ -2,8 +2,8 @@ import { StyleSheet, View } from 'react-native';
 import { useEffect, useState } from 'react';
 
 import Actions from 'components/home/Actions';
-import WaterMarkBackground from 'components/common/WaterMarkBackground';
 import BackToSettings from 'components/settings/BackToSettings';
+import ScrollViewWithWaterMark from 'components/common/ScrollViewWithWaterMark';
 
 import { useBackEndContext } from 'context/BackEndContext';
 import { COLORS, FONT, SIZES } from 'constants/theme';
@@ -42,7 +42,7 @@ const PendingActions = () => {
   }, []);
 
   return (
-    <WaterMarkBackground>
+    <ScrollViewWithWaterMark>
       <View style={styles.container}>
         <BackToSettings />
         {loading && <CardSkeleton />}
@@ -53,7 +53,7 @@ const PendingActions = () => {
           />
         )}
       </View>
-    </WaterMarkBackground>
+    </ScrollViewWithWaterMark>
   );
 };
 

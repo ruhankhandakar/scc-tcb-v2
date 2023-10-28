@@ -31,6 +31,18 @@ const settings = [
       />
     ),
   },
+  {
+    router: '/settings/products',
+    text: 'পণ্য ব্যবস্থাপনা',
+    icon: (
+      <Feather
+        name="box"
+        size={SIZES.large}
+        color={COLORS.tertiary}
+        style={{ fontFamily: FONT.bold }}
+      />
+    ),
+  },
 ];
 
 const Settings = () => {

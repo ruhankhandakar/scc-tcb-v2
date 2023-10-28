@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -7,7 +7,10 @@ import {
   View,
   Dimensions,
   StatusBar,
+  RefreshControl,
 } from 'react-native';
+import { useRouter, useSegments } from 'expo-router';
+import { useRoute } from '@react-navigation/native';
 
 import { waterMarkIcon } from 'constants/images';
 import { COLORS } from 'constants/theme';
@@ -19,6 +22,18 @@ interface Props {
 const { height } = Dimensions.get('window');
 
 const ScrollViewWithWaterMark: React.FC<Props> = ({ children }) => {
+  const [refreshing, setRefreshing] = useState(false);
+  const router = useRouter();
+  const segments = useSegments();
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    const currentRoutePath = segments.join('/');
+    // @ts-ignore
+    router.replace(currentRoutePath);
+    setRefreshing(false);
+  }, [segments, router]);
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar
@@ -32,7 +47,12 @@ const ScrollViewWithWaterMark: React.FC<Props> = ({ children }) => {
         style={styles.imageBackground}
         resizeMode="contain"
       >
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
           <View style={{ minHeight: height - 100 }}>{children}</View>
         </ScrollView>
       </ImageBackground>

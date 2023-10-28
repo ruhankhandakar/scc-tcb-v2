@@ -99,3 +99,12 @@ export type PendingTasksType = {
   route: string;
   text: string;
 };
+
+export type CreateProductPayload = {
+  unit: string;
+  quantity: string;
+  per_unit_price: string;
+  product_name: string;
+};
+
+export type RefetchType = 'products';

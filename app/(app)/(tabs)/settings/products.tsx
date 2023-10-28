@@ -1,27 +1,26 @@
 import { StyleSheet, View } from 'react-native';
 
-import Dealer from 'scenes/settings/Dealer';
+import ProductsSettings from 'components/settings/ProductsSettings';
 import ScrollViewWithWaterMark from 'components/common/ScrollViewWithWaterMark';
 import BackToSettings from 'components/settings/BackToSettings';
 
 import { SIZES } from 'constants/theme';
 
-const DealerManagement = () => {
+const Products = () => {
   return (
     <ScrollViewWithWaterMark>
       <View style={styles.container}>
         <BackToSettings />
-        <Dealer />
+        <ProductsSettings />
       </View>
     </ScrollViewWithWaterMark>
   );
 };
 
-export default DealerManagement;
+export default Products;
 
 const styles = StyleSheet.create({
   container: {
     padding: SIZES.medium,
-    marginBottom: 100,
   },
 });
