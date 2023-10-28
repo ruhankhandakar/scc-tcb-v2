@@ -54,19 +54,32 @@ const Products = () => {
                 products.map((product) => (
                   <View style={styles.listItem} key={product.id}>
                     <View style={{ justifyContent: 'center' }}>
-                      <Text style={styles.item}>
+                      <Text
+                        style={[
+                          styles.item,
+                          !product.is_active && styles.inactiveStyle,
+                        ]}
+                      >
                         {product.product_name} {product.quantity} {product.unit}{' '}
                       </Text>
                       <Text
-                        style={{
-                          color: COLORS.gray,
-                          fontSize: SIZES.medium - 3,
-                        }}
+                        style={[
+                          {
+                            color: COLORS.gray,
+                            fontSize: SIZES.medium - 3,
+                          },
+                          !product.is_active && styles.inactiveStyle,
+                        ]}
                       >
                         (প্রতি {product.unit} {product.per_unit_price} টাকা)
                       </Text>
                     </View>
-                    <Text style={styles.item}>
+                    <Text
+                      style={[
+                        styles.item,
+                        !product.is_active && styles.inactiveStyle,
+                      ]}
+                    >
                       মোট{' '}
                       {multiplyNumbersInBangla(
                         product.quantity,
@@ -148,5 +161,8 @@ const styles = StyleSheet.create({
   headingContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  inactiveStyle: {
+    textDecorationLine: 'line-through',
   },
 });

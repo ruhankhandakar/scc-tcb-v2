@@ -12,7 +12,7 @@ import * as FileSystem from 'expo-file-system';
 import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 
 import { supabase } from 'lib/supabase';
-import { ProfileData, SelectedProfileData } from 'types/profile';
+import { ProfileData, ROLE, SelectedProfileData } from 'types/profile';
 import {
   Customer,
   DealerConfig,
@@ -224,7 +224,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
       state.profile?.user_role === 'ADMIN' ||
       state.profile?.user_role === 'DEALER'
     ) {
-      getProducts();
+      getProducts(state.profile?.user_role);
       getOtherConfigs();
     }
     if (state.profile?.user_role === 'ADMIN') {
@@ -520,11 +520,12 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     return customersData;
   };
 
-  const getProducts = async () => {
-    const { error, data } = await supabase
-      .from('products')
-      .select('*')
-      .eq('is_active', true);
+  const getProducts = async (userRole: ROLE) => {
+    let query = supabase.from('products').select('*');
+    if (userRole === 'DEALER') {
+      query = query.eq('is_active', true);
+    }
+    const { error, data } = await query;
 
     if (error) {
       setErrorMessage('getProducts' + error.message);
