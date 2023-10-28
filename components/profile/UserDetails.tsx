@@ -102,7 +102,7 @@ const UserDetails: React.FC<Props> = ({
         <View>
           {!!selectedProfile.email && (
             <ListCard
-              label="ইমেইল"
+              label="ইমেইলঃ"
               value={selectedProfile.email}
               icon={
                 <MaterialIcons
@@ -116,7 +116,7 @@ const UserDetails: React.FC<Props> = ({
           )}
           {!!selectedProfile.gurdian_name && (
             <ListCard
-              label="পরিবার প্রধানের নামে"
+              label="পরিবার প্রধানের নামেঃ"
               value={selectedProfile.gurdian_name}
               icon={
                 <AntDesign
@@ -130,7 +130,7 @@ const UserDetails: React.FC<Props> = ({
           )}
           {selectedProfile.phone_number && (
             <ListCard
-              label="মোবাইল"
+              label="মোবাইলঃ"
               value={`+${selectedProfile.phone_number}`}
               icon={
                 <MaterialIcons
@@ -143,7 +143,7 @@ const UserDetails: React.FC<Props> = ({
           )}
           {!!selectedProfile.document_proof_number && (
             <ListCard
-              label={selectedProfile.document_proof_name || 'NID নাম্বার'}
+              label={selectedProfile.document_proof_name || 'NID নাম্বার' + 'ঃ'}
               value={selectedProfile.document_proof_number}
               icon={
                 <Octicons
@@ -156,7 +156,7 @@ const UserDetails: React.FC<Props> = ({
           )}
           {!!selectedProfile.customer_id && (
             <ListCard
-              label="পরিবার card নাম্বার"
+              label="পরিবার card নাম্বারঃ"
               value={selectedProfile.customer_id.toString()}
               icon={
                 <Octicons
@@ -169,7 +169,7 @@ const UserDetails: React.FC<Props> = ({
           )}
           {!!selectedProfile?.foundation_name && (
             <ListCard
-              label="ব্যবসা প্রতিষ্ঠানের নাম"
+              label="ব্যবসা প্রতিষ্ঠানের নামঃ"
               value={selectedProfile?.foundation_name}
               icon={
                 <Octicons
@@ -182,7 +182,7 @@ const UserDetails: React.FC<Props> = ({
           )}
           {(selectedProfile?.ward || selectedProfile?.address) && (
             <ListCard
-              label="ঠিকানা"
+              label="ঠিকানাঃ"
               value={`${selectedProfile?.wards?.name} ${
                 selectedProfile?.address ? `, ${selectedProfile?.address}` : ``
               }`}
@@ -208,7 +208,7 @@ const UserDetails: React.FC<Props> = ({
         <View>
           {!!selectedProfile.document_proof_link && (
             <ListCard
-              label="NID কার্ড"
+              label="NID কার্ডঃ"
               icon={
                 <Feather
                   name="image"
@@ -249,7 +249,7 @@ const UserDetails: React.FC<Props> = ({
           )}
           {!!selectedProfile.deo_documents && (
             <ListCard
-              label="DEO কার্ড"
+              label="DEO কার্ডঃ"
               icon={
                 <Feather
                   name="image"
@@ -288,7 +288,7 @@ const UserDetails: React.FC<Props> = ({
           )}
           {!!selectedProfile.family_card && (
             <ListCard
-              label="TCB কার্ড"
+              label="TCB কার্ডঃ"
               icon={
                 <Feather
                   name="image"
@@ -323,7 +323,7 @@ const UserDetails: React.FC<Props> = ({
 
           {!isReadOnly && (
             <ListCard
-              label="সাহায্য/রিপোর্ট"
+              label="সাহায্য/রিপোর্টঃ"
               icon={
                 <Foundation
                   name="foundation"
@@ -349,7 +349,7 @@ const UserDetails: React.FC<Props> = ({
           )}
           {!isReadOnly && (
             <ListCard
-              label="লগ আউট"
+              label="লগ আউটঃ"
               icon={
                 <SimpleLineIcons
                   name="logout"
