@@ -54,7 +54,7 @@ const RegisterComponent = ({
   handleUpdate,
 }: Props) => {
   const {
-    state: { user, loggedInProfileData },
+    state: { user, loggedInProfileData, profile },
     actions: { getOnlyWards, signUpWithPhoneAndPassword, verifyOtp },
   } = useBackEndContext();
   const {
@@ -212,7 +212,7 @@ const RegisterComponent = ({
     (!registeredFormData.number && !isEditing) ||
     !registeredFormData.firstName ||
     !registeredFormData.lastName ||
-    !registeredFormData.foundationName ||
+    (!registeredFormData.foundationName && profile?.user_role === 'DEALER') ||
     (!registeredFormData.password && !isEditing) ||
     (!registeredFormData.confirmPassword && !isEditing) ||
     (!registeredFormData.nidDocuments.length && !isEditing) ||
@@ -304,17 +304,19 @@ const RegisterComponent = ({
                     placeholderTextColor={COLORS.gray}
                   />
                 </View>
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(text: string) =>
-                      onRegisteredFormDataChange('foundationName', text)
-                    }
-                    value={registeredFormData.foundationName}
-                    placeholder="আপনার ফাউন্ডেশন নাম"
-                    placeholderTextColor={COLORS.gray}
-                  />
-                </View>
+                {profile?.user_role === 'DEALER' && (
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      onChangeText={(text: string) =>
+                        onRegisteredFormDataChange('foundationName', text)
+                      }
+                      value={registeredFormData.foundationName}
+                      placeholder="আপনার ব্যবসা প্রতিষ্ঠানের নাম"
+                      placeholderTextColor={COLORS.gray}
+                    />
+                  </View>
+                )}
                 {!isEditing && (
                   <View style={styles.inputContainer}>
                     <Text style={styles.mobilePrefix}>+880</Text>

@@ -80,7 +80,8 @@ const DealerCard = ({ data }: Props) => {
       </Text>
       <Text style={styles.wardText}>{wards?.name!}</Text>
       <Text style={styles.foundationText}>
-        ফাউন্ডেশন নামঃ <Text style={styles.bold}>{foundation_name}</Text>
+        ব্যবসা প্রতিষ্ঠানের নামঃ{' '}
+        <Text style={styles.bold}>{foundation_name}</Text>
       </Text>
 
       {/* Files Details */}

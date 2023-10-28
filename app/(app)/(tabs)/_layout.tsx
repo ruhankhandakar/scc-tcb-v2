@@ -26,6 +26,7 @@ export default function TabLayout() {
           backgroundColor: COLORS.white,
         },
       }}
+      backBehavior="history"
     >
       <Tabs.Screen
         name="details"

@@ -169,7 +169,7 @@ const UserDetails: React.FC<Props> = ({
           )}
           {!!selectedProfile?.foundation_name && (
             <ListCard
-              label="ফাউন্ডেশন নাম"
+              label="ব্যবসা প্রতিষ্ঠানের নাম"
               value={selectedProfile?.foundation_name}
               icon={
                 <Octicons
