@@ -202,6 +202,15 @@ type ContextType = {
         }
       | undefined
     >;
+    updateProduct: (
+      id: number,
+      payload: CreateProductPayload
+    ) => Promise<
+      | {
+          success: boolean;
+        }
+      | undefined
+    >;
     refetch: (type: RefetchType) => Promise<void>;
   };
 };
@@ -1080,6 +1089,27 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateProduct = async (id: number, payload: CreateProductPayload) => {
+    try {
+      const { error, data } = await supabase
+        .from('products')
+        .update(payload)
+        .eq('id', id);
+
+      if (error) {
+        setErrorMessage('Updating product error: ' + error.message);
+        return {
+          success: false,
+        };
+      }
+      return {
+        success: true,
+      };
+    } catch (err: any) {
+      setErrorMessage('Updating product error: ' + err.message);
+    }
+  };
+
   const refetch = async (type: RefetchType) => {
     const userRole = state.profile?.user_role || 'DEALER';
     if (type === 'products') {
@@ -1120,6 +1150,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     getTotalCustomersV2,
     getAnyPendingTasks,
     createProduct,
+    updateProduct,
   };
 
   return (

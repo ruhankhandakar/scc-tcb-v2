@@ -105,6 +105,7 @@ export type CreateProductPayload = {
   quantity: string;
   per_unit_price: string;
   product_name: string;
+  is_active?: boolean;
 };
 
 export type RefetchType = 'products';

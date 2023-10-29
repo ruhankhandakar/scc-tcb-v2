@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useState } from 'react';
-import { Button, Text } from 'react-native-paper';
+import { Button, Text, Checkbox } from 'react-native-paper';
 import { useBottomSheet } from '@gorhom/bottom-sheet';
 
 import { COLORS, FONT, SIZES } from 'constants/theme';
@@ -9,18 +9,25 @@ import { convertNumberToBangla, isBanglaNumber } from 'utils';
 import { Products } from 'types';
 import { CreateProductPayload } from 'utils/types';
 
-const EditProducts = () => {
+interface Props {
+  selectedProduct?: Products | null;
+  handleEdit?: (product: Products | null) => void;
+}
+
+const EditProducts = ({ selectedProduct, handleEdit }: Props) => {
   const {
-    actions: { createProduct, refetch },
+    actions: { createProduct, refetch, updateProduct },
   } = useBackEndContext();
   const { close } = useBottomSheet();
 
-  const [products, setProducts] = useState<Partial<Products>>({
-    product_name: '',
-    quantity: '',
-    unit: 'কেজি',
-    per_unit_price: '',
-  });
+  const [products, setProducts] = useState<Partial<Products>>(() => ({
+    product_name: selectedProduct?.product_name || '',
+    quantity: selectedProduct?.quantity || '',
+    unit: selectedProduct?.unit || 'কেজি',
+    per_unit_price: selectedProduct?.per_unit_price || '',
+    is_active: selectedProduct ? selectedProduct.is_active : true,
+  }));
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onTextChange = (type: string, value: string) => {
@@ -31,7 +38,8 @@ const EditProducts = () => {
   };
 
   const handleSubmit = async () => {
-    const { per_unit_price, quantity, unit, product_name } = products;
+    const { per_unit_price, quantity, unit, product_name, is_active } =
+      products;
 
     let perUnitPrice = per_unit_price;
     let _quantity = quantity;
@@ -49,10 +57,16 @@ const EditProducts = () => {
       quantity: _quantity,
       per_unit_price: perUnitPrice,
       product_name,
+      is_active,
     } as CreateProductPayload;
 
     setIsSubmitting(true);
-    const response = await createProduct(payload);
+    let response;
+    if (selectedProduct) {
+      response = await updateProduct(selectedProduct.id, payload);
+    } else {
+      response = await createProduct(payload);
+    }
     if (response?.success) {
       await refetch('products');
       setProducts({
@@ -61,6 +75,9 @@ const EditProducts = () => {
         unit: 'কেজি',
         per_unit_price: '',
       });
+      if (handleEdit) {
+        handleEdit(null);
+      }
       close();
     }
     setIsSubmitting(false);
@@ -149,6 +166,20 @@ const EditProducts = () => {
           </Pressable>
         </View>
       </View>
+      <View style={styles.statusContainer}>
+        <Checkbox
+          status={products?.is_active ? 'checked' : 'unchecked'}
+          onPress={() => {
+            setProducts((prevState) => ({
+              ...prevState,
+              is_active: !prevState.is_active,
+            }));
+          }}
+        />
+        <Text style={styles.statusText}>
+          {products?.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'} আছে
+        </Text>
+      </View>
       <View style={styles.submitBtnContainer}>
         <Button
           mode="contained"
@@ -173,6 +204,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: SIZES.small,
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.small,
+    paddingLeft: 4,
+  },
+  statusText: {
+    fontFamily: FONT.medium,
+    fontSize: SIZES.small,
+    color: COLORS.darkBlue,
   },
   inputContainer: {
     flexDirection: 'row',

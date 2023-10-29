@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 import { COLORS, FONT, SIZES } from 'constants/theme';
 import { multiplyNumbersInBangla } from 'utils';
@@ -6,26 +7,56 @@ import { Products } from 'types';
 
 interface Props {
   product: Products;
+  isFromSetting?: boolean;
+  handleEdit?: (product: Products) => void;
 }
 
-const ProductList = ({ product }: Props) => {
+const ProductList = ({ product, isFromSetting = false, handleEdit }: Props) => {
   return (
     <View style={styles.listItem} key={product.id}>
-      <View style={{ justifyContent: 'center' }}>
-        <Text style={[styles.item, !product.is_active && styles.inactiveStyle]}>
-          {product.product_name} {product.quantity} {product.unit}{' '}
-        </Text>
-        <Text
-          style={[
-            {
-              color: COLORS.gray,
-              fontSize: SIZES.medium - 3,
-            },
-            !product.is_active && styles.inactiveStyle,
-          ]}
-        >
-          (প্রতি {product.unit} {product.per_unit_price} টাকা)
-        </Text>
+      <View
+        style={{
+          justifyContent: 'center',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: SIZES.small,
+        }}
+      >
+        {isFromSetting && (
+          <Pressable
+            android_ripple={{
+              color: COLORS.primary,
+              borderless: true,
+              radius: 20,
+              foreground: true,
+            }}
+            onPress={() => {
+              if (handleEdit) {
+                handleEdit(product);
+              }
+            }}
+          >
+            <Feather name="edit" size={SIZES.large} color={COLORS.primary} />
+          </Pressable>
+        )}
+        <View>
+          <Text
+            style={[styles.item, !product.is_active && styles.inactiveStyle]}
+          >
+            {product.product_name} {product.quantity} {product.unit}{' '}
+          </Text>
+          <Text
+            style={[
+              {
+                color: COLORS.gray,
+                fontSize: SIZES.medium - 3,
+              },
+              !product.is_active && styles.inactiveStyle,
+            ]}
+          >
+            (প্রতি {product.unit} {product.per_unit_price} টাকা)
+          </Text>
+        </View>
       </View>
       <Text style={[styles.item, !product.is_active && styles.inactiveStyle]}>
         মোট {multiplyNumbersInBangla(product.quantity, product.per_unit_price)}{' '}

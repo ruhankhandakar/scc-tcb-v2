@@ -2,19 +2,27 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Pressable } from 'react-native';
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import EditProduct from 'components/home/Actions/EditProduct';
+import { useRef, useState } from 'react';
 
 import ProductList from 'components/home/ProductList';
 
 import { useBackEndContext } from 'context/BackEndContext';
 import { COLORS, FONT, SIZES } from 'constants/theme';
-import { useRef } from 'react';
+import { Products } from 'types';
 
 const ProductsSettings = () => {
   const {
-    state: { products, profile },
+    state: { products },
   } = useBackEndContext();
 
+  const [selectedProduct, setSelectedProduct] = useState<Products | null>(null);
+
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  const handleEdit = (product: Products | null) => {
+    setSelectedProduct(product);
+    bottomSheetModalRef?.current?.present();
+  };
 
   return (
     <>
@@ -42,7 +50,12 @@ const ProductsSettings = () => {
 
         {!!products?.length &&
           products.map((product) => (
-            <ProductList key={product.id} product={product} />
+            <ProductList
+              key={product.id}
+              product={product}
+              handleEdit={handleEdit}
+              isFromSetting
+            />
           ))}
       </View>
       <BottomSheetModal
@@ -55,7 +68,10 @@ const ProductsSettings = () => {
         }}
       >
         <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
-          <EditProduct />
+          <EditProduct
+            selectedProduct={selectedProduct}
+            handleEdit={handleEdit}
+          />
         </BottomSheetScrollView>
       </BottomSheetModal>
     </>
