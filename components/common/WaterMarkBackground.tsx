@@ -4,12 +4,17 @@ import {
   StyleSheet,
   ImageBackground,
   StatusBar,
+  View,
+  Dimensions,
 } from 'react-native';
 
 import ScrollViewComponent from './ScrollViewComponent';
 
 import { waterMarkIcon } from 'constants/images';
 import { COLORS } from 'constants/theme';
+import Footer from './Footer';
+
+const { height } = Dimensions.get('window');
 
 interface Props {
   children: React.ReactNode;
@@ -30,7 +35,14 @@ const WaterMarkBackground: React.FC<Props> = ({ children }) => {
         resizeMode="contain"
       >
         <ScrollViewComponent showsVerticalScrollIndicator={false}>
-          {children}
+          <View style={{ minHeight: height - 100 }}>{children}</View>
+          <View
+            style={{
+              marginBottom: 100,
+            }}
+          >
+            <Footer />
+          </View>
         </ScrollViewComponent>
       </ImageBackground>
     </SafeAreaView>

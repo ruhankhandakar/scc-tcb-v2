@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
   sceneContainer: {
     flex: 1,
     padding: SIZES.medium,
-    marginBottom: 100,
+    marginBottom: 0,
   },
 });
 

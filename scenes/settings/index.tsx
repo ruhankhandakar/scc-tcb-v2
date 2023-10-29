@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     padding: SIZES.medium,
     paddingLeft: SIZES.xLarge,
     paddingRight: SIZES.xLarge,
-    marginBottom: 100,
+    marginBottom: 0,
   },
   listContainer: {
     flexDirection: 'row',

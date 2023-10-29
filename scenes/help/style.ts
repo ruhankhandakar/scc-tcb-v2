@@ -5,7 +5,7 @@ const styles = StyleSheet.create({
   container: {
     padding: SIZES.medium,
     flex: 1,
-    marginBottom: 100,
+    marginBottom: 0,
   },
   titleContainer: {
     backgroundColor: COLORS.darkBlue,
@@ -35,15 +35,15 @@ const styles = StyleSheet.create({
     fontSize: SIZES.medium,
     fontFamily: FONT.regular,
     fontWeight: 'bold',
-    flexShrink: 1,
     padding: 6,
+    flex: 2,
   },
   linkTextLink: {
     color: COLORS.error,
     fontSize: SIZES.medium,
     fontFamily: FONT.regular,
     fontWeight: 'bold',
-    flexShrink: 1,
+    flex: 1,
   },
 });
 

@@ -173,7 +173,7 @@ const HelpScene = () => {
                 style={styles.linkTextLink}
                 variant="labelMedium"
                 lineBreakMode="tail"
-                numberOfLines={1}
+                numberOfLines={2}
                 ellipsizeMode="head"
               >
                 {link.link}

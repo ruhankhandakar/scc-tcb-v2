@@ -102,7 +102,7 @@ export default registration;
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 100,
+    marginBottom: 10,
   },
   backBtn: {
     padding: 20,

@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: SIZES.xLarge,
-    marginBottom: 100,
+    marginBottom: 10,
   },
   headingContainer: {
     justifyContent: 'center',

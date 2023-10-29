@@ -14,6 +14,8 @@ import { useRoute } from '@react-navigation/native';
 
 import { waterMarkIcon } from 'constants/images';
 import { COLORS } from 'constants/theme';
+import { Text } from 'react-native-paper';
+import Footer from './Footer';
 
 interface Props {
   children: React.ReactNode;
@@ -54,6 +56,13 @@ const ScrollViewWithWaterMark: React.FC<Props> = ({ children }) => {
           }
         >
           <View style={{ minHeight: height - 100 }}>{children}</View>
+          <View
+            style={{
+              marginBottom: 100,
+            }}
+          >
+            <Footer />
+          </View>
         </ScrollView>
       </ImageBackground>
     </SafeAreaView>
