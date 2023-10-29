@@ -332,12 +332,7 @@ const UserDetails: React.FC<Props> = ({
                 />
               }
               rightIcon={
-                <TouchableOpacity
-                  onPress={() => {
-                    console.log('logout');
-                  }}
-                  style={styles.utilsIcon}
-                >
+                <TouchableOpacity onPress={() => {}} style={styles.utilsIcon}>
                   <AntDesign
                     name="right"
                     size={SIZES.large}

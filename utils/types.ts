@@ -23,6 +23,7 @@ export interface ProfileDBPayload {
   profile_picture: string | null;
   deo_documents: string[] | null;
   foundation_name: string;
+  phone_number: string;
 }
 
 export interface UpdateParams {
@@ -89,7 +90,7 @@ export interface RegisterFormData {
 export interface ActivateDealerParam {
   registered_customer?: number;
   dealerId: number;
-  actionType: 'accept' | 'reject';
+  actionType: 'accept' | 'reject' | 'deactivate';
   remarks?: string;
 }
 

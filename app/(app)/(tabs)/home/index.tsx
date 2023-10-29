@@ -1,13 +1,13 @@
 import React from 'react';
 
-import WaterMarkBackground from 'components/common/WaterMarkBackground';
 import HomePageComponent from 'scenes/home';
+import ScrollViewWithWaterMark from 'components/common/ScrollViewWithWaterMark';
 
 const HomePage = () => {
   return (
-    <WaterMarkBackground>
+    <ScrollViewWithWaterMark>
       <HomePageComponent />
-    </WaterMarkBackground>
+    </ScrollViewWithWaterMark>
   );
 };
 

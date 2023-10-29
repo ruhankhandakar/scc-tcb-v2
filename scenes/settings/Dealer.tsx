@@ -20,7 +20,7 @@ const Dealer = () => {
 
   useEffect(() => {
     setIsFetching(true);
-    getDealerList(4)
+    getDealerList()
       .then((response) => {
         setAllDealerList(response);
       })
@@ -36,21 +36,11 @@ const Dealer = () => {
           <Feather name="users" size={SIZES.large} color={COLORS.tertiary} />
           <Text style={styles.titleText}>ডিলার ব্যাবস্থপনাঃ</Text>
         </View>
-        {allDealerList && allDealerList?.length > 3 && (
-          <Pressable style={styles.viewAllBtn}>
-            <Text style={styles.viewAllText}>সব দেখুন</Text>
-            <AntDesign
-              name="arrowright"
-              size={SIZES.large}
-              color={COLORS.primary}
-            />
-          </Pressable>
-        )}
       </View>
       {isFetching && <CardSkeleton />}
       {!isFetching && allDealerList && allDealerList.length > 0 && (
         <View style={styles.listContainer}>
-          {allDealerList.slice(0, 3).map((list) => (
+          {allDealerList.map((list) => (
             <DealerCard key={list.id} data={list} />
           ))}
         </View>

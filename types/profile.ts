@@ -1,4 +1,4 @@
-import { Customer, IWards } from 'types';
+import { Customer, DealerConfig, IWards } from 'types';
 
 export type ROLE = 'ADMIN' | 'CUSTOMER' | 'DEALER';
 
@@ -18,6 +18,7 @@ export interface ProfileData extends Partial<Customer> {
   foundation_name?: string;
   remarks?: string | null;
   wards?: Partial<IWards>;
+  dealer_config?: DealerConfig;
 }
 
 // @ts-ignore

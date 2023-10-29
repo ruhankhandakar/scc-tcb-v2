@@ -1,7 +1,8 @@
 import React from 'react';
 
-import WaterMarkBackground from 'components/common/WaterMarkBackground';
 import ProfileComponent from 'components/profile';
+import ScrollViewWithWaterMark from 'components/common/ScrollViewWithWaterMark';
+
 import { useBackEndContext } from 'context/BackEndContext';
 
 const SettingPage = () => {
@@ -10,9 +11,9 @@ const SettingPage = () => {
   } = useBackEndContext();
 
   return (
-    <WaterMarkBackground>
+    <ScrollViewWithWaterMark>
       <ProfileComponent selectedProfile={loggedInProfileData} />
-    </WaterMarkBackground>
+    </ScrollViewWithWaterMark>
   );
 };
 

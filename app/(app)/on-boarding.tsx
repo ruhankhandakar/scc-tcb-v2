@@ -144,6 +144,7 @@ const OnBoarding = () => {
       profile_picture: null,
       deo_documents: null,
       foundation_name: data.foundationName,
+      phone_number: data.number,
     };
 
     if (files.length) {

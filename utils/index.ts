@@ -135,3 +135,17 @@ export const isMediumStrengthPassword = (password: string): boolean => {
 };
 
 // P@ssw0rd
+
+export const formatPhoneNumber = (phoneNumber: string): string => {
+  const cleanedNumber = phoneNumber.replace(/\D/g, '');
+
+  if (cleanedNumber.startsWith('88') && cleanedNumber.length === 12) {
+    return `+${cleanedNumber}`;
+  } else if (cleanedNumber.length === 10) {
+    return `+880${cleanedNumber}`;
+  } else if (cleanedNumber.length === 11 && cleanedNumber.startsWith('0')) {
+    return `+880${cleanedNumber.substring(1)}`;
+  } else {
+    return phoneNumber;
+  }
+};

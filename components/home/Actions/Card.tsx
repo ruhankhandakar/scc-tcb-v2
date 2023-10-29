@@ -1,4 +1,11 @@
-import { Pressable, StyleSheet, Text, View, TextInput } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Linking,
+} from 'react-native';
 import { Image } from 'expo-image';
 import 'dayjs/locale/bn-bd';
 import dayjs from 'dayjs';
@@ -15,6 +22,8 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import AnimatedLottieView from 'lottie-react-native';
 import { submittingLottie } from 'constants/lottie_files';
 import { placeholderUser } from 'constants/icons';
+import { formatPhoneNumber } from 'utils';
+import { useRouter, useSegments } from 'expo-router';
 
 interface Props {
   profileData: ProfileData;
@@ -26,6 +35,9 @@ const Card = ({ profileData, filterPendingDealerListData }: Props) => {
     actions: { activateDealer, downloadFile },
   } = useBackEndContext();
 
+  const segments = useSegments();
+  const router = useRouter();
+
   const {
     profile_picture,
     created_at,
@@ -36,6 +48,7 @@ const Card = ({ profileData, filterPendingDealerListData }: Props) => {
     id: dealerId,
     first_name,
     last_name,
+    phone_number,
   } = profileData;
 
   const [bottomSheetViewType, setBottomSheetViewType] = useState<
@@ -49,6 +62,11 @@ const Card = ({ profileData, filterPendingDealerListData }: Props) => {
   const [submitting, setSubmitting] = useState(false);
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  const reload = () => {
+    // @ts-ignore
+    router.replace(segments.join('/'));
+  };
 
   const handleAccept = () => {
     bottomSheetModalRef?.current?.present();
@@ -77,8 +95,8 @@ const Card = ({ profileData, filterPendingDealerListData }: Props) => {
     if (response.success && filterPendingDealerListData) {
       filterPendingDealerListData(dealerId);
     }
-
     setSubmitting(false);
+    reload();
   };
 
   const handleRejectSubmit = async () => {
@@ -94,6 +112,7 @@ const Card = ({ profileData, filterPendingDealerListData }: Props) => {
     }
 
     setSubmitting(false);
+    reload();
   };
 
   const handleDownloadFile = async (filePath: string) => {
@@ -128,6 +147,28 @@ const Card = ({ profileData, filterPendingDealerListData }: Props) => {
         <Text style={styles.nameText}>
           {first_name} {last_name}
         </Text>
+        {!!phone_number && (
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: 4,
+              gap: 4,
+            }}
+          >
+            <Text style={styles.numberText}>মোবাইল নাম্বারঃ</Text>
+            <Pressable
+              onPress={() => {
+                Linking.openURL(`tel:${formatPhoneNumber(phone_number)}`);
+              }}
+            >
+              <Text style={[styles.numberText, { color: 'blue' }]}>
+                {formatPhoneNumber(phone_number)}
+              </Text>
+            </Pressable>
+          </View>
+        )}
         <Text style={styles.joinedAtText}>
           নিবন্ধিত করেছেঃ{' '}
           {dayjs(created_at).locale('bn-bd').format('DD  MMMM YY, A h:m')}
@@ -365,6 +406,12 @@ const styles = StyleSheet.create({
     fontFamily: FONT.regular,
     fontSize: SIZES.small,
     color: COLORS.gray,
+    textAlign: 'center',
+  },
+  numberText: {
+    fontFamily: FONT.regular,
+    fontSize: SIZES.small,
+    color: COLORS.darkBlue,
     textAlign: 'center',
   },
   wardText: {

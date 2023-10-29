@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   scrollContainer: {
-    maxHeight: 200, // Set your maximum height here
+    maxHeight: 220, // Set your maximum height here
   },
   listContainer: {
     marginTop: SIZES.medium,

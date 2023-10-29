@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Linking } from 'react-native';
 import React from 'react';
 import { Image } from 'expo-image';
 import 'dayjs/locale/bn-bd';
@@ -6,11 +6,13 @@ import dayjs from 'dayjs';
 import { AntDesign } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 
+import DealerActionMenu from 'components/settings/DealerActionMenu';
+
 import { ProfileData } from 'types/profile';
 import { SIZES, SHADOWS, COLORS, FONT } from 'constants/theme';
 import { placeholderUser } from 'constants/icons';
 import { useBackEndContext } from 'context/BackEndContext';
-import { Tooltip } from 'react-native-paper';
+import { formatPhoneNumber } from 'utils';
 
 interface Props {
   data: ProfileData;
@@ -22,6 +24,7 @@ const DealerCard = ({ data }: Props) => {
   } = useBackEndContext();
 
   const {
+    id,
     profile_picture,
     created_at,
     wards,
@@ -32,6 +35,9 @@ const DealerCard = ({ data }: Props) => {
     last_name,
     is_verified,
     remarks,
+    phone_number,
+    is_active,
+    dealer_config,
   } = data;
   const handleDownloadFile = async (filePath: string) => {
     try {
@@ -44,15 +50,15 @@ const DealerCard = ({ data }: Props) => {
 
   return (
     <View style={styles.container}>
-      {/* Status */}
-      <View style={styles.status}>
-        {is_verified ? (
-          <Text style={styles.verifiedStatusText}>Verified</Text>
-        ) : (
-          <Text style={styles.pendingStatusText}>
-            {remarks ? <Text>Rejected</Text> : <>Verification{'\n'}Pending</>}
-          </Text>
-        )}
+      {/* Actions */}
+      <View style={styles.actionsContainer}>
+        <DealerActionMenu
+          isVerified={is_verified}
+          dealerId={id}
+          remarks={remarks!}
+          isActive={is_active}
+          fetchedRegisteredCustomerNumber={dealer_config?.registered_customer}
+        />
       </View>
       {/* Profile Pic */}
       <View style={styles.profilePicContainer}>
@@ -74,6 +80,28 @@ const DealerCard = ({ data }: Props) => {
       <Text style={styles.nameText}>
         {first_name} {last_name}
       </Text>
+      {!!phone_number && (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 4,
+            gap: 4,
+          }}
+        >
+          <Text style={styles.numberText}>মোবাইল নাম্বারঃ</Text>
+          <Pressable
+            onPress={() => {
+              Linking.openURL(`tel:${formatPhoneNumber(phone_number)}`);
+            }}
+          >
+            <Text style={[styles.numberText, { color: 'blue' }]}>
+              {formatPhoneNumber(phone_number)}
+            </Text>
+          </Pressable>
+        </View>
+      )}
       <Text style={styles.joinedAtText}>
         নিবন্ধিত করেছেঃ{' '}
         {dayjs(created_at).locale('bn-bd').format('DD  MMMM YY, A h:m')}
@@ -83,6 +111,24 @@ const DealerCard = ({ data }: Props) => {
         ব্যবসা প্রতিষ্ঠানের নামঃ{' '}
         <Text style={styles.bold}>{foundation_name}</Text>
       </Text>
+
+      {/* Registered Details */}
+      {!!dealer_config && (
+        <View style={styles.customerDetailsView}>
+          <Text style={styles.foundationText}>
+            নিবন্ধিত উপকারভোগীঃ{' '}
+            <Text style={[styles.bold, styles.textUnderline]}>
+              {dealer_config.registered_customer}
+            </Text>
+          </Text>
+          <Text style={styles.foundationText}>
+            সুবিধাপ্রাপ্ত উপকারভোগীঃ{' '}
+            <Text style={[styles.bold, styles.textUnderline]}>
+              {dealer_config.privileged_customer}
+            </Text>
+          </Text>
+        </View>
+      )}
 
       {/* Files Details */}
       <View style={styles.fileListContainer}>
@@ -129,6 +175,33 @@ const DealerCard = ({ data }: Props) => {
           </View>
         </View>
       </View>
+      {/* Status */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <View style={styles.status}>
+          {!is_active ? (
+            <Text style={styles.pendingStatusText}>Deactivated</Text>
+          ) : (
+            <>
+              {is_verified ? (
+                <Text style={styles.verifiedStatusText}>Verified</Text>
+              ) : (
+                <Text style={styles.pendingStatusText}>
+                  {remarks ? (
+                    <Text>Rejected - {remarks}</Text>
+                  ) : (
+                    <>Verification Pending</>
+                  )}
+                </Text>
+              )}
+            </>
+          )}
+        </View>
+      </View>
     </View>
   );
 };
@@ -136,8 +209,21 @@ const DealerCard = ({ data }: Props) => {
 export default DealerCard;
 
 const styles = StyleSheet.create({
+  customerDetailsView: {
+    marginTop: SIZES.small,
+    alignItems: 'center',
+  },
+  numberText: {
+    fontFamily: FONT.regular,
+    fontSize: SIZES.small,
+    color: COLORS.darkBlue,
+    textAlign: 'center',
+  },
   bold: {
     fontWeight: 'bold',
+  },
+  textUnderline: {
+    textDecorationLine: 'underline',
   },
   container: {
     backgroundColor: '#fff',
@@ -203,20 +289,18 @@ const styles = StyleSheet.create({
     gap: SIZES.medium,
   },
   status: {
-    position: 'absolute',
-    right: 4,
-    top: 4,
+    marginTop: SIZES.medium,
   },
   pendingStatusText: {
     borderWidth: 1,
     borderColor: COLORS.error,
     borderRadius: 6,
     padding: 2,
-    paddingTop: 2.6,
+    paddingLeft: 5,
+    paddingRight: 5,
     textAlign: 'center',
     fontFamily: FONT.regular,
     fontSize: SIZES.small,
-    lineHeight: 14,
     color: COLORS.error,
   },
   verifiedStatusText: {
@@ -224,9 +308,17 @@ const styles = StyleSheet.create({
     borderColor: COLORS.lightGreenDarken2,
     borderRadius: 6,
     padding: 2,
+    paddingLeft: 5,
+    paddingRight: 5,
     textAlign: 'center',
     fontFamily: FONT.regular,
     fontSize: SIZES.small,
     color: COLORS.lightGreenDarken2,
+  },
+
+  actionsContainer: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
   },
 });

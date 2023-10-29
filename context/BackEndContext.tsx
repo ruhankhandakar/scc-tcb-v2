@@ -913,6 +913,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
         .from('profiles')
         .select('id', { count: 'exact', head: true })
         .eq('is_verified', false)
+        .eq('is_active', true)
         .eq('user_role', 'DEALER');
 
       if (error) {
@@ -940,9 +941,10 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     try {
       let { data: profiles, error } = await supabase
         .from('profiles')
-        .select('*, wards(*)')
+        .select('*, wards:ward(*)')
         .eq('user_role', 'DEALER')
-        .eq('is_verified', false);
+        .eq('is_verified', false)
+        .eq('is_active', true);
 
       if (error) {
         setErrorMessage('Pending Dealer Fetching Issue: ' + error.message);
@@ -961,7 +963,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
     try {
       let query = supabase
         .from('profiles')
-        .select('*, wards(*)')
+        .select('*, wards(*), dealer_config(*)')
         .eq('user_role', 'DEALER');
 
       if (limit) {
@@ -982,6 +984,28 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
 
   const activateDealer = async (payload: ActivateDealerParam) => {
     try {
+      if (payload.actionType === 'deactivate') {
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            remarks: payload.remarks,
+            is_active: false,
+            is_verified: false,
+          })
+          .eq('id', payload.dealerId);
+
+        if (error) {
+          setErrorMessage('Something went wrong: ' + error.message);
+          return {
+            success: false,
+          };
+        }
+
+        return {
+          success: true,
+        };
+      }
+
       if (payload.actionType == 'reject') {
         const { error } = await supabase
           .from('profiles')
@@ -999,6 +1023,7 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
           success: true,
         };
       }
+
       const { error } = await supabase.from('dealer_config').upsert({
         registered_customer: payload.registered_customer,
         dealer_id: payload.dealerId,
@@ -1011,21 +1036,15 @@ const BackEndContextProvider = ({ children }: { children: ReactNode }) => {
               registered_customer: payload.registered_customer,
             })
             .eq('dealer_id', payload.dealerId);
-          return {
-            success: true,
-          };
         } else {
           setErrorMessage(
             'Something went wrong with dealer activation: ' + error.message
           );
         }
-        return {
-          success: false,
-        };
       }
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ is_verified: true })
+        .update({ is_verified: true, is_active: true, remarks: '' })
         .eq('id', payload.dealerId);
       if (profileError) {
         setErrorMessage(
